@@ -1,0 +1,275 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================================
+   TRUSTIFY — Sistema de Diseño (Design System)
+   Paleta neón: celeste + azul + verde + blanco. Dark por defecto, con
+   modo claro completo. Todos los colores son variables HSL.
+   ========================================================================= */
+
+@layer base {
+  :root {
+    /* --- INDIGO/SLATE · DARK --- */
+    --background: 222 47% 11%;      /* #0F172A slate-900 */
+    --foreground: 210 40% 98%;      /* #F8FAFC */
+
+    --card: 217 33% 17%;            /* #1E293B slate-800 */
+    --card-foreground: 210 40% 98%;
+
+    --muted: 217 30% 23%;
+    --muted-foreground: 213 27% 84%; /* #CBD5E1 */
+
+    --border: 215 25% 27%;          /* #334155 slate-700 */
+    --input: 215 25% 27%;
+
+    /* Índigo (marca) + azul + verde esmeralda */
+    --trust: 239 84% 74%;           /* índigo claro #818CF8 (enlaces/detalles en dark) */
+    --trust-soft: 213 93% 68%;      /* azul #60A5FA */
+    --verified: 154 72% 67%;        /* esmeralda #6EE7B7 */
+    --pending: 38 92% 55%;
+    --danger: 0 84% 63%;
+
+    --primary-ink: 222 47% 11%;     /* tinta oscura (para fondos claros) */
+    --ring: 239 84% 74%;
+    --radius: 0.9rem;
+  }
+
+  .light {
+    /* --- INDIGO/SLATE · LIGHT --- */
+    --background: 210 40% 98%;      /* #F8FAFC */
+    --foreground: 222 47% 11%;      /* #0F172A */
+
+    --card: 0 0% 100%;              /* #FFFFFF */
+    --card-foreground: 222 47% 11%;
+
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 19% 35%; /* #475569 */
+
+    --border: 214 32% 91%;          /* #E2E8F0 */
+    --input: 214 32% 91%;
+
+    --trust: 244 76% 59%;           /* índigo #4F46E5 */
+    --trust-soft: 239 84% 67%;      /* índigo #6366F1 */
+    --verified: 162 94% 24%;        /* esmeralda #047857 */
+    --pending: 38 92% 50%;
+    --danger: 0 74% 50%;
+
+    --primary-ink: 0 0% 100%;       /* texto blanco (para fondos oscuros/color) */
+    --ring: 244 76% 59%;
+  }
+
+  * { @apply border-border; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5 { @apply font-display tracking-tight; }
+
+  ::selection {
+    background: hsl(var(--trust) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+    background-clip: content-box;
+  }
+
+  /* Accesibilidad: respeta a quien pide menos movimiento */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* --- Glassmorphism --- */
+  .glass {
+    background: hsl(var(--card) / 0.55);
+    backdrop-filter: blur(12px) saturate(135%);
+    -webkit-backdrop-filter: blur(12px) saturate(135%);
+    border: 1px solid hsl(var(--border) / 0.9);
+  }
+  .glass-strong {
+    background: hsl(var(--card) / 0.82);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Borde con gradiente sutil de acento (1px) */
+  .hairline-gradient { position: relative; }
+  .hairline-gradient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--trust) / 0.6),
+      transparent 38%,
+      transparent 62%,
+      hsl(var(--verified) / 0.4)
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Borde neón animado (gira el gradiente) para tarjetas destacadas */
+  .neon-border { position: relative; z-index: 0; }
+  .neon-border::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: conic-gradient(
+      from var(--angle, 0deg),
+      hsl(var(--trust)),
+      hsl(var(--verified)),
+      hsl(var(--trust-soft)),
+      hsl(var(--trust))
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: spin-angle 5s linear infinite;
+  }
+
+  .glow-trust { text-shadow: 0 0 24px hsl(var(--trust) / 0.5); }
+
+  .text-gradient {
+    background: linear-gradient(100deg,
+      hsl(var(--foreground)), hsl(var(--trust)) 55%, hsl(var(--trust-soft)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-gradient-neon {
+    background: linear-gradient(100deg,
+      hsl(var(--trust)), hsl(var(--verified)) 60%, hsl(var(--trust-soft)));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-x 6s ease infinite;
+  }
+
+  /* Barrido de brillo al hacer hover (para tarjetas) */
+  .shine { position: relative; overflow: hidden; }
+  .shine::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 60%;
+    height: 100%;
+    transform: skewX(-20deg);
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.08), transparent);
+    transition: none;
+  }
+  .shine:hover::after { animation: shine-sweep 0.9s ease; }
+}
+
+@layer utilities {
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.55) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.55) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+  .aura {
+    background: radial-gradient(50% 50% at 50% 40%, hsl(var(--trust) / 0.2), transparent 70%);
+  }
+  /* Mancha de aurora que flota en el fondo */
+  .aurora-blob {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(44px);
+    opacity: 0.5;
+    will-change: transform;
+  }
+  .fade-edges {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+}
+
+/* Keyframes que no dependen de Tailwind theme */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-angle { to { --angle: 360deg; } }
+@keyframes shine-sweep { to { left: 130%; } }
+
+/* Línea de escaneo biométrico (efecto radar sobre el perfil / KYC) */
+@keyframes scanline {
+  0%   { top: 6%;  opacity: 0.85; }
+  50%  { top: 90%; opacity: 1; }
+  100% { top: 6%;  opacity: 0.85; }
+}
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, hsl(var(--trust)), hsl(var(--verified)), transparent);
+  box-shadow: 0 0 14px hsl(var(--trust));
+  animation: scanline 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ===== Orbital de "Negocios en Trustify" ===== */
+@keyframes orbit-spin{to{transform:rotate(360deg)}}
+@keyframes orbit-pulse{0%{transform:translate(-50%,-50%) scale(.42);opacity:.65}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+.orbit-g1{animation:orbit-spin 34s linear infinite}
+.orbit-g2{animation:orbit-spin 46s linear infinite reverse}
+.orbit-g1 .orbit-keep{animation:orbit-spin 34s linear infinite reverse}
+.orbit-g2 .orbit-keep{animation:orbit-spin 46s linear infinite}
+.orbit-pulse{animation:orbit-pulse 3.8s ease-out infinite}
+.orbit-pulse.delay{animation-delay:1.9s}
+@media (prefers-reduced-motion: reduce){
+  .orbit-g1,.orbit-g2,.orbit-g1 .orbit-keep,.orbit-g2 .orbit-keep,.orbit-pulse{animation:none}
+}
+
+/* ===== Modo claro: profundidad (evita el look "vacío/blanco plano") ===== */
+.light .glass{
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+  box-shadow: 0 1px 2px hsl(220 40% 25% / .05), 0 12px 30px -16px hsl(220 45% 25% / .22);
+}
+.light .glass-strong{
+  background: hsl(var(--card) / .92);
+  box-shadow: 0 1px 2px hsl(220 40% 25% / .05), 0 16px 40px -18px hsl(220 45% 25% / .25);
+}
+/* auroras un poco más presentes en claro para que aporten color */
+.light .aura{ background: radial-gradient(50% 50% at 50% 40%, hsl(var(--trust) / .18), transparent 70%); }
+.light .aurora-blob{ opacity:.32; }
+/* franjas de sección con un pelín más de tinte */
+.light section.bg-card\/20,
+.light section.bg-card\/30{ background: hsl(210 40% 97%); }
