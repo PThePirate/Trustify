@@ -93,7 +93,7 @@ export default function SavingsSimulator() {
         </div>
         <div className="hairline-gradient rounded-2xl bg-verified/5 p-6">
           <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Ban className="size-4 text-verified" /> En Trustify pagas
+            <Ban className="size-4 text-verified" /> En CheckBiz pagas
           </p>
           <p className="mt-2 font-display text-4xl font-bold text-verified">
             $0<span className="text-lg text-muted-foreground"> en comisiones</span>

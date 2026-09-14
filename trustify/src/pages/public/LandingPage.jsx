@@ -14,6 +14,7 @@ import OrbitalNetwork from "@/components/brand/OrbitalNetwork";
 import LogoMarquee from "@/components/brand/LogoMarquee";
 import PublicNav from "@/components/layout/PublicNav";
 import PublicFooter from "@/components/layout/PublicFooter";
+import { useTheme } from "@/components/theme/ThemeProvider";
 import AuroraBackground from "@/components/ui/AuroraBackground";
 import Reveal from "@/components/ui/Reveal";
 import Counter from "@/components/ui/Counter";
@@ -30,7 +31,7 @@ import {
 function SectionLabel({ children }) {
   return (
     <div className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-trust">
-      <span className="size-1.5 rounded-full bg-trust shadow-[0_0_8px_hsl(var(--trust))] animate-blink" />
+      <span className="size-1.5 rounded-full bg-action" />
       {children}
     </div>
   );
@@ -45,6 +46,7 @@ const glowByColor = {
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState(0);
+  const { theme } = useTheme();
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -55,7 +57,7 @@ export default function LandingPage() {
         {/* ---- Fondo de video ---- */}
         <div className="absolute inset-0 -z-10">
           {/* Fallback (se ve si el video no carga) */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0B1220] via-[#111a30] to-[#0B1220]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#172A36] via-[#203743] to-[#172A36]" />
           {/* Video principal: personas.mp4 */}
           <video
             className="absolute inset-0 h-full w-full object-cover"
@@ -67,9 +69,9 @@ export default function LandingPage() {
             <source src="/videos/personas.mp4" type="video/mp4" />
           </video>
           {/* Overlays para legibilidad del texto */}
-          <div className="absolute inset-0 bg-[#0B1220]/70" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0B1220] via-[#0B1220]/70 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[#172A36]/70" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#172A36] via-[#172A36]/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#172A36]/45 to-transparent" />
         </div>
 
         <div className="container relative grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
@@ -81,15 +83,14 @@ export default function LandingPage() {
             >
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
                 <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-trust opacity-70" />
-                  <span className="relative inline-flex size-2 rounded-full bg-trust" />
+                  <span className="relative inline-flex size-2 rounded-full bg-action" />
                 </span>
                 KYC bidireccional · 1 cédula = 1 cuenta
               </div>
 
               <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tight text-white sm:text-5xl lg:text-[3.85rem]">
                 El fin del anonimato en el{" "}
-                <span className="relative whitespace-nowrap bg-gradient-to-r from-[#A5B4FC] to-[#60A5FA] bg-clip-text text-transparent">
+                <span className="relative whitespace-nowrap text-[#B7DEE4]">
                   comercio local
                   <svg
                     className="absolute -bottom-2 left-0 w-full"
@@ -100,7 +101,7 @@ export default function LandingPage() {
                     <motion.path
                       d="M4 11 C 70 3, 150 3, 296 9"
                       fill="none"
-                      stroke="#60A5FA"
+                      stroke="#F09A70"
                       strokeWidth="5"
                       strokeLinecap="round"
                       initial={{ pathLength: 0 }}
@@ -112,7 +113,7 @@ export default function LandingPage() {
               </h1>
 
               <p className="mt-7 max-w-xl text-lg text-white/75">
-                Trustify le da a cada emprendimiento una Mini Landing Page
+                CheckBiz le da a cada emprendimiento una Mini Landing Page
                 verificada —respaldada por cédula, contrato legal y certificación
                 universitaria. Confianza real, sin intermediarios.
               </p>
@@ -251,7 +252,7 @@ export default function LandingPage() {
         <AuroraBackground className="opacity-30" />
         <div className="container relative">
           <Reveal className="max-w-2xl">
-            <SectionLabel>Qué hace Trustify</SectionLabel>
+            <SectionLabel>Qué hace CheckBiz</SectionLabel>
             <h2 className="text-3xl font-bold sm:text-4xl">
               Mucho más que un directorio: un Micro-SaaS de identidad
             </h2>
@@ -346,7 +347,7 @@ export default function LandingPage() {
         <AuroraBackground className="opacity-25" />
         <div className="container relative">
           <Reveal className="max-w-2xl">
-            <SectionLabel>Negocios en Trustify</SectionLabel>
+            <SectionLabel>Negocios en CheckBiz</SectionLabel>
             <h2 className="text-3xl font-bold sm:text-4xl">
               Una red de perfiles reales y verificables
             </h2>
@@ -407,34 +408,38 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===================== PERSONAS REALES (video de fondo) ===================== */}
+      {/* ===================== PERSONAS REALES (video según el tema) ===================== */}
       <section className="relative overflow-hidden border-y border-border/60 py-20">
         {/* ---- Fondo de video ---- */}
         <div className="absolute inset-0 -z-10">
           {/* Fallback si el video no carga */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0B1220] via-[#111a30] to-[#0B1220]" />
-          {/* Video de la sección Personas reales: hero.mp4 */}
+          <div className="absolute inset-0 bg-[#F4EBDD] dark:bg-[#172A36]" />
+          {/* En claro usa hero2.mp4; en oscuro conserva hero.mp4. */}
           <video
+            key={theme}
             className="absolute inset-0 h-full w-full object-cover"
             autoPlay
             muted
             loop
             playsInline
           >
-            <source src="/videos/hero.mp4" type="video/mp4" />
+            <source
+              src={theme === "light" ? "/videos/hero2.mp4" : "/videos/hero.mp4"}
+              type="video/mp4"
+            />
           </video>
-          {/* Overlays para legibilidad */}
-          <div className="absolute inset-0 bg-[#0B1220]/78" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0B1220] via-[#0B1220]/70 to-[#0B1220]/40" />
+          {/* Capa cálida en claro y azul petróleo en oscuro. */}
+          <div className="absolute inset-0 bg-[#FFFCF6]/72 dark:bg-[#172A36]/78" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FFFCF6]/95 via-[#FFFCF6]/76 to-[#FFFCF6]/42 dark:from-[#172A36] dark:via-[#172A36]/72 dark:to-[#172A36]/45" />
         </div>
 
         <div className="container relative">
           <Reveal className="max-w-2xl">
             <SectionLabel>Detrás de cada perfil</SectionLabel>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">
+            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
               Personas reales, con nombre y rostro
             </h2>
-            <p className="mt-4 text-white/75">
+            <p className="mt-4 text-muted-foreground">
               No hay cuentas fantasma ni vendedores anónimos. Cada emprendimiento
               está respaldado por una persona verificada.
             </p>
@@ -448,12 +453,12 @@ export default function LandingPage() {
                   label={p.rol}
                   Icon={p.Icon}
                   caption={`${p.rol} · ${p.ciudad}`}
-                  className="aspect-[4/5] ring-1 ring-white/10"
+                  className="aspect-[4/5] ring-1 ring-border"
                 />
               </Reveal>
             ))}
           </div>
-          <p className="mt-6 flex items-center gap-2 text-sm text-white/70">
+          <p className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="size-4 text-trust" />
             Reemplaza estos espacios con fotos reales de emprendedores en sus
             talleres, locales o escritorios.
@@ -499,7 +504,7 @@ export default function LandingPage() {
           <Reveal className="max-w-2xl">
             <SectionLabel>Por qué no te copian</SectionLabel>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              Trustify frente a las alternativas
+              CheckBiz frente a las alternativas
             </h2>
           </Reveal>
 
@@ -558,7 +563,7 @@ export default function LandingPage() {
             </h2>
             <p className="mt-4 text-muted-foreground">
               Otras plataformas se quedan con un porcentaje de cada venta. En
-              Trustify, ese dinero es tuyo.
+              CheckBiz, ese dinero es tuyo.
             </p>
           </Reveal>
           <Reveal>
@@ -674,7 +679,7 @@ export default function LandingPage() {
 
                 <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
                   <span className="flex items-center gap-2">
-                    <Mail className="size-4 text-trust" /> hola@trustify.ec
+                    <Mail className="size-4 text-trust" /> hola@checkbiz.ec
                   </span>
                   <span className="flex items-center gap-2">
                     <Phone className="size-4 text-trust" /> +593 99 000 0000

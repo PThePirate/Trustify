@@ -1,5 +1,5 @@
 # Las reglas generales estan en ../.gitignore.
-# Estas reglas tambien permiten usar trustify como proyecto independiente.
+# Estas reglas tambien permiten usar CheckBiz como proyecto independiente.
 node_modules/
 dist/
 dist-ssr/

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const ThemeContext = createContext({ theme: "dark", toggle: () => {} });
+const ThemeContext = createContext({ theme: "light", toggle: () => {} });
 
 /**
  * ThemeProvider: controla el modo claro/oscuro.
@@ -10,15 +10,18 @@ const ThemeContext = createContext({ theme: "dark", toggle: () => {} });
  */
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    if (typeof window === "undefined") return "dark";
-    return localStorage.getItem("trustify-theme") || "dark";
+    if (typeof window === "undefined") return "light";
+    return localStorage.getItem("checkbiz-theme") || "light";
   });
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-    localStorage.setItem("trustify-theme", theme);
+    localStorage.setItem("checkbiz-theme", theme);
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", theme === "dark" ? "#172A36" : "#FFFCF6");
   }, [theme]);
 
   const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));

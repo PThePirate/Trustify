@@ -4,16 +4,16 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         trust:
-          "bg-gradient-to-r from-[#4F46E5] to-[#6366F1] text-white font-semibold shadow-[0_10px_28px_-10px_rgba(79,70,229,.6)] hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]",
+          "border border-action bg-action text-[hsl(var(--action-ink))] shadow-glow hover:brightness-95 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]",
         verified:
           "bg-verified text-[hsl(var(--primary-ink))] font-semibold hover:brightness-110 shadow-glow-verified hover:-translate-y-0.5 active:scale-[0.98]",
         outline:
-          "border border-border bg-card/50 text-foreground hover:bg-muted/60 hover:border-trust/40 hover:-translate-y-0.5",
+          "border border-trust bg-transparent text-trust hover:bg-trust/10 hover:-translate-y-0.5",
         ghost: "hover:bg-muted/60 text-foreground",
         secondary: "bg-muted text-foreground hover:bg-muted/70",
         link: "text-trust underline-offset-4 hover:underline",

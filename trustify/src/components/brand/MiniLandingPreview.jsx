@@ -74,7 +74,7 @@ export default function MiniLandingPreview() {
         </div>
 
         {/* Botón WhatsApp */}
-        <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-verified py-2.5 text-sm font-semibold text-[hsl(var(--primary-ink))]">
+        <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-action py-2.5 text-sm font-semibold text-[hsl(var(--action-ink))] transition-colors hover:brightness-95">
           <MessageCircle className="size-4" /> Contactar por WhatsApp
         </button>
       </div>

@@ -8,7 +8,7 @@ import {
 
 /** Los 4 pilares del "Núcleo Intocable" (propuesta, sección 1.2). */
 export const PILARES = [
-  { icon: Ban, title: "No procesa dinero", desc: "El pago se acuerda libremente entre las partes, fuera de la app. Trustify nunca retiene fondos." },
+  { icon: Ban, title: "No procesa dinero", desc: "El pago se acuerda libremente entre las partes, fuera de la app. CheckBiz nunca retiene fondos." },
   { icon: Percent, title: "No cobra comisiones", desc: "Cero comisión sobre la mano de obra o el producto final. Monetizamos la confianza, no la transacción." },
   { icon: Truck, title: "No hace logística", desc: "Sin entregas, despachos ni garantías. Eliminamos toda la carga operativa." },
   { icon: UserCheck, title: "No permite anonimato", desc: "KYC bidireccional obligatorio: vendedor y comprador se identifican con cédula." },
@@ -59,7 +59,7 @@ export const CATEGORIAS = [
   { icon: Wrench, label: "Mantenimiento" },
 ];
 
-/** "Qué hace Trustify" — grid de características (estilo tarjetas). */
+/** "Qué hace CheckBiz" — grid de características. */
 export const CARACTERISTICAS = [
   { icon: ShieldCheck, title: "Mini Landing Page verificada", desc: "Carta de presentación llave en mano con catálogo, galería y sello de identidad." },
   { icon: TrendingUp, title: "Trust Score en vivo", desc: "Puntaje de reputación calculado con reseñas auditadas y solicitudes confirmadas." },
@@ -81,7 +81,7 @@ export const NEGOCIOS_DEMO = [
 export const COMPARATIVA = {
   criterios: ["Identidad verificada", "Contrato legal", "Reseñas auditadas", "Sin comisiones", "Ruta de formalización"],
   columnas: [
-    { nombre: "Trustify", valores: [true, true, true, true, true], destacado: true },
+    { nombre: "CheckBiz", valores: [true, true, true, true, true], destacado: true },
     { nombre: "Facebook / Instagram", valores: [false, false, false, true, false] },
     { nombre: "Catálogo gremial", valores: [false, false, false, true, false] },
     { nombre: "LinkedIn", valores: [false, false, false, true, false] },
@@ -90,9 +90,9 @@ export const COMPARATIVA = {
 
 /** Preguntas frecuentes (adelanta objeciones del jurado). */
 export const FAQ = [
-  { q: "¿Por qué no cobran comisión si todos lo hacen?", a: "Cobrar comisión nos convertiría en intermediario financiero regulado. Trustify monetiza la confianza —suscripciones, licenciamiento B2B y publicidad— nunca la transacción." },
+  { q: "¿Por qué no cobran comisión si todos lo hacen?", a: "Cobrar comisión nos convertiría en intermediario financiero regulado. CheckBiz monetiza la confianza —suscripciones, licenciamiento B2B y publicidad— nunca la transacción." },
   { q: "¿Cómo saben que la cédula es realmente de esa persona?", a: "El Módulo 10 es solo la primera de cinco capas: se suma OTP telefónico, foto con cédula, cruce con SENESCYT/SRI y, a futuro, biometría tipo banco." },
-  { q: "¿Trustify guarda o mueve el dinero de las ventas?", a: "No. El pago se acuerda directo entre las partes por fuera de la app. No retenemos fondos ni gestionamos entregas." },
+  { q: "¿CheckBiz guarda o mueve el dinero de las ventas?", a: "No. El pago se acuerda directo entre las partes por fuera de la app. No retenemos fondos ni gestionamos entregas." },
   { q: "¿Qué gana una universidad o cámara al aliarse?", a: "Indicadores CACES auditables en tiempo real, seguimiento a graduados y un panel agregado de formalización, sin acceso a datos personales sensibles." },
 ];
 

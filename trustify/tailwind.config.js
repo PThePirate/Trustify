@@ -1,3 +1,5 @@
+import animate from "tailwindcss-animate";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
@@ -23,12 +25,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Acentos neón de marca Trustify
+        // Colores semánticos de CheckBiz
         trust: {
           DEFAULT: "hsl(var(--trust))",       // celeste/cian eléctrico
           soft: "hsl(var(--trust-soft))",     // azul
         },
         verified: "hsl(var(--verified))",      // verde neón = verificado
+        action: "hsl(var(--action))",          // terracota = CTA principal
         pending: "hsl(var(--pending))",        // ámbar = pendiente
         danger: "hsl(var(--danger))",
       },
@@ -38,14 +41,14 @@ export default {
         sm: "calc(var(--radius) - 8px)",
       },
       fontFamily: {
-        display: ["Sora", "system-ui", "sans-serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Sora", "Avenir Next", "Segoe UI", "sans-serif"],
+        sans: ["Manrope", "Inter", "Segoe UI", "sans-serif"],
       },
       boxShadow: {
-        glow: "0 0 0 1px hsl(var(--trust) / 0.15), 0 0 40px -8px hsl(var(--trust) / 0.45)",
+        glow: "0 8px 24px -16px hsl(var(--foreground) / 0.22)",
         "glow-verified":
-          "0 0 0 1px hsl(var(--verified) / 0.2), 0 0 40px -8px hsl(var(--verified) / 0.5)",
-        "glow-lg": "0 0 60px -10px hsl(var(--trust) / 0.55)",
+          "0 8px 24px -16px hsl(var(--verified) / 0.36)",
+        "glow-lg": "0 12px 32px -18px hsl(var(--foreground) / 0.28)",
       },
       keyframes: {
         "seal-spin": { from: { transform: "rotate(0deg)" }, to: { transform: "rotate(360deg)" } },
@@ -100,5 +103,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate],
 };

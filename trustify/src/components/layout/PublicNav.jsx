@@ -33,7 +33,7 @@ export default function PublicNav() {
     >
       <div className="container flex h-16 items-center justify-between">
         {/* Sobre el hero (no scrolled) forzamos texto claro */}
-        <Link to="/" aria-label="Trustify inicio" className={cn(!scrolled && "text-white")}>
+        <Link to="/" aria-label="CheckBiz inicio" className={cn(!scrolled && "text-white")}>
           <Logo />
         </Link>
 

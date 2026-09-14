@@ -5,7 +5,7 @@ import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 
 /**
- * Router principal de Trustify.
+ * Router principal de CheckBiz.
  * A medida que construyamos cada módulo (A Cliente, B Emprendedor, C/D paneles,
  * E admin) iremos agregando sus rutas aquí.
  */

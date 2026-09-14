@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** Logo de marca: sello hexagonal compacto + wordmark "Trustify". */
+/** Logo de marca: sello verificado + wordmark "CheckBiz". */
 export default function Logo({ className, showText = true }) {
   return (
     <div className={cn("flex items-center gap-2.5 select-none", className)}>
@@ -29,7 +29,7 @@ export default function Logo({ className, showText = true }) {
       </svg>
       {showText && (
         <span className="font-display text-lg font-semibold tracking-tight">
-          Trustify
+          CheckBiz
         </span>
       )}
     </div>

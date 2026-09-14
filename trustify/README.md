@@ -1,4 +1,4 @@
-# Trustify — Frontend
+# CheckBiz — Frontend
 
 Marketplace de identidad digital verificada. Prototipo para Business Week (UEES),
 competencia estilo Shark Tank. **Deadline del pitch: 23 de septiembre.**

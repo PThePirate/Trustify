@@ -2,7 +2,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /**
- * VerificationSeal — el "sello" hexagonal de Trustify.
+ * VerificationSeal — el sello hexagonal de CheckBiz.
  * Es el símbolo visual central de la marca: aparece en el hero, perfiles,
  * catálogo y certificaciones para comunicar "identidad verificada".
  *

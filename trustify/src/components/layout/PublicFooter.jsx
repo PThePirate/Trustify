@@ -14,7 +14,7 @@ export default function PublicFooter() {
         <div className="text-xs text-muted-foreground">
           <p>Business Week — UEES · Prototipo académico</p>
           <p className="mt-1">
-            © {new Date().getFullYear()} Trustify. Confianza verificada, sin
+            © {new Date().getFullYear()} CheckBiz. Confianza verificada, sin
             intermediarios.
           </p>
         </div>
