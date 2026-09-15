@@ -264,3 +264,24 @@
 /* franjas de sección con un pelín más de tinte */
 .light section.bg-card\/20,
 .light section.bg-card\/30{ background: hsl(var(--muted) / .45); }
+
+/* =====================================================================
+   PANEL DE ADMINISTRADOR — estilo sobrio, sin glassmorphism ni neón.
+   Fiel a la guía de marca: "tarjetas serenas, esquinas moderadas, borde
+   fino y sombra suave; no efecto vidrio".
+   ========================================================================= */
+@layer components {
+  .panel {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    box-shadow: 0 6px 18px -8px hsl(var(--foreground) / 0.08);
+  }
+  .panel-hover {
+    transition: box-shadow .2s ease, transform .2s ease;
+  }
+  .panel-hover:hover {
+    box-shadow: 0 10px 26px -10px hsl(var(--foreground) / 0.14);
+    transform: translateY(-1px);
+  }
+}
