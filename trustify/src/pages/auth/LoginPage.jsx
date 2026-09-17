@@ -1,25 +1,35 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react";
 import AuthLayout from "@/pages/auth/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { login } from "@/services/authApi";
 
 export default function LoginPage() {
+  const [correo, setCorreo] = useState("");
+  const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    // Placeholder: aquí conectaremos el backend (login + detección de rol).
+    setError("");
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const data = await login({ correo, password });
+      // Si ya tiene rol emprendedor, lo llevamos directo a su panel de negocio;
+      // si no, a la landing (el flujo de cliente todavía no tiene home propio).
+      navigate(data.usuario.kycLayer < 2 ? "/verificar-otp" : data.usuario.rolEmprendedor ? "/negocio" : "/");
+    } catch (err) {
+      setError(err.message || "No se pudo iniciar sesión");
+    } finally {
       setLoading(false);
-      navigate("/");
-    }, 1100);
+    }
   };
 
   return (
@@ -46,6 +56,8 @@ export default function LoginPage() {
                 placeholder="tu@correo.com"
                 required
                 className="pl-10"
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
               />
             </div>
           </div>
@@ -53,10 +65,7 @@ export default function LoginPage() {
           <div>
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Contraseña</Label>
-              <Link
-                to="#"
-                className="text-xs text-trust transition-colors hover:underline"
-              >
+              <Link to="#" className="text-xs text-trust transition-colors hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
@@ -68,6 +77,8 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 required
                 className="px-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
@@ -80,13 +91,14 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            variant="trust"
-            size="lg"
-            className="w-full"
-            disabled={loading}
-          >
+          {error && (
+            <div className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2.5 text-sm text-danger">
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <Button type="submit" variant="trust" size="lg" className="w-full" disabled={loading}>
             {loading ? (
               <>
                 <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -100,7 +112,6 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        {/* Separador */}
         <div className="my-6 flex items-center gap-4 text-xs text-muted-foreground">
           <span className="h-px flex-1 bg-border" />o<span className="h-px flex-1 bg-border" />
         </div>

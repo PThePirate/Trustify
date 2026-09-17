@@ -1,8 +1,26 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import LandingPage from "@/pages/public/LandingPage";
+import MiniLandingPublicaPage from "@/pages/public/MiniLandingPublicaPage";
+import BuscarPage from "@/pages/public/BuscarPage";
+import ResultadosBusquedaPage from "@/pages/public/ResultadosBusquedaPage";
+import MisSolicitudesPage from "@/pages/public/MisSolicitudesPage";
+import PerfilPage from "@/pages/public/PerfilPage";
+import NotificacionesPage from "@/pages/public/NotificacionesPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
+import OtpVerificationPage from "@/pages/auth/OtpVerificationPage";
+import FotoVerificacionPage from "@/pages/auth/FotoVerificacionPage";
+import OnboardingPage from "@/pages/public/OnboardingPage";
+
+// Módulo B — Emprendedor
+import RequireAuth from "@/components/auth/RequireAuth";
+import ActivarEmprendedorPage from "@/pages/emprendedor/ActivarEmprendedorPage";
+import EmprendedorLayout from "@/components/emprendedor/EmprendedorLayout";
+import NegocioEditorPage from "@/pages/emprendedor/NegocioEditorPage";
+import CatalogoPage from "@/pages/emprendedor/CatalogoPage";
+import BandejaSolicitudesPage from "@/pages/emprendedor/BandejaSolicitudesPage";
+import ReputacionPage from "@/pages/emprendedor/ReputacionPage";
 
 // Módulo E — Admin
 import AdminLoginPage from "@/pages/admin/AdminLoginPage";
@@ -18,8 +36,8 @@ import UserDetailPage from "@/pages/admin/UserDetailPage";
 
 /**
  * Router principal de CheckBiz.
- * A medida que construyamos cada módulo (A Cliente, B Emprendedor, C/D paneles)
- * iremos agregando sus rutas aquí.
+ * A medida que construyamos cada módulo (A Cliente, C/D paneles) iremos
+ * agregando sus rutas aquí.
  */
 export default function App() {
   return (
@@ -29,9 +47,74 @@ export default function App() {
           {/* MÓDULO F — Público / Marketing */}
           <Route path="/" element={<LandingPage />} />
 
+          {/* A6 — Mini Landing Page pública de un negocio */}
+          <Route path="/negocio/publico/:slug" element={<MiniLandingPublicaPage />} />
+
+          {/* A4/A5 — Búsqueda y resultados */}
+          <Route path="/buscar" element={<BuscarPage />} />
+          <Route path="/buscar/resultados" element={<ResultadosBusquedaPage />} />
+
+          {/* A7/A8 — Mis solicitudes (requiere sesión de cliente) */}
+          <Route
+            path="/mis-solicitudes"
+            element={
+              <RequireAuth>
+                <MisSolicitudesPage />
+              </RequireAuth>
+            }
+          />
+
+          {/* A9 — Perfil del comprador (requiere sesión) */}
+          <Route
+            path="/perfil"
+            element={
+              <RequireAuth>
+                <PerfilPage />
+              </RequireAuth>
+            }
+          />
+
+          {/* A10 — Notificaciones (requiere sesión) */}
+          <Route
+            path="/notificaciones"
+            element={
+              <RequireAuth>
+                <NotificacionesPage />
+              </RequireAuth>
+            }
+          />
+
           {/* Autenticación pública (Cliente / Emprendedor) */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
+          <Route path="/verificar-otp" element={<OtpVerificationPage />} />
+          <Route path="/verificar-foto" element={<FotoVerificacionPage />} />
+
+          {/* A1 — Onboarding, primera vez que un cliente nuevo entra */}
+          <Route path="/bienvenida" element={<OnboardingPage />} />
+
+          {/* MÓDULO B — Emprendedor */}
+          <Route
+            path="/negocio/activar"
+            element={
+              <RequireAuth>
+                <ActivarEmprendedorPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/negocio"
+            element={
+              <RequireAuth>
+                <EmprendedorLayout />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<NegocioEditorPage />} />
+            <Route path="catalogo" element={<CatalogoPage />} />
+            <Route path="solicitudes" element={<BandejaSolicitudesPage />} />
+            <Route path="reputacion" element={<ReputacionPage />} />
+          </Route>
 
           {/* MÓDULO E — Admin (ruta y login completamente separados) */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -53,9 +136,7 @@ export default function App() {
           </Route>
 
           {/* Próximos módulos (placeholders):
-          <Route path="/app/*" element={<ClienteLayout />} />
-          <Route path="/negocio/*" element={<EmprendedorLayout />} />
-          <Route path="/panel/*" element={<PanelLayout />} />
+          <Route path="/panel/*" element={<PanelLayout />} />                        <- C/D
           */}
         </Routes>
       </BrowserRouter>
