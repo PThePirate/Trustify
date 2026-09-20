@@ -147,3 +147,18 @@ export async function obtenerMiQr() {
 export async function registrarEscaneoQr(codigo) {
   return api(`/negocios/qr/${codigo}/escaneo`, { method: "POST", auth: false });
 }
+
+// ---------------------------------------------------------------------
+// Ruta de Formalización + Simulador RIMPE (B8)
+// ---------------------------------------------------------------------
+export async function obtenerFormalizacion() {
+  return api("/negocio/mio/formalizacion");
+}
+
+export async function marcarRimpeRegistrado(completado) {
+  return api("/negocio/mio/formalizacion/rimpe", { method: "PATCH", body: { completado } });
+}
+
+export async function simularRimpe(ingresosAnuales) {
+  return api("/negocio/rimpe/simular", { method: "POST", body: { ingresosAnuales } });
+}
