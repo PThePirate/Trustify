@@ -40,7 +40,11 @@ async function api(path, { method = "GET", body, query, auth = true } = {}) {
   } catch {
     // sin cuerpo
   }
-  if (!res.ok) throw new Error(data?.mensaje || `Error del servidor (${res.status})`);
+  if (!res.ok) {
+    const err = new Error(data?.mensaje || `Error del servidor (${res.status})`);
+    err.codigo = data?.error;
+    throw err;
+  }
   return data;
 }
 
@@ -173,4 +177,19 @@ export async function marcarRimpeRegistrado(completado) {
 
 export async function simularRimpe(ingresosAnuales) {
   return api("/negocio/rimpe/simular", { method: "POST", body: { ingresosAnuales } });
+}
+
+// ---------------------------------------------------------------------
+// Suscripción / Planes (B9)
+// ---------------------------------------------------------------------
+export async function listarPlanes() {
+  return api("/negocio/planes");
+}
+
+export async function obtenerMiSuscripcion() {
+  return api("/negocio/mio/suscripcion");
+}
+
+export async function cambiarPlan(planNombre, ciclo) {
+  return api("/negocio/mio/suscripcion/checkout", { method: "POST", body: { planNombre, ciclo } });
 }

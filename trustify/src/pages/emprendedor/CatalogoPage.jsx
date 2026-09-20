@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  Package, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Check,
+  Package, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Check, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  listarCatalogo, crearItemCatalogo, actualizarItemCatalogo, eliminarItemCatalogo,
+  listarCatalogo, crearItemCatalogo, actualizarItemCatalogo, eliminarItemCatalogo, obtenerMiSuscripcion,
 } from "@/services/negocioApi";
 
 const VACIO = { nombre: "", precioReferencial: "" };
@@ -18,13 +19,16 @@ function formatearPrecio(p) {
 
 export default function CatalogoPage() {
   const [items, setItems] = useState(null);
+  const [suscripcion, setSuscripcion] = useState(null);
   const [form, setForm] = useState(VACIO);
   const [editandoId, setEditandoId] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
+  const [limiteAlcanzado, setLimiteAlcanzado] = useState(false);
 
   function cargar() {
     listarCatalogo().then(setItems).catch((err) => setError(err.message));
+    obtenerMiSuscripcion().then(setSuscripcion).catch(() => {});
   }
   useEffect(cargar, []);
 
@@ -42,6 +46,7 @@ export default function CatalogoPage() {
     e.preventDefault();
     if (!form.nombre.trim()) return;
     setError("");
+    setLimiteAlcanzado(false);
     setGuardando(true);
     try {
       const datos = {
@@ -57,6 +62,7 @@ export default function CatalogoPage() {
       cargar();
     } catch (err) {
       setError(err.message || "No se pudo guardar");
+      setLimiteAlcanzado(err.codigo === "LIMITE_CATALOGO_ALCANZADO");
     } finally {
       setGuardando(false);
     }
@@ -79,6 +85,12 @@ export default function CatalogoPage() {
         <p className="mt-1 text-muted-foreground">
           Productos o servicios con precio referencial — así los ven tus clientes en tu perfil público.
         </p>
+        {suscripcion && (
+          <p className="mt-1 text-sm text-muted-foreground">
+            {items?.length ?? suscripcion.totalCatalogoUsado}/{suscripcion.plan.limiteCatalogo} ítems usados en tu plan{" "}
+            {suscripcion.plan.nombre === "basico" ? "Básico" : suscripcion.plan.nombre === "pro" ? "Pro" : "Elite"}.
+          </p>
+        )}
       </div>
 
       <form onSubmit={guardar} className="panel mb-6 p-5">
@@ -123,7 +135,18 @@ export default function CatalogoPage() {
 
       {error && (
         <div className="mb-4 flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2.5 text-sm text-danger">
-          <AlertCircle className="mt-0.5 size-4 shrink-0" /> {error}
+          <AlertCircle className="mt-0.5 size-4 shrink-0" />
+          <span>
+            {error}
+            {limiteAlcanzado && (
+              <>
+                {" "}
+                <Link to="/negocio/planes" className="inline-flex items-center gap-1 font-semibold underline">
+                  <Sparkles className="size-3.5" /> Mejora tu plan
+                </Link>
+              </>
+            )}
+          </span>
         </div>
       )}
 

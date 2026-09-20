@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Store, Package, Inbox, Star, LogOut, ExternalLink, QrCode, TrendingUp, LineChart, Menu, X } from "lucide-react";
+import { Store, Package, Inbox, Star, LogOut, ExternalLink, QrCode, TrendingUp, LineChart, Menu, X, CreditCard } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { logout } from "@/services/authApi";
@@ -14,6 +14,7 @@ const NAV = [
   { to: "/negocio/analitica", label: "Analítica", icon: LineChart },
   { to: "/negocio/formalizacion", label: "Formalización", icon: TrendingUp },
   { to: "/negocio/qr", label: "QR de verificación", icon: QrCode },
+  { to: "/negocio/planes", label: "Suscripción y planes", icon: CreditCard },
 ];
 
 export default function EmprendedorLayout() {

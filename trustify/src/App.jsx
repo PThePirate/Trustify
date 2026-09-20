@@ -23,6 +23,7 @@ import BandejaSolicitudesPage from "@/pages/emprendedor/BandejaSolicitudesPage";
 import ReputacionPage from "@/pages/emprendedor/ReputacionPage";
 import FormalizacionPage from "@/pages/emprendedor/FormalizacionPage";
 import AnaliticaPage from "@/pages/emprendedor/AnaliticaPage";
+import PlanesPage from "@/pages/emprendedor/PlanesPage";
 import QrVerificacionPage from "@/pages/emprendedor/QrVerificacionPage";
 import QrEscaneoPage from "@/pages/public/QrEscaneoPage";
 
@@ -130,6 +131,7 @@ export default function App() {
             <Route path="analitica" element={<AnaliticaPage />} />
             <Route path="formalizacion" element={<FormalizacionPage />} />
             <Route path="qr" element={<QrVerificacionPage />} />
+            <Route path="planes" element={<PlanesPage />} />
           </Route>
 
           {/* MÓDULO E — Admin (ruta y login completamente separados) */}
