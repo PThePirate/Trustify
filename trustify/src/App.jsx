@@ -21,6 +21,8 @@ import NegocioEditorPage from "@/pages/emprendedor/NegocioEditorPage";
 import CatalogoPage from "@/pages/emprendedor/CatalogoPage";
 import BandejaSolicitudesPage from "@/pages/emprendedor/BandejaSolicitudesPage";
 import ReputacionPage from "@/pages/emprendedor/ReputacionPage";
+import QrVerificacionPage from "@/pages/emprendedor/QrVerificacionPage";
+import QrEscaneoPage from "@/pages/public/QrEscaneoPage";
 
 // Módulo E — Admin
 import AdminLoginPage from "@/pages/admin/AdminLoginPage";
@@ -49,6 +51,9 @@ export default function App() {
 
           {/* A6 — Mini Landing Page pública de un negocio */}
           <Route path="/negocio/publico/:slug" element={<MiniLandingPublicaPage />} />
+
+          {/* B11 — a donde apunta el QR físico; registra el escaneo y redirige a A6 */}
+          <Route path="/qr/:codigo" element={<QrEscaneoPage />} />
 
           {/* A4/A5 — Búsqueda y resultados */}
           <Route path="/buscar" element={<BuscarPage />} />
@@ -114,6 +119,7 @@ export default function App() {
             <Route path="catalogo" element={<CatalogoPage />} />
             <Route path="solicitudes" element={<BandejaSolicitudesPage />} />
             <Route path="reputacion" element={<ReputacionPage />} />
+            <Route path="qr" element={<QrVerificacionPage />} />
           </Route>
 
           {/* MÓDULO E — Admin (ruta y login completamente separados) */}

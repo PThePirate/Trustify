@@ -135,3 +135,15 @@ export async function buscarNegocios({ texto, categoriaId, ciudad, nivel } = {})
 export async function listarCiudadesDisponibles() {
   return api("/negocios/ciudades-disponibles", { auth: false });
 }
+
+// ---------------------------------------------------------------------
+// QR de verificación física (B11)
+// ---------------------------------------------------------------------
+export async function obtenerMiQr() {
+  return api("/negocio/mio/qr");
+}
+
+// Sin sesión: cualquiera que escanee el QR físico dispara esto.
+export async function registrarEscaneoQr(codigo) {
+  return api(`/negocios/qr/${codigo}/escaneo`, { method: "POST", auth: false });
+}

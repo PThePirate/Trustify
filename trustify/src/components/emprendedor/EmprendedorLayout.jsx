@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Store, Package, Inbox, Star, LogOut, ExternalLink } from "lucide-react";
+import { Store, Package, Inbox, Star, LogOut, ExternalLink, QrCode } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { logout } from "@/services/authApi";
@@ -10,6 +10,7 @@ const NAV = [
   { to: "/negocio/catalogo", label: "Catálogo", icon: Package },
   { to: "/negocio/solicitudes", label: "Solicitudes", icon: Inbox },
   { to: "/negocio/reputacion", label: "Reputación", icon: Star },
+  { to: "/negocio/qr", label: "QR de verificación", icon: QrCode },
 ];
 
 export default function EmprendedorLayout() {
