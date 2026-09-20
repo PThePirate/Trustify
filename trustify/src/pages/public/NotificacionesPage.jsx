@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, ShieldCheck, ShieldX, Flag, Store, MessageCircle, Loader2, CheckCheck } from "lucide-react";
+import { Bell, ShieldCheck, ShieldX, Flag, Store, Inbox, MessageCircle, Loader2, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -11,6 +11,7 @@ const ICONOS = {
   kyc_rechazado: { Icon: ShieldX, tono: "text-danger bg-danger/10" },
   denuncia: { Icon: Flag, tono: "text-pending bg-pending/10" },
   negocio: { Icon: Store, tono: "text-trust bg-trust/10" },
+  solicitud: { Icon: Inbox, tono: "text-trust bg-trust/10" },
 };
 
 function formatearFecha(iso) {

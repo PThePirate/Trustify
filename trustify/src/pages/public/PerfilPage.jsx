@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   User, Mail, Contact, Phone, ShieldCheck, CheckCircle2, XCircle,
-  FileText, Store, Loader2, AlertCircle, Save,
+  FileText, Store, Loader2, AlertCircle, Save, Camera, HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,71 @@ import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import NotificationBell from "@/components/shared/NotificationBell";
-import { obtenerPerfil, actualizarPerfil, logout } from "@/services/authApi";
+import {
+  obtenerPerfil, actualizarPerfil, logout, subirFotoPerfil, obtenerFotoPerfilUrl,
+} from "@/services/authApi";
+
+/** Avatar del comprador (A9) — foto propia si la subió, iniciales si no. */
+function AvatarPerfil({ usuario, onActualizado }) {
+  const [fotoUrl, setFotoUrl] = useState(null);
+  const [subiendo, setSubiendo] = useState(false);
+  const [error, setError] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    let objectUrl = null;
+    let cancelado = false;
+    if (usuario.fotoPerfilUrl) {
+      obtenerFotoPerfilUrl().then((u) => {
+        if (cancelado || !u) return;
+        objectUrl = u;
+        setFotoUrl(u);
+      });
+    }
+    return () => {
+      cancelado = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [usuario.fotoPerfilUrl]);
+
+  async function elegirArchivo(e) {
+    const archivo = e.target.files?.[0];
+    if (!archivo) return;
+    setError("");
+    setSubiendo(true);
+    try {
+      const actualizado = await subirFotoPerfil(archivo);
+      onActualizado(actualizado);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubiendo(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <div className="relative shrink-0">
+      <div className="grid size-16 place-items-center overflow-hidden rounded-2xl bg-trust/10 font-display text-xl font-bold text-trust">
+        {fotoUrl ? (
+          <img src={fotoUrl} alt="Foto de perfil" className="size-full object-cover" />
+        ) : (
+          usuario.nombreCompleto.split(" ").map((p) => p[0]).slice(0, 2).join("")
+        )}
+      </div>
+      <button
+        onClick={() => inputRef.current?.click()}
+        disabled={subiendo}
+        title="Cambiar foto de perfil"
+        className="absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full bg-trust text-white shadow-sm hover:bg-trust/90 disabled:opacity-60"
+      >
+        {subiendo ? <Loader2 className="size-3.5 animate-spin" /> : <Camera className="size-3.5" />}
+      </button>
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={elegirArchivo} />
+      {error && <p className="absolute top-full mt-1 w-40 text-xs text-danger">{error}</p>}
+    </div>
+  );
+}
 
 const CAPAS = [
   { n: 1, nombre: "Estructura (cédula)" },
@@ -87,9 +151,7 @@ export default function PerfilPage() {
 
       <div className="mx-auto max-w-2xl px-6 py-8">
         <div className="mb-6 flex items-center gap-4">
-          <div className="grid size-16 shrink-0 place-items-center rounded-2xl bg-trust/10 font-display text-xl font-bold text-trust">
-            {usuario.nombreCompleto.split(" ").map((p) => p[0]).slice(0, 2).join("")}
-          </div>
+          <AvatarPerfil usuario={usuario} onActualizado={setUsuario} />
           <div>
             <h1 className="font-display text-2xl font-bold">{usuario.nombreCompleto}</h1>
             <div className="mt-1 flex flex-wrap gap-1.5">
@@ -136,6 +198,13 @@ export default function PerfilPage() {
               </div>
             </Link>
           )}
+          <Link to="/ayuda" className="panel panel-hover flex items-center gap-3 p-4">
+            <HelpCircle className="size-5 text-muted-foreground" />
+            <div>
+              <p className="font-medium">Centro de ayuda</p>
+              <p className="text-xs text-muted-foreground">Preguntas frecuentes y reportes</p>
+            </div>
+          </Link>
         </div>
 
         {/* Datos personales */}

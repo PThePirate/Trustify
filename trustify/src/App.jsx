@@ -7,6 +7,7 @@ import ResultadosBusquedaPage from "@/pages/public/ResultadosBusquedaPage";
 import MisSolicitudesPage from "@/pages/public/MisSolicitudesPage";
 import PerfilPage from "@/pages/public/PerfilPage";
 import NotificacionesPage from "@/pages/public/NotificacionesPage";
+import AyudaPage from "@/pages/public/AyudaPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import OtpVerificationPage from "@/pages/auth/OtpVerificationPage";
@@ -106,6 +107,9 @@ export default function App() {
 
           {/* A1 — Onboarding, primera vez que un cliente nuevo entra */}
           <Route path="/bienvenida" element={<OnboardingPage />} />
+
+          {/* A11 — Centro de Ayuda / FAQ, público */}
+          <Route path="/ayuda" element={<AyudaPage />} />
 
           {/* MÓDULO B — Emprendedor */}
           <Route

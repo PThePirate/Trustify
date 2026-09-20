@@ -89,6 +89,23 @@ export async function actualizarPerfil({ nombreCompleto, telefono }) {
 }
 
 // ---------------------------------------------------------------------
+// Foto de perfil (A9)
+// ---------------------------------------------------------------------
+export async function subirFotoPerfil(archivo) {
+  const form = new FormData();
+  form.append("foto", archivo);
+  const data = await api("/auth/perfil/foto", { method: "POST", body: form, isForm: true });
+  return data.usuario;
+}
+
+export async function obtenerFotoPerfilUrl() {
+  const res = await fetch(`${API_BASE}/auth/perfil/foto/archivo`, { headers: authHeaders() });
+  if (!res.ok) return null;
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+// ---------------------------------------------------------------------
 // Notificaciones (A10)
 // ---------------------------------------------------------------------
 export async function listarNotificaciones() {

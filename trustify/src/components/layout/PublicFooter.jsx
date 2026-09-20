@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Logo from "@/components/brand/Logo";
 
 export default function PublicFooter() {
@@ -10,6 +11,9 @@ export default function PublicFooter() {
             Marketplace de identidad digital verificada. Convertimos la
             desconfianza del comercio local en un activo de reputación.
           </p>
+          <Link to="/ayuda" className="inline-block text-sm font-medium text-trust hover:underline">
+            Centro de Ayuda
+          </Link>
         </div>
         <div className="text-xs text-muted-foreground">
           <p>Business Week — UEES · Prototipo académico</p>
