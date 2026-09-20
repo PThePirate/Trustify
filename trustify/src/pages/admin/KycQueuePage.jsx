@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import {
   ShieldCheck, Clock, Check, X, AlertCircle, User, Mail, CreditCard,
-  Calendar, Camera, Loader2,
+  Calendar, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { listarFotos, decidirFoto } from "@/services/adminApi";
+import { listarFotos, decidirFoto, obtenerFotoVerificacionUrl } from "@/services/adminApi";
 
 const TABS = [
   { value: "en_revision", label: "En revisión", icon: Clock },
@@ -56,14 +56,56 @@ function ModalRechazo({ abierto, onCancelar, onConfirmar, enviando }) {
   );
 }
 
+function MiniaturaFoto({ id }) {
+  const [url, setUrl] = useState(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let objectUrl = null;
+    let cancelado = false;
+    setError(false);
+    obtenerFotoVerificacionUrl(id)
+      .then((u) => {
+        if (cancelado) {
+          URL.revokeObjectURL(u);
+          return;
+        }
+        objectUrl = u;
+        setUrl(u);
+      })
+      .catch(() => !cancelado && setError(true));
+    return () => {
+      cancelado = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [id]);
+
+  if (error) {
+    return (
+      <div className="flex size-20 shrink-0 items-center justify-center rounded-xl border border-dashed border-danger/30 bg-danger/10 text-danger sm:size-24">
+        <AlertCircle className="size-6" />
+      </div>
+    );
+  }
+
+  if (!url) {
+    return <div className="size-20 shrink-0 animate-pulse rounded-xl bg-muted/40 sm:size-24" />;
+  }
+
+  return (
+    <img
+      src={url}
+      alt="Selfie con cédula"
+      className="size-20 shrink-0 rounded-xl border border-border object-cover sm:size-24"
+    />
+  );
+}
+
 function TarjetaVerificacion({ item, onAprobar, onRechazar, procesando }) {
   const { usuario } = item;
   return (
     <div className="panel panel-hover flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
-      {/* Miniatura de la foto (placeholder hasta conectar /uploads reales) */}
-      <div className="flex size-20 shrink-0 items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 text-muted-foreground sm:size-24">
-        <Camera className="size-7" />
-      </div>
+      <MiniaturaFoto id={item.id} />
 
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2">
