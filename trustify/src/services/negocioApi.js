@@ -11,7 +11,7 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function api(path, { method = "GET", body, query } = {}) {
+async function api(path, { method = "GET", body, query, auth = true } = {}) {
   const qs = query
     ? "?" + new URLSearchParams(Object.entries(query).filter(([, v]) => v !== undefined)).toString()
     : "";
@@ -19,14 +19,18 @@ async function api(path, { method = "GET", body, query } = {}) {
   try {
     res = await fetch(`${API_BASE}${path}${qs}`, {
       method,
-      headers: { "Content-Type": "application/json", ...authHeaders() },
+      headers: { "Content-Type": "application/json", ...(auth ? authHeaders() : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
     throw new Error("No se pudo conectar con el servidor. Verifica que el backend esté corriendo.");
   }
 
-  if (res.status === 401) logout();
+  // Un token vencido/corrupto hace que el filtro JWT del backend responda
+  // 401 incluso en rutas públicas (revisa el token antes de mirar si la
+  // ruta exige sesión). En una llamada sin auth, ese 401 no significa que
+  // haya que cerrar sesión.
+  if (res.status === 401 && auth) logout();
 
   if (res.status === 204) return null; // sin contenido (ej. eliminar)
 
@@ -60,7 +64,10 @@ export async function cambiarPublicacion(publicar) {
 }
 
 export async function listarCategoriasDisponibles() {
-  return api("/negocio/categorias-disponibles");
+  // Vive bajo /negocios (plural, público) y no /negocio (singular, exige
+  // sesión) — antes de este cambio el backend devolvía 401 para cualquiera
+  // que abriera la búsqueda sin haber iniciado sesión.
+  return api("/negocios/categorias-disponibles", { auth: false });
 }
 
 // ---------------------------------------------------------------------
@@ -112,7 +119,7 @@ export async function eliminarItemCatalogo(id) {
 // Perfil público (A6) — sin autenticación, cualquiera puede verlo
 // ---------------------------------------------------------------------
 export async function obtenerNegocioPublico(slug) {
-  return api(`/negocios/publico/${slug}`);
+  return api(`/negocios/publico/${slug}`, { auth: false });
 }
 
 // ---------------------------------------------------------------------
@@ -121,9 +128,10 @@ export async function obtenerNegocioPublico(slug) {
 export async function buscarNegocios({ texto, categoriaId, ciudad, nivel } = {}) {
   return api("/negocios", {
     query: { texto, categoriaId, ciudad, nivel },
+    auth: false,
   });
 }
 
 export async function listarCiudadesDisponibles() {
-  return api("/negocios/ciudades-disponibles");
+  return api("/negocios/ciudades-disponibles", { auth: false });
 }

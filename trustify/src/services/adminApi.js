@@ -99,6 +99,24 @@ export async function decidirFoto(id, { estado, motivoRechazo }) {
   });
 }
 
+/**
+ * El archivo de la foto (selfie + cédula) ya no es un estático público en
+ * /uploads — es un dato sensible que exige rol ADMIN. Un <img src="..."> no
+ * puede mandar el header Authorization, así que lo traemos como blob y
+ * devolvemos una URL de objeto local para usarla en el <img>.
+ * El caller debe llamar URL.revokeObjectURL(url) cuando ya no la necesite.
+ */
+export async function obtenerFotoVerificacionUrl(id) {
+  const res = await fetch(`${API_BASE}/admin/kyc/fotos/${id}/archivo`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) {
+    throw new Error(res.status === 404 ? "La foto ya no está disponible" : `Error del servidor (${res.status})`);
+  }
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
 // ---------------------------------------------------------------------
 // Veto por cédula (E4)
 // ---------------------------------------------------------------------
