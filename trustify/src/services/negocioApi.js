@@ -149,6 +149,18 @@ export async function registrarEscaneoQr(codigo) {
 }
 
 // ---------------------------------------------------------------------
+// Panel de Analítica (B7)
+// ---------------------------------------------------------------------
+export async function obtenerMiAnalitica() {
+  return api("/negocio/mio/analitica");
+}
+
+// Sin sesión: lo dispara cualquier visitante al abrir el enlace de WhatsApp.
+export async function registrarClicWhatsapp(slug) {
+  return api(`/negocios/publico/${slug}/clic-whatsapp`, { method: "POST", auth: false });
+}
+
+// ---------------------------------------------------------------------
 // Ruta de Formalización + Simulador RIMPE (B8)
 // ---------------------------------------------------------------------
 export async function obtenerFormalizacion() {

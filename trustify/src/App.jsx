@@ -22,6 +22,7 @@ import CatalogoPage from "@/pages/emprendedor/CatalogoPage";
 import BandejaSolicitudesPage from "@/pages/emprendedor/BandejaSolicitudesPage";
 import ReputacionPage from "@/pages/emprendedor/ReputacionPage";
 import FormalizacionPage from "@/pages/emprendedor/FormalizacionPage";
+import AnaliticaPage from "@/pages/emprendedor/AnaliticaPage";
 import QrVerificacionPage from "@/pages/emprendedor/QrVerificacionPage";
 import QrEscaneoPage from "@/pages/public/QrEscaneoPage";
 
@@ -126,6 +127,7 @@ export default function App() {
             <Route path="catalogo" element={<CatalogoPage />} />
             <Route path="solicitudes" element={<BandejaSolicitudesPage />} />
             <Route path="reputacion" element={<ReputacionPage />} />
+            <Route path="analitica" element={<AnaliticaPage />} />
             <Route path="formalizacion" element={<FormalizacionPage />} />
             <Route path="qr" element={<QrVerificacionPage />} />
           </Route>

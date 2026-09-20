@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Store, Package, Inbox, Star, LogOut, ExternalLink, QrCode, TrendingUp, Menu, X } from "lucide-react";
+import { Store, Package, Inbox, Star, LogOut, ExternalLink, QrCode, TrendingUp, LineChart, Menu, X } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { logout } from "@/services/authApi";
@@ -11,6 +11,7 @@ const NAV = [
   { to: "/negocio/catalogo", label: "Catálogo", icon: Package },
   { to: "/negocio/solicitudes", label: "Solicitudes", icon: Inbox },
   { to: "/negocio/reputacion", label: "Reputación", icon: Star },
+  { to: "/negocio/analitica", label: "Analítica", icon: LineChart },
   { to: "/negocio/formalizacion", label: "Formalización", icon: TrendingUp },
   { to: "/negocio/qr", label: "QR de verificación", icon: QrCode },
 ];

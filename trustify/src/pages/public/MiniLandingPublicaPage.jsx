@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import NotificationBell from "@/components/shared/NotificationBell";
-import { obtenerNegocioPublico } from "@/services/negocioApi";
+import { obtenerNegocioPublico, registrarClicWhatsapp } from "@/services/negocioApi";
 import { crearSolicitud } from "@/services/solicitudApi";
 import { reportarNegocio } from "@/services/denunciaApi";
 import { isLoggedIn } from "@/services/authApi";
@@ -193,6 +193,7 @@ export default function MiniLandingPublicaPage() {
             href={urlWhatsApp(negocio.whatsapp, `Hola, vi tu perfil de ${negocio.nombreComercial} en CheckBiz`)}
             target="_blank"
             rel="noreferrer"
+            onClick={() => registrarClicWhatsapp(negocio.slug).catch(() => {})}
           >
             <Button variant="verified" size="lg">
               <MessageCircle className="size-4" /> Contactar por WhatsApp
