@@ -37,6 +37,12 @@ import CategoriesPage from "@/pages/admin/CategoriesPage";
 import AuditLogsPage from "@/pages/admin/AuditLogsPage";
 import UserDetailPage from "@/pages/admin/UserDetailPage";
 
+// Módulo D — Institucional (B2G)
+import RequireInstitucional from "@/components/institucional/RequireInstitucional";
+import InstitucionalLayout from "@/components/institucional/InstitucionalLayout";
+import InstitucionalLoginPage from "@/pages/institucional/InstitucionalLoginPage";
+import DashboardB2GPage from "@/pages/institucional/DashboardB2GPage";
+
 /**
  * Router principal de CheckBiz.
  * A medida que construyamos cada módulo (A Cliente, C/D paneles) iremos
@@ -143,8 +149,21 @@ export default function App() {
             <Route path="usuarios/:id" element={<UserDetailPage />} />
           </Route>
 
+          {/* MÓDULO D — Institucional / B2G (ruta y login separados) */}
+          <Route path="/institucional/login" element={<InstitucionalLoginPage />} />
+          <Route
+            path="/institucional"
+            element={
+              <RequireInstitucional>
+                <InstitucionalLayout />
+              </RequireInstitucional>
+            }
+          >
+            <Route index element={<DashboardB2GPage />} />
+          </Route>
+
           {/* Próximos módulos (placeholders):
-          <Route path="/panel/*" element={<PanelLayout />} />                        <- C/D
+          <Route path="/panel/*" element={<PanelLayout />} />                        <- C
           */}
         </Routes>
       </BrowserRouter>
