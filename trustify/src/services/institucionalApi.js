@@ -6,6 +6,7 @@
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 const TOKEN_KEY = "checkbiz_institucional_token";
+const INFO_KEY = "checkbiz_institucional_info";
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -15,6 +16,16 @@ function setToken(token) {
 }
 function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(INFO_KEY);
+}
+
+/** tipo: 'universidad' | 'camara_impuestos' | 'camara_negocio' — decide qué nav/dashboard mostrar. */
+export function obtenerInstitucionActual() {
+  try {
+    return JSON.parse(localStorage.getItem(INFO_KEY));
+  } catch {
+    return null;
+  }
 }
 
 function authHeaders() {
@@ -53,6 +64,7 @@ async function api(path, { method = "GET", body, auth = true } = {}) {
 export async function institucionalLogin({ correo, password }) {
   const data = await api("/institucional/login", { method: "POST", body: { correo, password }, auth: false });
   setToken(data.token);
+  localStorage.setItem(INFO_KEY, JSON.stringify(data.institucion));
   return data;
 }
 
@@ -69,4 +81,19 @@ export function isInstitucionalLoggedIn() {
 // ---------------------------------------------------------------------
 export async function obtenerDashboardB2G() {
   return api("/institucional/dashboard-b2g");
+}
+
+// ---------------------------------------------------------------------
+// Panel B2B Universidades (C2/C3)
+// ---------------------------------------------------------------------
+export async function obtenerDashboardCaces() {
+  return api("/institucional/dashboard-caces");
+}
+
+export async function listarAlumniSeguimiento() {
+  return api("/institucional/alumni");
+}
+
+export async function decidirAlumni(id, estado) {
+  return api(`/institucional/alumni/${id}`, { method: "PATCH", body: { estado } });
 }

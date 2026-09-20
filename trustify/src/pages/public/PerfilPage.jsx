@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   User, Mail, Contact, Phone, ShieldCheck, CheckCircle2, XCircle,
-  FileText, Store, Loader2, AlertCircle, Save, Camera, HelpCircle,
+  FileText, Store, Loader2, AlertCircle, Save, Camera, HelpCircle, GraduationCap, Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,98 @@ import NotificationBell from "@/components/shared/NotificationBell";
 import {
   obtenerPerfil, actualizarPerfil, logout, subirFotoPerfil, obtenerFotoPerfilUrl,
 } from "@/services/authApi";
+import {
+  listarUniversidades, solicitarVerificacionAlumni, misVerificacionesAlumni,
+} from "@/services/alumniApi";
+
+const ALUMNI_ESTADO_INFO = {
+  pendiente: { label: "En revisión", variant: "pending" },
+  verificado: { label: "Verificado", variant: "verified" },
+  rechazado: { label: "No verificado", variant: "outline" },
+};
+
+/** Verificación de alumni (Módulo C) — pedirle a una universidad que te reconozca como su egresado. */
+function VerificacionAlumni() {
+  const [universidades, setUniversidades] = useState(null);
+  const [misVerificaciones, setMisVerificaciones] = useState(null);
+  const [seleccion, setSeleccion] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState("");
+
+  function cargar() {
+    listarUniversidades().then(setUniversidades).catch(() => setUniversidades([]));
+    misVerificacionesAlumni().then(setMisVerificaciones).catch(() => setMisVerificaciones([]));
+  }
+  useEffect(cargar, []);
+
+  async function solicitar(e) {
+    e.preventDefault();
+    if (!seleccion) return;
+    setError("");
+    setEnviando(true);
+    try {
+      await solicitarVerificacionAlumni(Number(seleccion));
+      setSeleccion("");
+      cargar();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  if (!universidades || !misVerificaciones) return null;
+
+  const yaSolicitadas = new Set(misVerificaciones.map((v) => v.universidad.id));
+  const disponibles = universidades.filter((u) => !yaSolicitadas.has(u.id));
+
+  return (
+    <div className="panel mb-6 p-5">
+      <h2 className="mb-3 flex items-center gap-2 font-display text-base font-bold">
+        <GraduationCap className="size-4 text-trust" /> Verificación de alumni
+      </h2>
+      <p className="mb-3 text-sm text-muted-foreground">
+        Pide que tu universidad te reconozca como su egresado — suma a tu identidad verificada.
+      </p>
+
+      {misVerificaciones.length > 0 && (
+        <div className="mb-3 space-y-2">
+          {misVerificaciones.map((v) => {
+            const info = ALUMNI_ESTADO_INFO[v.estado] ?? { label: v.estado, variant: "outline" };
+            return (
+              <div key={v.id} className="flex items-center justify-between rounded-lg bg-muted/30 px-3 py-2 text-sm">
+                <span>{v.universidad.nombre}</span>
+                <Badge variant={info.variant}>
+                  {v.estado === "pendiente" && <Clock className="size-3.5" />} {info.label}
+                </Badge>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {disponibles.length > 0 && (
+        <form onSubmit={solicitar} className="flex gap-2">
+          <select
+            value={seleccion}
+            onChange={(e) => setSeleccion(e.target.value)}
+            className="h-11 flex-1 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="">Selecciona tu universidad…</option>
+            {disponibles.map((u) => (
+              <option key={u.id} value={u.id}>{u.nombre}</option>
+            ))}
+          </select>
+          <Button type="submit" variant="trust" disabled={enviando || !seleccion}>
+            {enviando ? <Loader2 className="size-4 animate-spin" /> : "Solicitar"}
+          </Button>
+        </form>
+      )}
+
+      {error && <p className="mt-2 flex items-center gap-1.5 text-sm text-danger"><AlertCircle className="size-4" /> {error}</p>}
+    </div>
+  );
+}
 
 /** Avatar del comprador (A9) — foto propia si la subió, iniciales si no. */
 function AvatarPerfil({ usuario, onActualizado }) {
@@ -179,6 +271,8 @@ export default function PerfilPage() {
             ))}
           </div>
         </div>
+
+        <VerificacionAlumni />
 
         {/* Accesos rápidos */}
         <div className="mb-6 grid gap-3 sm:grid-cols-2">

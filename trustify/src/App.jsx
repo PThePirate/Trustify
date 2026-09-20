@@ -44,7 +44,8 @@ import UserDetailPage from "@/pages/admin/UserDetailPage";
 import RequireInstitucional from "@/components/institucional/RequireInstitucional";
 import InstitucionalLayout from "@/components/institucional/InstitucionalLayout";
 import InstitucionalLoginPage from "@/pages/institucional/InstitucionalLoginPage";
-import DashboardB2GPage from "@/pages/institucional/DashboardB2GPage";
+import InstitucionalIndexPage from "@/pages/institucional/InstitucionalIndexPage";
+import SeguimientoAlumniPage from "@/pages/institucional/SeguimientoAlumniPage";
 
 /**
  * Router principal de CheckBiz.
@@ -157,7 +158,9 @@ export default function App() {
             <Route path="usuarios/:id" element={<UserDetailPage />} />
           </Route>
 
-          {/* MÓDULO D — Institucional / B2G (ruta y login separados) */}
+          {/* MÓDULO D / C — Institucional: B2G (cámaras) y universidades comparten
+              login y layout; InstitucionalIndexPage decide el dashboard según el
+              tipo de cuenta (D2 para cámaras, C2 para universidades). */}
           <Route path="/institucional/login" element={<InstitucionalLoginPage />} />
           <Route
             path="/institucional"
@@ -167,12 +170,10 @@ export default function App() {
               </RequireInstitucional>
             }
           >
-            <Route index element={<DashboardB2GPage />} />
+            <Route index element={<InstitucionalIndexPage />} />
+            {/* C3 — solo tiene sentido para universidades; una cámara nunca ve este link en su nav */}
+            <Route path="alumni" element={<SeguimientoAlumniPage />} />
           </Route>
-
-          {/* Próximos módulos (placeholders):
-          <Route path="/panel/*" element={<PanelLayout />} />                        <- C
-          */}
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

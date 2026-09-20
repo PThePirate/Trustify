@@ -1,16 +1,24 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Landmark } from "lucide-react";
+import { LayoutDashboard, LogOut, Landmark, GraduationCap, Users } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
-import { institucionalLogout } from "@/services/institucionalApi";
+import { institucionalLogout, obtenerInstitucionActual } from "@/services/institucionalApi";
 import { cn } from "@/lib/utils";
 
-const NAV = [
+const NAV_CAMARA = [
   { to: "/institucional", label: "Panel agregado", icon: LayoutDashboard, end: true },
+];
+
+const NAV_UNIVERSIDAD = [
+  { to: "/institucional", label: "Dashboard CACES", icon: GraduationCap, end: true },
+  { to: "/institucional/alumni", label: "Seguimiento de alumni", icon: Users },
 ];
 
 export default function InstitucionalLayout() {
   const navigate = useNavigate();
+  const institucion = obtenerInstitucionActual();
+  const esUniversidad = institucion?.tipo === "universidad";
+  const NAV = esUniversidad ? NAV_UNIVERSIDAD : NAV_CAMARA;
 
   function salir() {
     institucionalLogout();
@@ -26,7 +34,8 @@ export default function InstitucionalLayout() {
 
         <div className="px-4 py-3">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-trust/25 bg-trust/10 px-2.5 py-1 text-[11px] font-semibold text-trust">
-            <Landmark className="size-3.5" /> Acceso institucional (B2G)
+            {esUniversidad ? <GraduationCap className="size-3.5" /> : <Landmark className="size-3.5" />}
+            {esUniversidad ? "Panel universitario" : "Acceso institucional (B2G)"}
           </span>
         </div>
 
