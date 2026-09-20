@@ -127,6 +127,9 @@ export default function MiniLandingPublicaPage() {
   }
 
   const iniciales = negocio.nombreComercial.split(" ").map((p) => p[0]).slice(0, 2).join("");
+  // El sello "Emprendedor Verificado" es una afirmación de confianza — solo
+  // se muestra si de verdad cumplió las 4 capas visibles, nunca por defecto.
+  const emprendedorVerificado = negocio.capasVerificacion.every((c) => c.cumplida);
 
   return (
     <div className="min-h-screen bg-background">
@@ -166,7 +169,9 @@ export default function MiniLandingPublicaPage() {
           <div className="mb-1 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-2xl font-bold sm:text-3xl">{negocio.nombreComercial}</h1>
-              <Badge variant="verified"><ShieldCheck className="size-3" /> Emprendedor Verificado</Badge>
+              {emprendedorVerificado && (
+                <Badge variant="verified"><ShieldCheck className="size-3" /> Emprendedor Verificado</Badge>
+              )}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               {negocio.categoria && <span>{negocio.categoria.nombre}</span>}

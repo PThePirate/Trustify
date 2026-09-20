@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Store, Package, Inbox, Star, LogOut, ExternalLink, QrCode, TrendingUp } from "lucide-react";
+import { Store, Package, Inbox, Star, LogOut, ExternalLink, QrCode, TrendingUp, Menu, X } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { logout } from "@/services/authApi";
@@ -16,6 +17,7 @@ const NAV = [
 
 export default function EmprendedorLayout() {
   const navigate = useNavigate();
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
   function salir() {
     logout();
@@ -71,6 +73,13 @@ export default function EmprendedorLayout() {
       </aside>
 
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
+        <button
+          onClick={() => setMenuAbierto((v) => !v)}
+          className="grid size-9 place-items-center rounded-lg text-foreground/80 hover:bg-muted/60"
+          aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
+        >
+          {menuAbierto ? <X className="size-5" /> : <Menu className="size-5" />}
+        </button>
         <Logo />
         <div className="flex items-center gap-2">
           <ThemeToggle />
@@ -79,6 +88,36 @@ export default function EmprendedorLayout() {
           </button>
         </div>
       </header>
+
+      {menuAbierto && (
+        <nav className="fixed inset-x-0 top-16 z-20 space-y-1 border-b border-border bg-card p-3 shadow-lg lg:hidden">
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              onClick={() => setMenuAbierto(false)}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive ? "bg-trust/10 text-trust" : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
+                )
+              }
+            >
+              <item.icon className="size-[18px]" />
+              {item.label}
+            </NavLink>
+          ))}
+          <a
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 hover:bg-muted/60"
+          >
+            <ExternalLink className="size-[18px]" /> Ver sitio público
+          </a>
+        </nav>
+      )}
 
       <div className="hidden justify-end border-b border-border bg-card px-8 py-3 lg:flex lg:ml-64">
         <ThemeToggle />
