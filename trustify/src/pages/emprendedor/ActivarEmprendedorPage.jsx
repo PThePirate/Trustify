@@ -47,7 +47,8 @@ export default function ActivarEmprendedorPage() {
             <div>
               <p className="font-medium">Cruce SENESCYT / SRI</p>
               <p className="text-sm text-muted-foreground">
-                Capa 4 — confirmamos actividad real registrada a tu nombre.
+                Capa 4 — en este piloto esta consulta está <strong>simulada</strong>: todavía no nos
+                conectamos a esas bases públicas. Autorizas el cruce para cuando esté disponible.
               </p>
             </div>
           </div>

@@ -114,6 +114,7 @@ export default function UserDetailPage() {
             <p className="mt-3 text-sm text-muted-foreground">
               Capa {usuario.kycLayer} de 5 · Foto: <span className="font-medium text-foreground">{usuario.fotoVerificacionEstado}</span>
               {" · "}SENESCYT/SRI: <span className="font-medium text-foreground">{usuario.senescytSriEstado}</span>
+              <span className="text-[11px]"> (simulado — no consulta esas bases en este piloto)</span>
             </p>
           </div>
 

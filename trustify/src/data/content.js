@@ -26,7 +26,7 @@ export const CAPAS = [
   { n: 1, icon: Hash, title: "Estructura", subtitle: "Módulo 10", desc: "Valida que el número de cédula sea matemáticamente correcto. Filtro instantáneo y sin costo.", estado: "Implementado", tone: "verified" },
   { n: 2, icon: Smartphone, title: "Titularidad telefónica", subtitle: "OTP", desc: "Confirma una línea móvil real asociada a la cédula vía código por SMS o WhatsApp.", estado: "Implementado", tone: "verified" },
   { n: 3, icon: Camera, title: "Foto de verificación", subtitle: "Cédula + rostro", desc: "Selfie sosteniendo la cédula junto al rostro, con revisión manual del equipo en el piloto.", estado: "Prioridad 1", tone: "trust" },
-  { n: 4, icon: Database, title: "Bases públicas", subtitle: "SENESCYT / SRI", desc: "Cruza la cédula con actividad real registrada: título académico o RUC activo.", estado: "Implementado", tone: "verified" },
+  { n: 4, icon: Database, title: "Bases públicas", subtitle: "SENESCYT / SRI", desc: "Cruza la cédula con actividad real registrada: título académico o RUC activo. En este piloto la consulta a SENESCYT/SRI está simulada — no se conecta a esas bases todavía.", estado: "Simulado en este piloto", tone: "pending" },
   { n: 5, icon: ScanFace, title: "Biometría", subtitle: "Matching facial", desc: "Verificación automática tipo banco/telecom vía alianza con proveedor de KYC.", estado: "Roadmap", tone: "pending" },
 ];
 

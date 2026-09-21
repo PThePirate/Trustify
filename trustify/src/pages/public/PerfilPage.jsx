@@ -379,6 +379,9 @@ export default function PerfilPage() {
               </div>
             ))}
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            La capa SENESCYT/SRI está simulada en este piloto — todavía no consulta esas bases públicas reales.
+          </p>
         </div>
 
         <VerificacionAlumni />

@@ -93,7 +93,10 @@ export default function ContratoPage() {
               10), tu número de teléfono mediante un código de un solo uso, y
               — si activas un perfil de emprendedor — que se realice un cruce
               con bases públicas (SENESCYT/SRI) para confirmar actividad
-              académica o comercial registrada a tu nombre.
+              académica o comercial registrada a tu nombre. En la versión
+              actual de este piloto, ese cruce está simulado: todavía no
+              consultamos SENESCYT ni el SRI en tiempo real, y lo dejaremos
+              explícito en la propia pantalla de activación mientras siga así.
             </p>
             <p>
               La foto de verificación (selfie con cédula) se almacena de
