@@ -8,6 +8,9 @@ import MisSolicitudesPage from "@/pages/public/MisSolicitudesPage";
 import PerfilPage from "@/pages/public/PerfilPage";
 import NotificacionesPage from "@/pages/public/NotificacionesPage";
 import AyudaPage from "@/pages/public/AyudaPage";
+import ContratoPage from "@/pages/public/ContratoPage";
+import ComoFuncionaPage from "@/pages/public/ComoFuncionaPage";
+import UniversidadesPage from "@/pages/public/UniversidadesPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import OtpVerificationPage from "@/pages/auth/OtpVerificationPage";
@@ -115,6 +118,15 @@ export default function App() {
 
           {/* A11 — Centro de Ayuda / FAQ, público */}
           <Route path="/ayuda" element={<AyudaPage />} />
+
+          {/* A2 — Contrato de Adhesión y Términos y Condiciones, público */}
+          <Route path="/contrato" element={<ContratoPage />} />
+
+          {/* F3 — Cómo funciona, recorrido completo por rol */}
+          <Route path="/como-funciona" element={<ComoFuncionaPage />} />
+
+          {/* F4 — Página B2B para universidades y cámaras */}
+          <Route path="/universidades" element={<UniversidadesPage />} />
 
           {/* MÓDULO B — Emprendedor */}
           <Route

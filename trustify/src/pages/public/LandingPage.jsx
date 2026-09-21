@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight, PlayCircle, ShieldCheck, Fingerprint, Building2,
@@ -231,6 +232,12 @@ export default function LandingPage() {
               </Reveal>
             ))}
           </div>
+
+          <Reveal className="mt-8">
+            <Link to="/como-funciona" className="text-sm font-medium text-trust hover:underline">
+              Ver el recorrido completo, para clientes y emprendedores →
+            </Link>
+          </Reveal>
         </div>
       </section>
 
@@ -672,8 +679,8 @@ export default function LandingPage() {
                   <Button variant="trust" size="lg">
                     Crear mi perfil <ArrowRight />
                   </Button>
-                  <Button variant="outline" size="lg">
-                    Soy universidad o cámara
+                  <Button variant="outline" size="lg" asChild>
+                    <Link to="/universidades">Soy universidad o cámara</Link>
                   </Button>
                 </div>
 

@@ -54,7 +54,11 @@ export default function ActivarEmprendedorPage() {
           <div className="panel flex items-start gap-3 p-4">
             <FileCheck2 className="mt-0.5 size-5 shrink-0 text-trust" />
             <div>
-              <p className="font-medium">Contrato de Adhesión de Emprendedor</p>
+              <p className="font-medium">
+                <a href="/contrato#verificacion-identidad" target="_blank" rel="noopener noreferrer" className="text-trust hover:underline">
+                  Contrato de Adhesión de Emprendedor
+                </a>
+              </p>
               <p className="text-sm text-muted-foreground">
                 Firma digital con validez legal — se registra tu IP y la fecha/hora exactas.
               </p>

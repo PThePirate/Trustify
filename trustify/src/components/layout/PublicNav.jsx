@@ -6,10 +6,11 @@ import ThemeToggle from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { label: "Cómo funciona", href: "#como-funciona" },
+  { label: "Cómo funciona", to: "/como-funciona" },
   { label: "Identidad", href: "#identidad" },
   { label: "Producto", href: "#producto" },
   { label: "Métricas", href: "#metricas" },
+  { label: "Universidades", to: "/universidades" },
 ];
 
 export default function PublicNav() {
@@ -38,20 +39,19 @@ export default function PublicNav() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {LINKS.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className={cn(
-                "text-sm transition-colors",
-                scrolled
-                  ? "text-muted-foreground hover:text-foreground"
-                  : "text-white/80 hover:text-white"
-              )}
-            >
-              {l.label}
-            </a>
-          ))}
+          {LINKS.map((l) => {
+            const className = cn(
+              "text-sm transition-colors",
+              scrolled
+                ? "text-muted-foreground hover:text-foreground"
+                : "text-white/80 hover:text-white"
+            );
+            return l.to ? (
+              <Link key={l.to} to={l.to} className={className}>{l.label}</Link>
+            ) : (
+              <a key={l.href} href={l.href} className={className}>{l.label}</a>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">

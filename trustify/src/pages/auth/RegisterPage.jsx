@@ -198,7 +198,7 @@ export default function RegisterPage() {
               className="mt-0.5 size-4 shrink-0 accent-[hsl(var(--trust))]" required />
             <span>
               Acepto el{" "}
-              <Link to="#" className="text-trust hover:underline">Contrato de Adhesión y los Términos y Condiciones</Link>.
+              <a href="/contrato" target="_blank" rel="noopener noreferrer" className="text-trust hover:underline">Contrato de Adhesión y los Términos y Condiciones</a>.
             </span>
           </label>
 

@@ -11,9 +11,17 @@ export default function PublicFooter() {
             Marketplace de identidad digital verificada. Convertimos la
             desconfianza del comercio local en un activo de reputación.
           </p>
-          <Link to="/ayuda" className="inline-block text-sm font-medium text-trust hover:underline">
-            Centro de Ayuda
-          </Link>
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 md:justify-start">
+            <Link to="/ayuda" className="text-sm font-medium text-trust hover:underline">
+              Centro de Ayuda
+            </Link>
+            <Link to="/universidades" className="text-sm font-medium text-trust hover:underline">
+              Universidades y cámaras
+            </Link>
+            <Link to="/contrato" className="text-sm font-medium text-trust hover:underline">
+              Términos y Contrato de Adhesión
+            </Link>
+          </div>
         </div>
         <div className="text-xs text-muted-foreground">
           <p>Business Week — UEES · Prototipo académico</p>
