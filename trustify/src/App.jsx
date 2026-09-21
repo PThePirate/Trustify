@@ -44,6 +44,7 @@ import ComplaintsPage from "@/pages/admin/ComplaintsPage";
 import CategoriesPage from "@/pages/admin/CategoriesPage";
 import AuditLogsPage from "@/pages/admin/AuditLogsPage";
 import GestionSuscripcionesPage from "@/pages/admin/GestionSuscripcionesPage";
+import GestionInsigniasPage from "@/pages/admin/GestionInsigniasPage";
 import UserDetailPage from "@/pages/admin/UserDetailPage";
 
 // Módulo D — Institucional (B2G)
@@ -181,6 +182,7 @@ export default function App() {
             <Route path="categorias" element={<CategoriesPage />} />
             <Route path="auditoria" element={<AuditLogsPage />} />
             <Route path="suscripciones" element={<GestionSuscripcionesPage />} />
+            <Route path="insignias" element={<GestionInsigniasPage />} />
             <Route path="usuarios/:id" element={<UserDetailPage />} />
           </Route>
 

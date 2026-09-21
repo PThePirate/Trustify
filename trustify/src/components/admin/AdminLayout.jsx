@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, ShieldCheck, Ban, Flag, Tags, ScrollText, LogOut, ShieldAlert, CreditCard,
+  LayoutDashboard, ShieldCheck, Ban, Flag, Tags, ScrollText, LogOut, ShieldAlert, CreditCard, Award,
 } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -27,7 +27,10 @@ const SECCIONES = [
   },
   {
     titulo: "Negocio",
-    items: [{ to: "/admin/suscripciones", label: "Suscripciones y B2B", icon: CreditCard }],
+    items: [
+      { to: "/admin/suscripciones", label: "Suscripciones y B2B", icon: CreditCard },
+      { to: "/admin/insignias", label: "Insignias co-branded", icon: Award },
+    ],
   },
   {
     titulo: "Sistema",

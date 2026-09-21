@@ -14,6 +14,7 @@ import { obtenerNegocioPublico, registrarClicWhatsapp, resolverImagenNegocio } f
 import { crearSolicitud } from "@/services/solicitudApi";
 import { reportarNegocio } from "@/services/denunciaApi";
 import { isLoggedIn } from "@/services/authApi";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const NIVEL_LABEL = { semilla: "Semilla", asesoria: "En asesoría", formalizado: "Formalizado" };
 const ICONO_INSIGNIA = { "badge-check": BadgeCheck, "graduation-cap": GraduationCap, "shield-check": ShieldCheck, languages: Languages };
@@ -61,6 +62,13 @@ export default function MiniLandingPublicaPage() {
       .then(setNegocio)
       .catch((err) => setError(err.message));
   }, [slug]);
+
+  useDocumentMeta(
+    negocio ? `${negocio.nombreComercial} — CheckBiz` : undefined,
+    negocio
+      ? (negocio.descripcionCorta || `Perfil verificado de ${negocio.nombreComercial} en CheckBiz${negocio.ciudad ? `, ${negocio.ciudad}` : ""}.`)
+      : undefined
+  );
 
   function abrirSolicitud() {
     if (!isLoggedIn()) {

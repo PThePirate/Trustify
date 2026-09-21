@@ -83,6 +83,11 @@ export async function obtenerDashboardB2G() {
   return api("/institucional/dashboard-b2g");
 }
 
+// D3 — detalle por ciudad, con supresión de ciudades poco pobladas.
+export async function obtenerDashboardDetalleB2G() {
+  return api("/institucional/dashboard-b2g/detalle");
+}
+
 // ---------------------------------------------------------------------
 // Panel B2B Universidades (C2/C3)
 // ---------------------------------------------------------------------

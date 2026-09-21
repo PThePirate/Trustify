@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /negocio/
+Allow: /negocio/publico/
+Disallow: /admin
+Disallow: /institucional
+Disallow: /perfil
+Disallow: /mis-solicitudes
+Disallow: /notificaciones
+Disallow: /verificar-otp
+Disallow: /verificar-foto
+
+Sitemap: /api/sitemap.xml

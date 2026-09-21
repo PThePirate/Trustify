@@ -198,3 +198,22 @@ export async function listarLogsAuditoria() {
 export async function obtenerGestionSuscripciones() {
   return api("/admin/suscripciones");
 }
+
+// ---------------------------------------------------------------------
+// E7 — Insignias co-branded
+// ---------------------------------------------------------------------
+export async function listarInsigniasCoBranded() {
+  return api("/admin/insignias");
+}
+
+export async function crearInsigniaCoBranded(datos) {
+  return api("/admin/insignias", { method: "POST", body: datos });
+}
+
+export async function asignarInsigniaCoBranded(id, negocioSlug) {
+  return api(`/admin/insignias/${id}/asignar`, { method: "POST", body: { negocioSlug } });
+}
+
+export async function revocarInsigniaCoBranded(id, negocioId) {
+  return api(`/admin/insignias/${id}/asignar/${negocioId}`, { method: "DELETE" });
+}
