@@ -11,6 +11,7 @@ import AyudaPage from "@/pages/public/AyudaPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import OtpVerificationPage from "@/pages/auth/OtpVerificationPage";
+import RecuperarPasswordPage from "@/pages/auth/RecuperarPasswordPage";
 import FotoVerificacionPage from "@/pages/auth/FotoVerificacionPage";
 import OnboardingPage from "@/pages/public/OnboardingPage";
 
@@ -106,6 +107,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/verificar-otp" element={<OtpVerificationPage />} />
+          <Route path="/recuperar-password" element={<RecuperarPasswordPage />} />
           <Route path="/verificar-foto" element={<FotoVerificacionPage />} />
 
           {/* A1 — Onboarding, primera vez que un cliente nuevo entra */}

@@ -106,6 +106,25 @@ export async function obtenerFotoPerfilUrl() {
 }
 
 // ---------------------------------------------------------------------
+// Cuenta / Seguridad (B12)
+// ---------------------------------------------------------------------
+export async function cambiarPassword(passwordActual, passwordNueva) {
+  return api("/auth/password", { method: "PATCH", body: { passwordActual, passwordNueva } });
+}
+
+export async function recuperarPassword(correo) {
+  return api("/auth/password/recuperar", { method: "POST", auth: false, body: { correo } });
+}
+
+export async function restablecerPassword(correo, codigo, passwordNueva) {
+  return api("/auth/password/restablecer", { method: "POST", auth: false, body: { correo, codigo, passwordNueva } });
+}
+
+export async function eliminarCuenta(password) {
+  return api("/auth/cuenta", { method: "DELETE", body: { password } });
+}
+
+// ---------------------------------------------------------------------
 // Notificaciones (A10)
 // ---------------------------------------------------------------------
 export async function listarNotificaciones() {

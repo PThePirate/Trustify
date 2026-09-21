@@ -65,7 +65,7 @@ export default function LoginPage() {
           <div>
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Contraseña</Label>
-              <Link to="#" className="text-xs text-trust transition-colors hover:underline">
+              <Link to="/recuperar-password" className="text-xs text-trust transition-colors hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>

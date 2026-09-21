@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   User, Mail, Contact, Phone, ShieldCheck, CheckCircle2, XCircle,
   FileText, Store, Loader2, AlertCircle, Save, Camera, HelpCircle, GraduationCap, Clock,
+  Lock, ShieldAlert, Trash2, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import ThemeToggle from "@/components/theme/ThemeToggle";
 import NotificationBell from "@/components/shared/NotificationBell";
 import {
   obtenerPerfil, actualizarPerfil, logout, subirFotoPerfil, obtenerFotoPerfilUrl,
+  cambiarPassword, eliminarCuenta,
 } from "@/services/authApi";
 import {
   listarUniversidades, solicitarVerificacionAlumni, misVerificacionesAlumni,
@@ -175,6 +177,113 @@ const CAPAS = [
   { n: 3, nombre: "Foto revisada" },
   { n: 4, nombre: "SENESCYT/SRI" },
 ];
+
+/** B12 — cambiar contraseña estando ya logueado (distinto del flujo de recuperación sin sesión). */
+function CambiarPasswordForm() {
+  const [passwordActual, setPasswordActual] = useState("");
+  const [passwordNueva, setPasswordNueva] = useState("");
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState("");
+  const [exito, setExito] = useState(false);
+
+  async function guardar(e) {
+    e.preventDefault();
+    setError("");
+    setExito(false);
+    setGuardando(true);
+    try {
+      await cambiarPassword(passwordActual, passwordNueva);
+      setPasswordActual("");
+      setPasswordNueva("");
+      setExito(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  return (
+    <form onSubmit={guardar} className="panel mt-6 space-y-4 p-6">
+      <h2 className="flex items-center gap-2 font-display text-base font-bold">
+        <Lock className="size-4" /> Cambiar contraseña
+      </h2>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="passwordActual">Contraseña actual</Label>
+          <Input id="passwordActual" type="password" required value={passwordActual}
+            onChange={(e) => setPasswordActual(e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="passwordNueva">Contraseña nueva</Label>
+          <Input id="passwordNueva" type="password" required minLength={8} value={passwordNueva}
+            onChange={(e) => setPasswordNueva(e.target.value)} />
+        </div>
+      </div>
+      {error && <p className="flex items-center gap-1.5 text-sm text-danger"><AlertCircle className="size-4" /> {error}</p>}
+      {exito && <p className="flex items-center gap-1.5 text-sm text-verified"><CheckCircle2 className="size-4" /> Contraseña actualizada</p>}
+      <Button type="submit" variant="outline" disabled={guardando}>
+        {guardando ? <Loader2 className="size-4 animate-spin" /> : <Lock className="size-4" />}
+        Cambiar contraseña
+      </Button>
+    </form>
+  );
+}
+
+/** B12 — desactiva la cuenta (no la borra) y cierra la sesión de inmediato, igual que el veto. */
+function EliminarCuentaSection({ onEliminada }) {
+  const [abierto, setAbierto] = useState(false);
+  const [password, setPassword] = useState("");
+  const [eliminando, setEliminando] = useState(false);
+  const [error, setError] = useState("");
+
+  async function confirmar(e) {
+    e.preventDefault();
+    setError("");
+    setEliminando(true);
+    try {
+      await eliminarCuenta(password);
+      onEliminada();
+    } catch (err) {
+      setError(err.message);
+      setEliminando(false);
+    }
+  }
+
+  return (
+    <div className="panel mt-6 border-danger/30 p-6">
+      <h2 className="flex items-center gap-2 font-display text-base font-bold text-danger">
+        <ShieldAlert className="size-4" /> Eliminar cuenta
+      </h2>
+      <p className="mt-1.5 text-sm text-muted-foreground">
+        Desactiva tu cuenta de inmediato — tu sesión se cierra al instante en todos tus dispositivos.
+        Tu historial de solicitudes y reseñas se conserva, ya que otras personas dependen de él.
+      </p>
+      {!abierto ? (
+        <Button variant="outline" className="mt-4 border-danger/30 text-danger hover:bg-danger/10" onClick={() => setAbierto(true)}>
+          <Trash2 className="size-4" /> Eliminar mi cuenta
+        </Button>
+      ) : (
+        <form onSubmit={confirmar} className="mt-4 space-y-3">
+          <div>
+            <Label htmlFor="passwordEliminar">Confirma tu contraseña para continuar</Label>
+            <Input id="passwordEliminar" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          </div>
+          {error && <p className="flex items-center gap-1.5 text-sm text-danger"><AlertCircle className="size-4" /> {error}</p>}
+          <div className="flex gap-2">
+            <Button type="submit" variant="danger" disabled={eliminando}>
+              {eliminando ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              Sí, eliminar mi cuenta
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => { setAbierto(false); setError(""); }}>
+              <X className="size-4" /> Cancelar
+            </Button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
 
 export default function PerfilPage() {
   const [usuario, setUsuario] = useState(null);
@@ -355,6 +464,9 @@ export default function PerfilPage() {
             Guardar cambios
           </Button>
         </form>
+
+        <CambiarPasswordForm />
+        <EliminarCuentaSection onEliminada={salir} />
 
         <button onClick={salir} className="mt-6 text-sm text-muted-foreground hover:text-danger">
           Cerrar sesión
