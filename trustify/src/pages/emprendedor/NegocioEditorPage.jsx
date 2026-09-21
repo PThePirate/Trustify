@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Store, MapPin, Phone, Tag, FileText, Globe, ShieldCheck, Star,
   Loader2, AlertCircle, CheckCircle2, ExternalLink, Rocket, EyeOff, Video, Sparkles,
-  BadgeCheck, GraduationCap, Languages, Image as ImageIcon, Upload,
+  BadgeCheck, GraduationCap, Languages, Image as ImageIcon, Upload, Users, UserPlus, Trash2, Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
   obtenerMiNegocio, crearNegocio, actualizarNegocio,
   cambiarPublicacion, listarCategoriasDisponibles, obtenerMiSuscripcion,
   subirLogo, subirPortada, resolverImagenNegocio,
+  listarColaboradores, invitarColaborador, eliminarColaborador,
 } from "@/services/negocioApi";
 
 const VACIO = { nombreComercial: "", categoriaId: "", descripcionCorta: "", ciudad: "", whatsapp: "", videoPresentacionUrl: "" };
@@ -53,6 +54,97 @@ function SubidaImagen({ label, aspecto, url, subiendo, onSeleccionar, error }) {
         />
       </div>
       {error && <p className="mt-1 text-xs text-danger">{error}</p>}
+    </div>
+  );
+}
+
+/** B9.1 (Elite) — multiusuario: solo el dueño la ve; un colaborador no puede invitar ni quitar a nadie. */
+function EquipoPanel() {
+  const [colaboradores, setColaboradores] = useState(null);
+  const [correo, setCorreo] = useState("");
+  const [invitando, setInvitando] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    listarColaboradores().then(setColaboradores).catch((err) => setError(err.message));
+  }, []);
+
+  async function invitar(e) {
+    e.preventDefault();
+    if (!correo.trim()) return;
+    setError("");
+    setInvitando(true);
+    try {
+      setColaboradores(await invitarColaborador(correo.trim()));
+      setCorreo("");
+    } catch (err) {
+      setError(err.message || "No se pudo invitar a esa persona");
+    } finally {
+      setInvitando(false);
+    }
+  }
+
+  async function quitar(usuarioId) {
+    if (!confirm("¿Quitar a esta persona de tu equipo?")) return;
+    setError("");
+    try {
+      setColaboradores(await eliminarColaborador(usuarioId));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  return (
+    <div className="panel mt-6 space-y-4 p-6">
+      <div>
+        <h2 className="flex items-center gap-2 font-display text-base font-bold">
+          <Users className="size-4" /> Equipo
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Invita a alguien más a administrar este negocio (editar el perfil, el catálogo y responder
+          solicitudes). No puede cambiar el plan, invitar a otros ni eliminar la cuenta.
+        </p>
+      </div>
+
+      <form onSubmit={invitar} className="flex flex-col gap-2 sm:flex-row sm:items-end">
+        <div className="flex-1">
+          <Label htmlFor="correoColaborador">Correo de la persona (ya debe tener cuenta en CheckBiz)</Label>
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input id="correoColaborador" type="email" placeholder="persona@correo.com" className="pl-10"
+              value={correo} onChange={(e) => setCorreo(e.target.value)} />
+          </div>
+        </div>
+        <Button type="submit" variant="trust" disabled={invitando || !correo.trim()}>
+          {invitando ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />} Invitar
+        </Button>
+      </form>
+
+      {error && (
+        <div className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2.5 text-sm text-danger">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" /> {error}
+        </div>
+      )}
+
+      {colaboradores === null ? (
+        <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Cargando…</div>
+      ) : colaboradores.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Todavía nadie más administra este negocio.</p>
+      ) : (
+        <div className="space-y-2">
+          {colaboradores.map((c) => (
+            <div key={c.usuarioId} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+              <div>
+                <p className="text-sm font-medium">{c.nombreCompleto}</p>
+                <p className="text-xs text-muted-foreground">{c.correo}</p>
+              </div>
+              <button onClick={() => quitar(c.usuarioId)} className="grid size-8 place-items-center rounded-lg text-danger hover:bg-danger/10" title="Quitar">
+                <Trash2 className="size-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -355,6 +447,20 @@ export default function NegocioEditorPage() {
           )}
         </div>
       </form>
+
+      {existe && negocio.esDueno && (
+        suscripcion?.plan.incluyeMultiusuario ? (
+          <EquipoPanel />
+        ) : (
+          <div className="mt-6 flex items-start gap-2 rounded-lg border border-border bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground">
+            <Sparkles className="mt-0.5 size-3.5 shrink-0 text-trust" />
+            <span>
+              Invitar a alguien más a administrar este negocio (multiusuario) es una función del plan Elite.{" "}
+              <Link to="/negocio/planes" className="font-medium text-trust hover:underline">Mejora tu plan</Link>
+            </span>
+          </div>
+        )
+      )}
     </div>
   );
 }

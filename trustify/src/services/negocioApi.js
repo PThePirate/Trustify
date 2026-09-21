@@ -247,3 +247,18 @@ export async function obtenerMiSuscripcion() {
 export async function cambiarPlan(planNombre, ciclo) {
   return api("/negocio/mio/suscripcion/checkout", { method: "POST", body: { planNombre, ciclo } });
 }
+
+// ---------------------------------------------------------------------
+// Multiusuario (B9.1 — Elite)
+// ---------------------------------------------------------------------
+export async function listarColaboradores() {
+  return api("/negocio/mio/colaboradores");
+}
+
+export async function invitarColaborador(correo) {
+  return api("/negocio/mio/colaboradores", { method: "POST", body: { correo } });
+}
+
+export async function eliminarColaborador(usuarioId) {
+  return api(`/negocio/mio/colaboradores/${usuarioId}`, { method: "DELETE" });
+}
