@@ -1,10 +1,42 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { jsPDF } from "jspdf";
 import {
   Star, ShieldCheck, Calendar, CheckCircle2, Loader2, AlertCircle,
-  MessageSquareText, Send, TrendingUp,
+  MessageSquareText, Send, TrendingUp, FileDown, Sparkles,
+  BadgeCheck, GraduationCap, Languages,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { obtenerReputacion, listarMisResenas, responderResena } from "@/services/negocioApi";
+import {
+  obtenerReputacion, listarMisResenas, responderResena, obtenerMiNegocio, obtenerMiSuscripcion,
+} from "@/services/negocioApi";
+
+const ICONO_INSIGNIA = { "badge-check": BadgeCheck, "graduation-cap": GraduationCap, "shield-check": ShieldCheck, languages: Languages };
+
+/** B9.1 — certificado generado en el navegador, sin backend: solo con datos que el propio dueño ya puede ver. */
+function generarCertificadoPdf(negocio, rep) {
+  const doc = new jsPDF();
+  doc.setFontSize(20);
+  doc.text("Certificado de Verificación CheckBiz", 20, 25);
+
+  doc.setFontSize(12);
+  doc.text(`Negocio: ${negocio.nombreComercial}`, 20, 45);
+  doc.text(`Perfil: checkbiz.ec/negocio/publico/${negocio.slug}`, 20, 53);
+  doc.text(`Trust Score: ${rep.trustScore}/100`, 20, 65);
+  doc.text(`Nivel de formalización: ${rep.nivelFormalizacion}`, 20, 73);
+  doc.text(`Reseñas: ${rep.totalResenas} (promedio ${rep.promedioResenas.toFixed(1)}/5)`, 20, 81);
+
+  if (rep.insignias.length > 0) {
+    doc.text("Insignias obtenidas:", 20, 95);
+    rep.insignias.forEach((ins, i) => doc.text(`- ${ins.nombre}`, 26, 103 + i * 8));
+  }
+
+  doc.setFontSize(9);
+  doc.text(`Emitido el ${new Date().toLocaleDateString("es-EC")} — datos verificados en checkbiz.ec`, 20, 280);
+
+  doc.save(`certificado-${negocio.slug}.pdf`);
+}
 
 const NIVEL_LABEL = { semilla: "Semilla", asesoria: "En asesoría", formalizado: "Formalizado" };
 
@@ -76,11 +108,15 @@ function FormularioRespuesta({ resenaId, onListo }) {
 export default function ReputacionPage() {
   const [rep, setRep] = useState(null);
   const [resenas, setResenas] = useState(null);
+  const [negocio, setNegocio] = useState(null);
+  const [suscripcion, setSuscripcion] = useState(null);
   const [error, setError] = useState("");
 
   function cargar() {
     obtenerReputacion().then(setRep).catch((err) => setError(err.message));
     listarMisResenas().then(setResenas).catch((err) => setError(err.message));
+    obtenerMiNegocio().then(setNegocio).catch(() => {});
+    obtenerMiSuscripcion().then(setSuscripcion).catch(() => {});
   }
   useEffect(cargar, []);
 
@@ -93,12 +129,36 @@ export default function ReputacionPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold sm:text-3xl">Reputación y Trust Score</h1>
-        <p className="mt-1 text-muted-foreground">
-          Se recalcula solo, a partir de datos reales — nunca es un número fijo.
-        </p>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-bold sm:text-3xl">Reputación y Trust Score</h1>
+          <p className="mt-1 text-muted-foreground">
+            Se recalcula solo, a partir de datos reales — nunca es un número fijo.
+          </p>
+        </div>
+        {suscripcion?.plan.incluyeCertificadoPdf && negocio ? (
+          <Button variant="outline" onClick={() => generarCertificadoPdf(negocio, rep)}>
+            <FileDown className="size-4" /> Descargar certificado
+          </Button>
+        ) : suscripcion && (
+          <Link to="/negocio/planes" className="flex items-center gap-1.5 text-sm text-trust hover:underline">
+            <Sparkles className="size-3.5" /> Certificado PDF disponible en Pro/Elite
+          </Link>
+        )}
       </div>
+
+      {rep.insignias.length > 0 && (
+        <div className="mb-6 flex flex-wrap gap-2">
+          {rep.insignias.map((ins) => {
+            const Icon = ICONO_INSIGNIA[ins.icono] ?? BadgeCheck;
+            return (
+              <Badge key={ins.nombre} variant="verified" title={ins.descripcion ?? undefined}>
+                <Icon className="size-3" /> {ins.nombre}
+              </Badge>
+            );
+          })}
+        </div>
+      )}
 
       <div className="panel mb-6 flex flex-col items-center gap-4 p-6 sm:flex-row sm:justify-around">
         <Medidor score={rep.trustScore} />

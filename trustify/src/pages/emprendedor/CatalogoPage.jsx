@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Package, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Check, Sparkles,
+  Package, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Check, Sparkles, Languages,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import {
   listarCatalogo, crearItemCatalogo, actualizarItemCatalogo, eliminarItemCatalogo, obtenerMiSuscripcion,
 } from "@/services/negocioApi";
 
-const VACIO = { nombre: "", precioReferencial: "" };
+const VACIO = { nombre: "", precioReferencial: "", nombreEn: "" };
 
 function formatearPrecio(p) {
   if (p === null || p === undefined) return "Sin precio";
@@ -34,7 +34,7 @@ export default function CatalogoPage() {
 
   function empezarEdicion(item) {
     setEditandoId(item.id);
-    setForm({ nombre: item.nombre, precioReferencial: item.precioReferencial ?? "" });
+    setForm({ nombre: item.nombre, precioReferencial: item.precioReferencial ?? "", nombreEn: item.nombreEn ?? "" });
   }
 
   function cancelar() {
@@ -52,6 +52,7 @@ export default function CatalogoPage() {
       const datos = {
         nombre: form.nombre.trim(),
         precioReferencial: form.precioReferencial === "" ? null : Number(form.precioReferencial),
+        nombreEn: form.nombreEn.trim() || null,
       };
       if (editandoId) {
         await actualizarItemCatalogo(editandoId, { ...datos, activo: true });
@@ -131,6 +132,23 @@ export default function CatalogoPage() {
             )}
           </div>
         </div>
+
+        {suscripcion?.plan.incluyeTraduccion ? (
+          <div className="mt-3">
+            <Label htmlFor="nombreEn">Nombre en inglés (opcional)</Label>
+            <div className="relative">
+              <Languages className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input id="nombreEn" placeholder="Ej: Logo design" className="pl-10"
+                value={form.nombreEn} onChange={(e) => setForm((f) => ({ ...f, nombreEn: e.target.value }))} />
+            </div>
+          </div>
+        ) : (
+          <p className="mt-3 flex items-start gap-1.5 text-xs text-muted-foreground">
+            <Sparkles className="mt-0.5 size-3.5 shrink-0 text-trust" />
+            La traducción de catálogo (ES↔EN, self-service) es una función de los planes Pro y Elite.{" "}
+            <Link to="/negocio/planes" className="font-medium text-trust hover:underline">Mejora tu plan</Link>
+          </p>
+        )}
       </form>
 
       {error && (
@@ -164,6 +182,9 @@ export default function CatalogoPage() {
             <div key={item.id} className="panel flex items-center justify-between gap-3 p-4">
               <div>
                 <p className="font-medium">{item.nombre}</p>
+                {item.nombreEn && (
+                  <p className="flex items-center gap-1 text-xs text-muted-foreground"><Languages className="size-3" /> {item.nombreEn}</p>
+                )}
                 <p className="text-sm text-muted-foreground">{formatearPrecio(item.precioReferencial)}</p>
               </div>
               <div className="flex gap-1.5">

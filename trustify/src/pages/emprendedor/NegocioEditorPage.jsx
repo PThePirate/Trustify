@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Store, MapPin, Phone, Tag, FileText, Globe, ShieldCheck, Star,
-  Loader2, AlertCircle, CheckCircle2, ExternalLink, Rocket, EyeOff,
+  Loader2, AlertCircle, CheckCircle2, ExternalLink, Rocket, EyeOff, Video, Sparkles,
+  BadgeCheck, GraduationCap, Languages,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,15 +11,17 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   obtenerMiNegocio, crearNegocio, actualizarNegocio,
-  cambiarPublicacion, listarCategoriasDisponibles,
+  cambiarPublicacion, listarCategoriasDisponibles, obtenerMiSuscripcion,
 } from "@/services/negocioApi";
 
-const VACIO = { nombreComercial: "", categoriaId: "", descripcionCorta: "", ciudad: "", whatsapp: "" };
+const VACIO = { nombreComercial: "", categoriaId: "", descripcionCorta: "", ciudad: "", whatsapp: "", videoPresentacionUrl: "" };
+const ICONO_INSIGNIA = { "badge-check": BadgeCheck, "graduation-cap": GraduationCap, "shield-check": ShieldCheck, languages: Languages };
 
 export default function NegocioEditorPage() {
   const [negocio, setNegocio] = useState(null);
   const [existe, setExiste] = useState(null); // null = cargando, false = no tiene, true = sí tiene
   const [categorias, setCategorias] = useState([]);
+  const [suscripcion, setSuscripcion] = useState(null);
   const [form, setForm] = useState(VACIO);
   const [guardando, setGuardando] = useState(false);
   const [publicando, setPublicando] = useState(false);
@@ -26,6 +30,7 @@ export default function NegocioEditorPage() {
 
   useEffect(() => {
     listarCategoriasDisponibles().then(setCategorias);
+    obtenerMiSuscripcion().then(setSuscripcion).catch(() => {});
     cargar();
   }, []);
 
@@ -39,6 +44,7 @@ export default function NegocioEditorPage() {
         descripcionCorta: n.descripcionCorta ?? "",
         ciudad: n.ciudad ?? "",
         whatsapp: n.whatsapp,
+        videoPresentacionUrl: n.videoPresentacionUrl ?? "",
       });
       setExiste(true);
     } catch (err) {
@@ -131,6 +137,19 @@ export default function NegocioEditorPage() {
         </div>
       )}
 
+      {existe && negocio.insignias.length > 0 && (
+        <div className="mb-6 flex flex-wrap gap-2">
+          {negocio.insignias.map((ins) => {
+            const Icon = ICONO_INSIGNIA[ins.icono] ?? BadgeCheck;
+            return (
+              <Badge key={ins.nombre} variant="verified" title={ins.descripcion ?? undefined}>
+                <Icon className="size-3" /> {ins.nombre}
+              </Badge>
+            );
+          })}
+        </div>
+      )}
+
       <form onSubmit={guardar} className="panel space-y-4 p-6">
         <div>
           <Label htmlFor="nombre">Nombre comercial</Label>
@@ -192,6 +211,25 @@ export default function NegocioEditorPage() {
               value={form.whatsapp} onChange={(e) => setForm((f) => ({ ...f, whatsapp: e.target.value.replace(/\D/g, "") }))} />
           </div>
         </div>
+
+        {suscripcion?.plan.incluyeVideo ? (
+          <div>
+            <Label htmlFor="video">Video de presentación</Label>
+            <div className="relative">
+              <Video className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input id="video" type="url" placeholder="Enlace de YouTube, Vimeo o video directo" className="pl-10"
+                value={form.videoPresentacionUrl} onChange={campo("videoPresentacionUrl")} />
+            </div>
+          </div>
+        ) : existe && (
+          <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground">
+            <Sparkles className="mt-0.5 size-3.5 shrink-0 text-trust" />
+            <span>
+              El video de presentación es una función de los planes Pro y Elite.{" "}
+              <Link to="/negocio/planes" className="font-medium text-trust hover:underline">Mejora tu plan</Link>
+            </span>
+          </div>
+        )}
 
         {error && (
           <div className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2.5 text-sm text-danger">

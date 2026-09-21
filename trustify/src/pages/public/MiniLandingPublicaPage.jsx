@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   MapPin, Star, ShieldCheck, MessageCircle, FileText, Package,
   Loader2, ShieldAlert, CheckCircle2, XCircle, Store, Home, AlertCircle, X, Flag, User,
+  BadgeCheck, GraduationCap, Languages, Video,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,16 @@ import { reportarNegocio } from "@/services/denunciaApi";
 import { isLoggedIn } from "@/services/authApi";
 
 const NIVEL_LABEL = { semilla: "Semilla", asesoria: "En asesoría", formalizado: "Formalizado" };
+const ICONO_INSIGNIA = { "badge-check": BadgeCheck, "graduation-cap": GraduationCap, "shield-check": ShieldCheck, languages: Languages };
+
+/** Convierte enlaces de YouTube/Vimeo a su URL de embed; cualquier otro enlace se asume un archivo de video directo. */
+function urlEmbedVideo(url) {
+  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{11})/);
+  if (yt) return { tipo: "iframe", src: `https://www.youtube.com/embed/${yt[1]}` };
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeo) return { tipo: "iframe", src: `https://player.vimeo.com/video/${vimeo[1]}` };
+  return { tipo: "video", src: url };
+}
 
 function formatearPrecio(p) {
   return p === null || p === undefined ? "Precio a consultar" : `$${Number(p).toFixed(2)}`;
@@ -40,6 +51,7 @@ export default function MiniLandingPublicaPage() {
   const [enviandoReporte, setEnviandoReporte] = useState(false);
   const [errorReporte, setErrorReporte] = useState("");
   const [exitoReporte, setExitoReporte] = useState(false);
+  const [idioma, setIdioma] = useState("es");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -127,9 +139,7 @@ export default function MiniLandingPublicaPage() {
   }
 
   const iniciales = negocio.nombreComercial.split(" ").map((p) => p[0]).slice(0, 2).join("");
-  // El sello "Emprendedor Verificado" es una afirmación de confianza — solo
-  // se muestra si de verdad cumplió las 4 capas visibles, nunca por defecto.
-  const emprendedorVerificado = negocio.capasVerificacion.every((c) => c.cumplida);
+  const hayTraduccion = negocio.catalogo.some((item) => item.nombreEn);
 
   return (
     <div className="min-h-screen bg-background">
@@ -169,9 +179,14 @@ export default function MiniLandingPublicaPage() {
           <div className="mb-1 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-2xl font-bold sm:text-3xl">{negocio.nombreComercial}</h1>
-              {emprendedorVerificado && (
-                <Badge variant="verified"><ShieldCheck className="size-3" /> Emprendedor Verificado</Badge>
-              )}
+              {negocio.insignias.map((ins) => {
+                const Icon = ICONO_INSIGNIA[ins.icono] ?? ShieldCheck;
+                return (
+                  <Badge key={ins.nombre} variant="verified" title={ins.descripcion ?? undefined}>
+                    <Icon className="size-3" /> {ins.nombre}
+                  </Badge>
+                );
+              })}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               {negocio.categoria && <span>{negocio.categoria.nombre}</span>}
@@ -314,6 +329,28 @@ export default function MiniLandingPublicaPage() {
           </div>
         )}
 
+        {/* Video de presentación (plan Pro/Elite — B9.1) */}
+        {negocio.videoPresentacionUrl && (
+          <div className="mt-8">
+            <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold">
+              <Video className="size-5" /> Video de presentación
+            </h2>
+            {(() => {
+              const embed = urlEmbedVideo(negocio.videoPresentacionUrl);
+              return embed.tipo === "iframe" ? (
+                <iframe
+                  src={embed.src}
+                  title="Video de presentación"
+                  allowFullScreen
+                  className="aspect-video w-full rounded-xl border border-border"
+                />
+              ) : (
+                <video src={embed.src} controls className="aspect-video w-full rounded-xl border border-border bg-black" />
+              );
+            })()}
+          </div>
+        )}
+
         {/* Trust Score + capas de verificación */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <div className="panel p-5">
@@ -346,16 +383,33 @@ export default function MiniLandingPublicaPage() {
 
         {/* Catálogo */}
         <div className="mt-8">
-          <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold">
-            <Package className="size-5" /> Catálogo
-          </h2>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold">
+              <Package className="size-5" /> Catálogo
+            </h2>
+            {hayTraduccion && (
+              <div className="flex items-center gap-1 rounded-full border border-border bg-muted/30 p-1">
+                {["es", "en"].map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setIdioma(lang)}
+                    className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                      idioma === lang ? "bg-trust text-white" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Languages className="size-3" /> {lang.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           {negocio.catalogo.length === 0 ? (
             <p className="text-sm text-muted-foreground">Este negocio todavía no publicó su catálogo.</p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {negocio.catalogo.map((item) => (
                 <div key={item.id} className="panel flex items-center justify-between p-4">
-                  <span className="font-medium">{item.nombre}</span>
+                  <span className="font-medium">{idioma === "en" && item.nombreEn ? item.nombreEn : item.nombre}</span>
                   <span className="text-sm text-muted-foreground">{formatearPrecio(item.precioReferencial)}</span>
                 </div>
               ))}

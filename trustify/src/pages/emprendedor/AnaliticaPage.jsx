@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  Eye, MessageCircle, TrendingUp, TrendingDown, Minus, Loader2, AlertCircle, Table2, LineChart as LineChartIcon,
+  Eye, MessageCircle, TrendingUp, TrendingDown, Minus, Loader2, AlertCircle, Table2, LineChart as LineChartIcon, Sparkles,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { obtenerMiAnalitica } from "@/services/negocioApi";
 
 function TarjetaMetrica({ icon: Icon, etiqueta, valor, nota, tono = "bg-trust/10 text-trust" }) {
@@ -213,26 +215,41 @@ export default function AnaliticaPage() {
         />
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="panel p-4">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Esta semana</p>
-          <p className="font-display text-xl font-bold">{datos.comparativaSemanal.periodoActual} visitas</p>
-          <Delta comparativa={datos.comparativaSemanal} periodoLabel="semana" />
-        </div>
-        <div className="panel p-4">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Este mes</p>
-          <p className="font-display text-xl font-bold">{datos.comparativaMensual.periodoActual} visitas</p>
-          <Delta comparativa={datos.comparativaMensual} periodoLabel="mes" />
-        </div>
-      </div>
+      {datos.avanzadaDisponible ? (
+        <>
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="panel p-4">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Esta semana</p>
+              <p className="font-display text-xl font-bold">{datos.comparativaSemanal.periodoActual} visitas</p>
+              <Delta comparativa={datos.comparativaSemanal} periodoLabel="semana" />
+            </div>
+            <div className="panel p-4">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Este mes</p>
+              <p className="font-display text-xl font-bold">{datos.comparativaMensual.periodoActual} visitas</p>
+              <Delta comparativa={datos.comparativaMensual} periodoLabel="mes" />
+            </div>
+          </div>
 
-      <div className="panel p-5">
-        <h2 className="mb-4 flex items-center gap-2 font-display text-base font-bold">
-          <LineChartIcon className="size-4" /> Últimos 30 días
-        </h2>
-        <GraficaVisitas serie={datos.serieDiaria} />
-        <TablaSerie serie={datos.serieDiaria} />
-      </div>
+          <div className="panel p-5">
+            <h2 className="mb-4 flex items-center gap-2 font-display text-base font-bold">
+              <LineChartIcon className="size-4" /> Últimos 30 días
+            </h2>
+            <GraficaVisitas serie={datos.serieDiaria} />
+            <TablaSerie serie={datos.serieDiaria} />
+          </div>
+        </>
+      ) : (
+        <div className="panel flex flex-col items-center gap-2 py-12 text-center">
+          <Sparkles className="size-8 text-trust/60" />
+          <p className="font-medium">La analítica avanzada es una función de los planes Pro y Elite</p>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Comparativas semana a semana, mes a mes y la gráfica de los últimos 30 días.
+          </p>
+          <Link to="/negocio/planes">
+            <Button variant="trust" className="mt-2">Mejora tu plan</Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
