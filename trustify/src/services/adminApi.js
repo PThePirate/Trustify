@@ -191,3 +191,10 @@ export async function resolverDenuncia(id, accion) {
 export async function listarLogsAuditoria() {
   return api("/admin/logs");
 }
+
+// ---------------------------------------------------------------------
+// E6 — Suscripciones y licenciamiento B2B (solo lectura)
+// ---------------------------------------------------------------------
+export async function obtenerGestionSuscripciones() {
+  return api("/admin/suscripciones");
+}

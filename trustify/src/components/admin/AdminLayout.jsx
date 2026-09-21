@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, ShieldCheck, Ban, Flag, Tags, ScrollText, LogOut, ShieldAlert,
+  LayoutDashboard, ShieldCheck, Ban, Flag, Tags, ScrollText, LogOut, ShieldAlert, CreditCard,
 } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -24,6 +24,10 @@ const SECCIONES = [
   {
     titulo: "Catálogo",
     items: [{ to: "/admin/categorias", label: "Categorías", icon: Tags }],
+  },
+  {
+    titulo: "Negocio",
+    items: [{ to: "/admin/suscripciones", label: "Suscripciones y B2B", icon: CreditCard }],
   },
   {
     titulo: "Sistema",
