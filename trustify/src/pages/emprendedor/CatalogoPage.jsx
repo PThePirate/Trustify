@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Package, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Check, Sparkles, Languages,
+  Package, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Check, Sparkles, Languages, Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   listarCatalogo, crearItemCatalogo, actualizarItemCatalogo, eliminarItemCatalogo, obtenerMiSuscripcion,
+  subirFotoItemCatalogo, resolverImagenNegocio,
 } from "@/services/negocioApi";
 
 const VACIO = { nombre: "", precioReferencial: "", nombreEn: "" };
@@ -15,6 +16,39 @@ const VACIO = { nombre: "", precioReferencial: "", nombreEn: "" };
 function formatearPrecio(p) {
   if (p === null || p === undefined) return "Sin precio";
   return `$${Number(p).toFixed(2)}`;
+}
+
+function FotoItem({ fotoUrl, subiendo, onSeleccionar }) {
+  const inputRef = useRef(null);
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => inputRef.current?.click()}
+      className="group relative grid size-14 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-lg border border-dashed border-input bg-muted/20 hover:border-trust"
+      title="Subir foto del ítem"
+    >
+      {fotoUrl ? (
+        <img src={resolverImagenNegocio(fotoUrl)} alt="" className="size-full object-cover" />
+      ) : (
+        <ImageIcon className="size-5 text-muted-foreground" />
+      )}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+        {subiendo ? <Loader2 className="size-4 animate-spin text-white" /> : <Pencil className="size-3.5 text-white" />}
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (file) onSeleccionar(file);
+        }}
+      />
+    </div>
+  );
 }
 
 export default function CatalogoPage() {
@@ -25,6 +59,7 @@ export default function CatalogoPage() {
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
   const [limiteAlcanzado, setLimiteAlcanzado] = useState(false);
+  const [subiendoFotoId, setSubiendoFotoId] = useState(null);
 
   function cargar() {
     listarCatalogo().then(setItems).catch((err) => setError(err.message));
@@ -76,6 +111,19 @@ export default function CatalogoPage() {
       cargar();
     } catch (err) {
       setError(err.message);
+    }
+  }
+
+  async function subirFoto(id, file) {
+    setError("");
+    setSubiendoFotoId(id);
+    try {
+      await subirFotoItemCatalogo(id, file);
+      cargar();
+    } catch (err) {
+      setError(err.message || "No se pudo subir la foto");
+    } finally {
+      setSubiendoFotoId(null);
     }
   }
 
@@ -180,12 +228,19 @@ export default function CatalogoPage() {
         <div className="space-y-2">
           {items.map((item) => (
             <div key={item.id} className="panel flex items-center justify-between gap-3 p-4">
-              <div>
-                <p className="font-medium">{item.nombre}</p>
-                {item.nombreEn && (
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground"><Languages className="size-3" /> {item.nombreEn}</p>
-                )}
-                <p className="text-sm text-muted-foreground">{formatearPrecio(item.precioReferencial)}</p>
+              <div className="flex items-center gap-3">
+                <FotoItem
+                  fotoUrl={item.fotoUrl}
+                  subiendo={subiendoFotoId === item.id}
+                  onSeleccionar={(file) => subirFoto(item.id, file)}
+                />
+                <div>
+                  <p className="font-medium">{item.nombre}</p>
+                  {item.nombreEn && (
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground"><Languages className="size-3" /> {item.nombreEn}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">{formatearPrecio(item.precioReferencial)}</p>
+                </div>
               </div>
               <div className="flex gap-1.5">
                 <button onClick={() => empezarEdicion(item)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">

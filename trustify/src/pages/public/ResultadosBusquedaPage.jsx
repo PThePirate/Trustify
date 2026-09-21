@@ -7,7 +7,7 @@ import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
 import {
-  buscarNegocios, listarCategoriasDisponibles, listarCiudadesDisponibles,
+  buscarNegocios, listarCategoriasDisponibles, listarCiudadesDisponibles, resolverImagenNegocio,
 } from "@/services/negocioApi";
 
 const NIVEL_LABEL = { semilla: "Semilla", asesoria: "En asesoría", formalizado: "Formalizado" };
@@ -23,7 +23,7 @@ function NegocioCard({ n }) {
       <div className="flex items-start gap-3">
         <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-trust/10 font-display text-sm font-bold text-trust">
           {n.logoUrl ? (
-            <img src={n.logoUrl} alt="" className="size-full rounded-xl object-cover" />
+            <img src={resolverImagenNegocio(n.logoUrl)} alt="" className="size-full rounded-xl object-cover" />
           ) : iniciales}
         </div>
         <div className="min-w-0">

@@ -5,10 +5,52 @@
 import { getToken, logout } from "@/services/authApi";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
 
 function authHeaders() {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/**
+ * Logo, portada y fotos de catálogo (A6/B3/B4) se guardan como ruta
+ * relativa al backend (/api/negocios/imagenes/...). Una URL externa pegada
+ * a mano (http/https) se deja tal cual.
+ */
+export function resolverImagenNegocio(url) {
+  if (!url) return url;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${API_ORIGIN}${url}`;
+}
+
+async function apiUpload(path, file) {
+  const formData = new FormData();
+  formData.append("foto", file);
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: formData,
+    });
+  } catch {
+    throw new Error("No se pudo conectar con el servidor. Verifica que el backend esté corriendo.");
+  }
+
+  if (res.status === 401) logout();
+
+  let data = null;
+  try {
+    data = await res.json();
+  } catch {
+    // sin cuerpo
+  }
+  if (!res.ok) {
+    const err = new Error(data?.mensaje || `Error del servidor (${res.status})`);
+    err.codigo = data?.error;
+    throw err;
+  }
+  return data;
 }
 
 async function api(path, { method = "GET", body, query, auth = true } = {}) {
@@ -67,6 +109,14 @@ export async function cambiarPublicacion(publicar) {
   return api("/negocio/mio/publicacion", { method: "PATCH", query: { publicar } });
 }
 
+export async function subirLogo(file) {
+  return apiUpload("/negocio/mio/logo", file);
+}
+
+export async function subirPortada(file) {
+  return apiUpload("/negocio/mio/portada", file);
+}
+
 export async function listarCategoriasDisponibles() {
   // Vive bajo /negocios (plural, público) y no /negocio (singular, exige
   // sesión) — antes de este cambio el backend devolvía 401 para cualquiera
@@ -117,6 +167,10 @@ export async function actualizarItemCatalogo(id, datos) {
 
 export async function eliminarItemCatalogo(id) {
   return api(`/negocio/mio/catalogo/${id}`, { method: "DELETE" });
+}
+
+export async function subirFotoItemCatalogo(id, file) {
+  return apiUpload(`/negocio/mio/catalogo/${id}/foto`, file);
 }
 
 // ---------------------------------------------------------------------

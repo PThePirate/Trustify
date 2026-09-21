@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Store, MapPin, Phone, Tag, FileText, Globe, ShieldCheck, Star,
   Loader2, AlertCircle, CheckCircle2, ExternalLink, Rocket, EyeOff, Video, Sparkles,
-  BadgeCheck, GraduationCap, Languages,
+  BadgeCheck, GraduationCap, Languages, Image as ImageIcon, Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +12,50 @@ import { Badge } from "@/components/ui/badge";
 import {
   obtenerMiNegocio, crearNegocio, actualizarNegocio,
   cambiarPublicacion, listarCategoriasDisponibles, obtenerMiSuscripcion,
+  subirLogo, subirPortada, resolverImagenNegocio,
 } from "@/services/negocioApi";
 
 const VACIO = { nombreComercial: "", categoriaId: "", descripcionCorta: "", ciudad: "", whatsapp: "", videoPresentacionUrl: "" };
 const ICONO_INSIGNIA = { "badge-check": BadgeCheck, "graduation-cap": GraduationCap, "shield-check": ShieldCheck, languages: Languages };
+
+function SubidaImagen({ label, aspecto, url, subiendo, onSeleccionar, error }) {
+  const inputRef = useRef(null);
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => inputRef.current?.click()}
+        className={`group relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-input bg-muted/20 hover:border-trust ${aspecto}`}
+      >
+        {url ? (
+          <img src={resolverImagenNegocio(url)} alt={label} className="size-full object-cover" />
+        ) : (
+          <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
+            <ImageIcon className="size-6" />
+            <span className="text-xs">JPG, PNG o WEBP</span>
+          </div>
+        )}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100">
+          {subiendo ? <Loader2 className="size-5 animate-spin" /> : <span className="flex items-center gap-1.5 text-sm font-medium"><Upload className="size-4" /> {url ? "Cambiar" : "Subir"}</span>}
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (file) onSeleccionar(file);
+          }}
+        />
+      </div>
+      {error && <p className="mt-1 text-xs text-danger">{error}</p>}
+    </div>
+  );
+}
 
 export default function NegocioEditorPage() {
   const [negocio, setNegocio] = useState(null);
@@ -27,6 +67,10 @@ export default function NegocioEditorPage() {
   const [publicando, setPublicando] = useState(false);
   const [error, setError] = useState("");
   const [exito, setExito] = useState("");
+  const [subiendoLogo, setSubiendoLogo] = useState(false);
+  const [subiendoPortada, setSubiendoPortada] = useState(false);
+  const [errorLogo, setErrorLogo] = useState("");
+  const [errorPortada, setErrorPortada] = useState("");
 
   useEffect(() => {
     listarCategoriasDisponibles().then(setCategorias);
@@ -69,6 +113,30 @@ export default function NegocioEditorPage() {
       setError(err.message || "No se pudo guardar");
     } finally {
       setGuardando(false);
+    }
+  }
+
+  async function subirArchivoLogo(file) {
+    setErrorLogo("");
+    setSubiendoLogo(true);
+    try {
+      setNegocio(await subirLogo(file));
+    } catch (err) {
+      setErrorLogo(err.message || "No se pudo subir el logo");
+    } finally {
+      setSubiendoLogo(false);
+    }
+  }
+
+  async function subirArchivoPortada(file) {
+    setErrorPortada("");
+    setSubiendoPortada(true);
+    try {
+      setNegocio(await subirPortada(file));
+    } catch (err) {
+      setErrorPortada(err.message || "No se pudo subir la portada");
+    } finally {
+      setSubiendoPortada(false);
     }
   }
 
@@ -151,6 +219,27 @@ export default function NegocioEditorPage() {
       )}
 
       <form onSubmit={guardar} className="panel space-y-4 p-6">
+        {existe && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SubidaImagen
+              label="Portada"
+              aspecto="aspect-[16/6]"
+              url={negocio.fotoPortadaUrl}
+              subiendo={subiendoPortada}
+              onSeleccionar={subirArchivoPortada}
+              error={errorPortada}
+            />
+            <SubidaImagen
+              label="Logo"
+              aspecto="aspect-square max-w-[9rem]"
+              url={negocio.logoUrl}
+              subiendo={subiendoLogo}
+              onSeleccionar={subirArchivoLogo}
+              error={errorLogo}
+            />
+          </div>
+        )}
+
         <div>
           <Label htmlFor="nombre">Nombre comercial</Label>
           <div className="relative">

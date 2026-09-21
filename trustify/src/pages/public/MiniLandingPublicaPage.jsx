@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import NotificationBell from "@/components/shared/NotificationBell";
-import { obtenerNegocioPublico, registrarClicWhatsapp } from "@/services/negocioApi";
+import { obtenerNegocioPublico, registrarClicWhatsapp, resolverImagenNegocio } from "@/services/negocioApi";
 import { crearSolicitud } from "@/services/solicitudApi";
 import { reportarNegocio } from "@/services/denunciaApi";
 import { isLoggedIn } from "@/services/authApi";
@@ -163,7 +163,7 @@ export default function MiniLandingPublicaPage() {
         className="relative h-48 sm:h-64"
         style={{
           background: negocio.fotoPortadaUrl
-            ? `url(${negocio.fotoPortadaUrl}) center/cover`
+            ? `url(${resolverImagenNegocio(negocio.fotoPortadaUrl)}) center/cover`
             : "linear-gradient(120deg, hsl(var(--trust)/0.25), hsl(var(--verified)/0.2))",
         }}
       />
@@ -173,7 +173,7 @@ export default function MiniLandingPublicaPage() {
         <div className="-mt-12 flex items-end gap-4">
           <div className="grid size-24 shrink-0 place-items-center rounded-2xl border-4 border-background bg-trust/10 font-display text-2xl font-bold text-trust shadow-lg">
             {negocio.logoUrl ? (
-              <img src={negocio.logoUrl} alt={negocio.nombreComercial} className="size-full rounded-2xl object-cover" />
+              <img src={resolverImagenNegocio(negocio.logoUrl)} alt={negocio.nombreComercial} className="size-full rounded-2xl object-cover" />
             ) : iniciales}
           </div>
           <div className="mb-1 flex-1">
@@ -408,9 +408,18 @@ export default function MiniLandingPublicaPage() {
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {negocio.catalogo.map((item) => (
-                <div key={item.id} className="panel flex items-center justify-between p-4">
-                  <span className="font-medium">{idioma === "en" && item.nombreEn ? item.nombreEn : item.nombre}</span>
-                  <span className="text-sm text-muted-foreground">{formatearPrecio(item.precioReferencial)}</span>
+                <div key={item.id} className="panel flex items-center gap-3 p-4">
+                  {item.fotoUrl && (
+                    <img
+                      src={resolverImagenNegocio(item.fotoUrl)}
+                      alt={item.nombre}
+                      className="size-12 shrink-0 rounded-lg object-cover"
+                    />
+                  )}
+                  <div className="flex flex-1 items-center justify-between gap-2">
+                    <span className="font-medium">{idioma === "en" && item.nombreEn ? item.nombreEn : item.nombre}</span>
+                    <span className="text-sm text-muted-foreground">{formatearPrecio(item.precioReferencial)}</span>
+                  </div>
                 </div>
               ))}
             </div>
