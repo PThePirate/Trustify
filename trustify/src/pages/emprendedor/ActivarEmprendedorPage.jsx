@@ -17,7 +17,7 @@ export default function ActivarEmprendedorPage() {
     setLoading(true);
     try {
       await activarEmprendedor();
-      navigate("/negocio");
+      navigate("/negocio/bienvenida");
     } catch (err) {
       setError(err.message || "No se pudo activar tu perfil de emprendedor");
     } finally {

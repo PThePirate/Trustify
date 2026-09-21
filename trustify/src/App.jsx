@@ -17,6 +17,7 @@ import OnboardingPage from "@/pages/public/OnboardingPage";
 // Módulo B — Emprendedor
 import RequireAuth from "@/components/auth/RequireAuth";
 import ActivarEmprendedorPage from "@/pages/emprendedor/ActivarEmprendedorPage";
+import OnboardingEmprendedorPage from "@/pages/emprendedor/OnboardingEmprendedorPage";
 import EmprendedorLayout from "@/components/emprendedor/EmprendedorLayout";
 import NegocioEditorPage from "@/pages/emprendedor/NegocioEditorPage";
 import CatalogoPage from "@/pages/emprendedor/CatalogoPage";
@@ -118,6 +119,15 @@ export default function App() {
             element={
               <RequireAuth>
                 <ActivarEmprendedorPage />
+              </RequireAuth>
+            }
+          />
+          {/* B1 — recorrido de los 4 pilares, entre activar (B2) y crear la Mini Landing Page (B3) */}
+          <Route
+            path="/negocio/bienvenida"
+            element={
+              <RequireAuth>
+                <OnboardingEmprendedorPage />
               </RequireAuth>
             }
           />
