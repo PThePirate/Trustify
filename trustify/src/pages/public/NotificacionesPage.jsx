@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { Bell, ShieldCheck, ShieldX, Flag, Store, Inbox, MessageCircle, Loader2, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Logo from "@/components/brand/Logo";
-import ThemeToggle from "@/components/theme/ThemeToggle";
 import { listarNotificaciones, marcarNotificacionLeida, marcarTodasLeidas } from "@/services/authApi";
 
 const ICONOS = {
@@ -45,13 +42,7 @@ export default function NotificacionesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <Link to="/"><Logo /></Link>
-        <ThemeToggle />
-      </header>
-
-      <div className="mx-auto max-w-2xl px-6 py-8">
+    <div className="mx-auto max-w-2xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-display text-2xl font-bold sm:text-3xl">Notificaciones</h1>
@@ -102,7 +93,6 @@ export default function NotificacionesPage() {
             })}
           </div>
         )}
-      </div>
     </div>
   );
 }

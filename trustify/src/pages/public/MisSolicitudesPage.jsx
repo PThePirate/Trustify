@@ -6,8 +6,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import Logo from "@/components/brand/Logo";
-import ThemeToggle from "@/components/theme/ThemeToggle";
 import { misSolicitudes, confirmarSolicitud, dejarResena } from "@/services/solicitudApi";
 
 const ESTADO_INFO = {
@@ -95,13 +93,7 @@ export default function MisSolicitudesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <Link to="/"><Logo /></Link>
-        <ThemeToggle />
-      </header>
-
-      <div className="mx-auto max-w-2xl px-6 py-8">
+    <div className="mx-auto max-w-2xl">
         <div className="mb-6">
           <h1 className="font-display text-2xl font-bold sm:text-3xl">Mis solicitudes</h1>
           <p className="mt-1 text-muted-foreground">
@@ -176,7 +168,6 @@ export default function MisSolicitudesPage() {
             })}
           </div>
         )}
-      </div>
     </div>
   );
 }

@@ -9,9 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import Logo from "@/components/brand/Logo";
-import ThemeToggle from "@/components/theme/ThemeToggle";
-import NotificationBell from "@/components/shared/NotificationBell";
 import {
   obtenerPerfil, actualizarPerfil, logout, subirFotoPerfil, obtenerFotoPerfilUrl,
   cambiarPassword, eliminarCuenta,
@@ -320,7 +317,7 @@ export default function PerfilPage() {
 
   function salir() {
     logout();
-    navigate("/");
+    navigate("/login");
   }
 
   if (error && !usuario) {
@@ -341,16 +338,7 @@ export default function PerfilPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <Link to="/"><Logo /></Link>
-        <div className="flex items-center gap-3">
-          <NotificationBell />
-          <ThemeToggle />
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-2xl px-6 py-8">
+    <div className="mx-auto max-w-2xl">
         <div className="mb-6 flex items-center gap-4">
           <AvatarPerfil usuario={usuario} onActualizado={setUsuario} />
           <div>
@@ -474,7 +462,6 @@ export default function PerfilPage() {
         <button onClick={salir} className="mt-6 text-sm text-muted-foreground hover:text-danger">
           Cerrar sesión
         </button>
-      </div>
     </div>
   );
 }

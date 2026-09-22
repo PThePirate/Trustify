@@ -41,7 +41,7 @@ export default function OnboardingPage() {
   const actual = PASOS[paso];
 
   function siguiente() {
-    if (esUltimo) navigate("/buscar");
+    if (esUltimo) navigate("/panel");
     else setPaso((p) => p + 1);
   }
 
@@ -49,7 +49,7 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="flex h-16 items-center justify-between px-6">
         <Logo />
-        <button onClick={() => navigate("/buscar")} className="text-sm text-muted-foreground hover:text-foreground">
+        <button onClick={() => navigate("/panel")} className="text-sm text-muted-foreground hover:text-foreground">
           Saltar
         </button>
       </header>

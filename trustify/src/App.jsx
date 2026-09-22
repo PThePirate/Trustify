@@ -17,6 +17,8 @@ import OtpVerificationPage from "@/pages/auth/OtpVerificationPage";
 import RecuperarPasswordPage from "@/pages/auth/RecuperarPasswordPage";
 import FotoVerificacionPage from "@/pages/auth/FotoVerificacionPage";
 import OnboardingPage from "@/pages/public/OnboardingPage";
+import ClienteLayout from "@/components/cliente/ClienteLayout";
+import ClienteInicioPage from "@/pages/cliente/ClienteInicioPage";
 
 // Módulo B — Emprendedor
 import RequireAuth from "@/components/auth/RequireAuth";
@@ -77,35 +79,24 @@ export default function App() {
           <Route path="/buscar" element={<BuscarPage />} />
           <Route path="/buscar/resultados" element={<ResultadosBusquedaPage />} />
 
-          {/* A7/A8 — Mis solicitudes (requiere sesión de cliente) */}
+          {/* Panel del cliente — mismo layout con sidebar que emprendedor/admin/
+              institucional; cada ruta hija conserva su URL de siempre para no
+              romper enlaces existentes (NotificationBell, "Mejora tu plan", etc). */}
           <Route
-            path="/mis-solicitudes"
             element={
               <RequireAuth>
-                <MisSolicitudesPage />
+                <ClienteLayout />
               </RequireAuth>
             }
-          />
-
-          {/* A9 — Perfil del comprador (requiere sesión) */}
-          <Route
-            path="/perfil"
-            element={
-              <RequireAuth>
-                <PerfilPage />
-              </RequireAuth>
-            }
-          />
-
-          {/* A10 — Notificaciones (requiere sesión) */}
-          <Route
-            path="/notificaciones"
-            element={
-              <RequireAuth>
-                <NotificacionesPage />
-              </RequireAuth>
-            }
-          />
+          >
+            <Route path="/panel" element={<ClienteInicioPage />} />
+            {/* A7/A8 — Mis solicitudes */}
+            <Route path="/mis-solicitudes" element={<MisSolicitudesPage />} />
+            {/* A9 — Perfil del comprador */}
+            <Route path="/perfil" element={<PerfilPage />} />
+            {/* A10 — Notificaciones */}
+            <Route path="/notificaciones" element={<NotificacionesPage />} />
+          </Route>
 
           {/* Autenticación pública (Cliente / Emprendedor) */}
           <Route path="/login" element={<LoginPage />} />

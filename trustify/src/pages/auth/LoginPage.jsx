@@ -24,7 +24,7 @@ export default function LoginPage() {
       const data = await login({ correo, password });
       // Si ya tiene rol emprendedor, lo llevamos directo a su panel de negocio;
       // si no, a la landing (el flujo de cliente todavía no tiene home propio).
-      navigate(data.usuario.kycLayer < 2 ? "/verificar-otp" : data.usuario.rolEmprendedor ? "/negocio" : "/");
+      navigate(data.usuario.kycLayer < 2 ? "/verificar-otp" : data.usuario.rolEmprendedor ? "/negocio" : "/panel");
     } catch (err) {
       setError(err.message || "No se pudo iniciar sesión");
     } finally {
