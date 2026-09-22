@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import VerificationSeal from "@/components/brand/VerificationSeal";
+import Logo from "@/components/brand/Logo";
 import MiniLandingPreview from "@/components/brand/MiniLandingPreview";
 import OrbitalNetwork from "@/components/brand/OrbitalNetwork";
 import LogoMarquee from "@/components/brand/LogoMarquee";
@@ -698,7 +698,7 @@ export default function LandingPage() {
               </div>
 
               <div className="flex justify-center">
-                <VerificationSeal size={200} />
+                <Logo showText={false} markClassName="h-44 w-48 rounded-3xl" />
               </div>
             </div>
           </Card>

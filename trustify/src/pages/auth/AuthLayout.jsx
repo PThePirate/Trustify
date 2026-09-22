@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShieldCheck, BadgeCheck, Lock, ArrowLeft } from "lucide-react";
 import Logo from "@/components/brand/Logo";
-import VerificationSeal from "@/components/brand/VerificationSeal";
 import AuroraBackground from "@/components/ui/AuroraBackground";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
@@ -43,7 +42,7 @@ export default function AuthLayout({ children }) {
             transition={{ duration: 0.7 }}
             className="mb-10"
           >
-            <VerificationSeal size={180} />
+            <Logo showText={false} markClassName="h-40 w-44 rounded-3xl" />
           </motion.div>
 
           <h2 className="max-w-md font-display text-4xl font-bold leading-tight">
