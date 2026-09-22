@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Store, Package, Inbox, Star, LogOut, ExternalLink, QrCode, TrendingUp, LineChart, Menu, X, CreditCard } from "lucide-react";
+import { Store, Package, Inbox, Star, LogOut, QrCode, TrendingUp, LineChart, Menu, X, CreditCard, HelpCircle, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { logout } from "@/services/authApi";
@@ -17,59 +17,100 @@ const NAV = [
   { to: "/negocio/planes", label: "Suscripción y planes", icon: CreditCard },
 ];
 
+const NAV_FINAL = [
+  { to: "/ayuda", label: "Ayuda", icon: HelpCircle },
+];
+
 export default function EmprendedorLayout() {
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [colapsado, setColapsado] = useState(() => localStorage.getItem("checkbiz-emprendedor-sidebar-colapsado") === "true");
+
+  useEffect(() => {
+    localStorage.setItem("checkbiz-emprendedor-sidebar-colapsado", String(colapsado));
+  }, [colapsado]);
 
   function salir() {
     logout();
     navigate("/login");
   }
 
+  function itemClasses(isActive, compacto = false) {
+    return cn(
+      "flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors",
+      compacto ? "justify-center px-2" : "gap-2.5 px-3",
+      isActive ? "bg-trust/10 text-trust" : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
+    );
+  }
+
+  function renderNav(onClick, compacto = false) {
+    return (
+      <>
+        {NAV.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            onClick={onClick}
+            title={compacto ? item.label : undefined}
+            className={({ isActive }) => itemClasses(isActive, compacto)}
+          >
+            <item.icon className="size-[18px]" />
+            {!compacto && item.label}
+          </NavLink>
+        ))}
+        <div className="my-2 border-t border-border" />
+        {NAV_FINAL.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={onClick}
+            title={compacto ? item.label : undefined}
+            className={({ isActive }) => itemClasses(isActive, compacto)}
+          >
+            <item.icon className="size-[18px]" />
+            {!compacto && item.label}
+          </NavLink>
+        ))}
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-border bg-card lg:flex">
-        <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-          <Logo />
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-border bg-card transition-[width] duration-200 lg:flex",
+        colapsado ? "w-20" : "w-64"
+      )}>
+        <div className={cn("flex h-16 items-center border-b border-border", colapsado ? "justify-center px-2" : "px-6")}>
+          <Logo showText={!colapsado} />
         </div>
 
-        <div className="px-4 py-3">
+        <div className={cn("py-3", colapsado ? "flex justify-center px-2" : "px-4")}>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-verified/25 bg-verified/10 px-2.5 py-1 text-[11px] font-semibold text-verified">
-            <Store className="size-3.5" /> Panel de negocio
+            <Store className="size-3.5 shrink-0" /> {!colapsado && "Panel de negocio"}
           </span>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-2">
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive ? "bg-trust/10 text-trust" : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
-                )
-              }
-            >
-              <item.icon className="size-[18px]" />
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+        <nav className={cn("flex-1 space-y-1 py-2", colapsado ? "px-2" : "px-3")}>{renderNav(undefined, colapsado)}</nav>
 
-        <div className="space-y-1 border-t border-border p-3">
+        <div className={cn("space-y-1 border-t border-border", colapsado ? "p-2" : "p-3")}>
           <button
-            onClick={() => window.open("/", "_blank")}
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 hover:bg-muted/60"
+            type="button"
+            onClick={() => setColapsado((v) => !v)}
+            title={colapsado ? "Expandir menú" : "Contraer menú"}
+            aria-label={colapsado ? "Expandir menú" : "Contraer menú"}
+            className={cn("flex w-full items-center rounded-lg py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground", colapsado ? "justify-center px-2" : "gap-2.5 px-3")}
           >
-            <ExternalLink className="size-[18px]" /> Ver sitio público
+            {colapsado ? <PanelLeftOpen className="size-[18px]" /> : <PanelLeftClose className="size-[18px]" />}
+            {!colapsado && "Contraer menú"}
           </button>
           <button
             onClick={salir}
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-danger hover:bg-danger/10"
+            title={colapsado ? "Cerrar sesión" : undefined}
+            className={cn("flex w-full items-center rounded-lg py-2.5 text-sm font-medium text-danger hover:bg-danger/10", colapsado ? "justify-center px-2" : "gap-2.5 px-3")}
           >
-            <LogOut className="size-[18px]" /> Cerrar sesión
+            <LogOut className="size-[18px]" /> {!colapsado && "Cerrar sesión"}
           </button>
         </div>
       </aside>
@@ -93,31 +134,12 @@ export default function EmprendedorLayout() {
 
       {menuAbierto && (
         <nav className="fixed inset-x-0 top-16 z-20 space-y-1 border-b border-border bg-card p-3 shadow-lg lg:hidden">
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              onClick={() => setMenuAbierto(false)}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive ? "bg-trust/10 text-trust" : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
-                )
-              }
-            >
-              <item.icon className="size-[18px]" />
-              {item.label}
-            </NavLink>
-          ))}
-          <a
-            href="/"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 hover:bg-muted/60"
-          >
-            <ExternalLink className="size-[18px]" /> Ver sitio público
-          </a>
+          {renderNav(() => setMenuAbierto(false))}
+          <div className="mt-2 border-t border-border pt-2">
+            <button onClick={salir} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-danger hover:bg-danger/10">
+              <LogOut className="size-[18px]" /> Cerrar sesión
+            </button>
+          </div>
         </nav>
       )}
 
@@ -125,7 +147,7 @@ export default function EmprendedorLayout() {
         <ThemeToggle />
       </div>
 
-      <main className="px-4 py-6 lg:ml-64 lg:px-8 lg:py-8">
+      <main className={cn("px-4 py-6 transition-[margin] duration-200 lg:px-8 lg:py-8", colapsado ? "lg:ml-20" : "lg:ml-64")}>
         <Outlet />
       </main>
     </div>

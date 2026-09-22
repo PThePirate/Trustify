@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ChevronDown, HelpCircle, ShieldCheck, Flag, Mail,
+  ChevronDown, HelpCircle, ShieldCheck, Flag, Mail, ArrowLeft,
 } from "lucide-react";
 import Logo from "@/components/brand/Logo";
+import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { isLoggedIn } from "@/services/authApi";
 
@@ -89,19 +90,23 @@ function SeccionFAQ({ titulo, preguntas, prefijo }) {
 }
 
 export default function AyudaPage() {
+  const conSesion = isLoggedIn();
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <Link to="/"><Logo /></Link>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          {isLoggedIn() ? (
-            <Link to="/perfil" className="text-sm font-medium text-trust hover:underline">Mi perfil</Link>
-          ) : (
-            <Link to="/login" className="text-sm font-medium text-trust hover:underline">Iniciar sesión</Link>
-          )}
-        </div>
-      </header>
+      {!conSesion && (
+        <header className="flex h-16 items-center justify-between border-b border-border px-6">
+          <Link to="/"><Logo /></Link>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/">
+                <ArrowLeft className="size-4" /> Volver
+              </Link>
+            </Button>
+            <ThemeToggle />
+          </div>
+        </header>
+      )}
 
       <div className="mx-auto max-w-2xl px-6 py-10">
         <div className="mb-8 text-center">

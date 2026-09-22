@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import LandingPage from "@/pages/public/LandingPage";
 import MiniLandingPublicaPage from "@/pages/public/MiniLandingPublicaPage";
@@ -19,6 +20,7 @@ import FotoVerificacionPage from "@/pages/auth/FotoVerificacionPage";
 import OnboardingPage from "@/pages/public/OnboardingPage";
 import ClienteLayout from "@/components/cliente/ClienteLayout";
 import ClienteInicioPage from "@/pages/cliente/ClienteInicioPage";
+import { isLoggedIn, obtenerPerfil } from "@/services/authApi";
 
 // Módulo B — Emprendedor
 import RequireAuth from "@/components/auth/RequireAuth";
@@ -56,6 +58,33 @@ import InstitucionalLoginPage from "@/pages/institucional/InstitucionalLoginPage
 import InstitucionalIndexPage from "@/pages/institucional/InstitucionalIndexPage";
 import SeguimientoAlumniPage from "@/pages/institucional/SeguimientoAlumniPage";
 
+function ClienteAwareLayout() {
+  return isLoggedIn() ? <ClienteLayout /> : <Outlet />;
+}
+
+function AyudaAwareLayout() {
+  const [rol, setRol] = useState(null);
+
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      setRol("publico");
+      return;
+    }
+
+    obtenerPerfil()
+      .then((usuario) => setRol(usuario.rolEmprendedor ? "emprendedor" : "cliente"))
+      .catch(() => setRol("publico"));
+  }, []);
+
+  if (rol === null) {
+    return <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Cargando…</div>;
+  }
+
+  if (rol === "cliente") return <ClienteLayout />;
+  if (rol === "emprendedor") return <EmprendedorLayout />;
+  return <Outlet />;
+}
+
 /**
  * Router principal de CheckBiz.
  * A medida que construyamos cada módulo (A Cliente, C/D paneles) iremos
@@ -69,15 +98,17 @@ export default function App() {
           {/* MÓDULO F — Público / Marketing */}
           <Route path="/" element={<LandingPage />} />
 
-          {/* A6 — Mini Landing Page pública de un negocio */}
-          <Route path="/negocio/publico/:slug" element={<MiniLandingPublicaPage />} />
-
           {/* B11 — a donde apunta el QR físico; registra el escaneo y redirige a A6 */}
           <Route path="/qr/:codigo" element={<QrEscaneoPage />} />
 
-          {/* A4/A5 — Búsqueda y resultados */}
-          <Route path="/buscar" element={<BuscarPage />} />
-          <Route path="/buscar/resultados" element={<ResultadosBusquedaPage />} />
+          {/* El cliente conserva su sidebar también al explorar negocios. */}
+          <Route element={<ClienteAwareLayout />}>
+            {/* A6 — Mini Landing Page pública de un negocio */}
+            <Route path="/negocio/publico/:slug" element={<MiniLandingPublicaPage />} />
+            {/* A4/A5 — Búsqueda y resultados */}
+            <Route path="/buscar" element={<BuscarPage />} />
+            <Route path="/buscar/resultados" element={<ResultadosBusquedaPage />} />
+          </Route>
 
           {/* Panel del cliente — mismo layout con sidebar que emprendedor/admin/
               institucional; cada ruta hija conserva su URL de siempre para no
@@ -108,8 +139,10 @@ export default function App() {
           {/* A1 — Onboarding, primera vez que un cliente nuevo entra */}
           <Route path="/bienvenida" element={<OnboardingPage />} />
 
-          {/* A11 — Centro de Ayuda / FAQ, público */}
-          <Route path="/ayuda" element={<AyudaPage />} />
+          {/* A11 — Centro de Ayuda: contenido único, layout según sesión/rol */}
+          <Route element={<AyudaAwareLayout />}>
+            <Route path="/ayuda" element={<AyudaPage />} />
+          </Route>
 
           {/* A2 — Contrato de Adhesión y Términos y Condiciones, público */}
           <Route path="/contrato" element={<ContratoPage />} />

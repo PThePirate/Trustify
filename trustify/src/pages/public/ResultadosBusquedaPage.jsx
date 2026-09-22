@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useOutletContext } from "react-router-dom";
 import {
   MapPin, Star, ShieldCheck, Search, Loader2, PackageSearch, X,
 } from "lucide-react";
@@ -57,6 +57,7 @@ export default function ResultadosBusquedaPage() {
   const [categorias, setCategorias] = useState([]);
   const [ciudades, setCiudades] = useState([]);
   const [orden, setOrden] = useState("relevancia");
+  const { dentroClienteShell = false } = useOutletContext() || {};
 
   const texto = searchParams.get("texto") || "";
   const categoriaId = searchParams.get("categoriaId") || "";
@@ -96,10 +97,12 @@ export default function ResultadosBusquedaPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <Link to="/"><Logo /></Link>
-        <ThemeToggle />
-      </header>
+      {!dentroClienteShell && (
+        <header className="flex h-16 items-center justify-between border-b border-border px-6">
+          <Link to="/"><Logo /></Link>
+          <ThemeToggle />
+        </header>
+      )}
 
       <div className="mx-auto max-w-5xl px-6 py-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
