@@ -56,3 +56,14 @@ export async function confirmarSolicitud(id) {
 export async function dejarResena(id, { estrellas, comentario }) {
   return api(`/solicitudes/${id}/resena`, { method: "POST", body: { estrellas, comentario } });
 }
+
+// ---------------------------------------------------------------------
+// Chat interno de la solicitud (reemplaza el botón de WhatsApp)
+// ---------------------------------------------------------------------
+export async function listarMensajes(id) {
+  return api(`/solicitudes/${id}/mensajes`);
+}
+
+export async function enviarMensaje(id, cuerpo) {
+  return api(`/solicitudes/${id}/mensajes`, { method: "POST", body: { cuerpo } });
+}

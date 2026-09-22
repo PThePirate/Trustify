@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FileText, Loader2, CheckCircle2, Star, AlertCircle, Home,
-  Calendar, Store, MessageSquareText,
+  Calendar, Store, MessageSquareText, MessageCircle, ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { misSolicitudes, confirmarSolicitud, dejarResena } from "@/services/solicitudApi";
+import HiloMensajes from "@/components/mensajes/HiloMensajes";
 
 const ESTADO_INFO = {
   enviada: { label: "Enviada", variant: "pending" },
@@ -73,6 +74,7 @@ export default function MisSolicitudesPage() {
   const [solicitudes, setSolicitudes] = useState(null);
   const [confirmandoId, setConfirmandoId] = useState(null);
   const [error, setError] = useState("");
+  const [hiloAbiertoId, setHiloAbiertoId] = useState(null);
 
   function cargar() {
     misSolicitudes().then(setSolicitudes).catch((err) => setError(err.message));
@@ -95,9 +97,10 @@ export default function MisSolicitudesPage() {
   return (
     <div className="mx-auto max-w-2xl">
         <div className="mb-6">
-          <h1 className="font-display text-2xl font-bold sm:text-3xl">Mis solicitudes</h1>
+          <h1 className="font-display text-2xl font-bold sm:text-3xl">Mensajes</h1>
           <p className="mt-1 text-muted-foreground">
-            El pago y la entrega se acuerdan directamente con el prestador, fuera de la app.
+            Todas tus conversaciones con negocios en un solo lugar. El pago y la entrega se acuerdan
+            directamente con el prestador, fuera de la app.
           </p>
         </div>
 
@@ -133,18 +136,30 @@ export default function MisSolicitudesPage() {
                     {s.fechaEstimada && <span>Fecha estimada: {s.fechaEstimada}</span>}
                   </div>
 
-                  {s.estado !== "confirmada" && s.estado !== "cancelada" && (
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <Button
-                      variant="verified"
+                      variant="outline"
                       size="sm"
-                      className="mt-3"
-                      onClick={() => confirmar(s.id)}
-                      disabled={confirmandoId === s.id}
+                      onClick={() => setHiloAbiertoId(hiloAbiertoId === s.id ? null : s.id)}
                     >
-                      {confirmandoId === s.id ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
-                      Confirmar que recibí el producto/servicio
+                      {hiloAbiertoId === s.id ? <ChevronUp className="size-4" /> : <MessageCircle className="size-4" />}
+                      {hiloAbiertoId === s.id ? "Ocultar conversación" : "Ver conversación"}
                     </Button>
-                  )}
+
+                    {s.estado !== "confirmada" && s.estado !== "cancelada" && (
+                      <Button
+                        variant="verified"
+                        size="sm"
+                        onClick={() => confirmar(s.id)}
+                        disabled={confirmandoId === s.id}
+                      >
+                        {confirmandoId === s.id ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+                        Confirmar que recibí el producto/servicio
+                      </Button>
+                    )}
+                  </div>
+
+                  {hiloAbiertoId === s.id && <HiloMensajes solicitudId={s.id} estado={s.estado} />}
 
                   {s.estado === "confirmada" && !s.resena && (
                     <FormularioResena solicitudId={s.id} onListo={cargar} />

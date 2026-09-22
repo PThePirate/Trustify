@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
-  Home, Search, FileText, Bell, User, HelpCircle, LogOut, ExternalLink, Menu, X, ShieldCheck,
+  Home, Search, MessageCircle, Bell, User, HelpCircle, LogOut, ExternalLink, Menu, X, ShieldCheck,
 } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/panel", label: "Inicio", icon: Home, end: true },
-  { to: "/mis-solicitudes", label: "Mis solicitudes", icon: FileText },
+  { to: "/mis-solicitudes", label: "Mensajes", icon: MessageCircle },
   { to: "/notificaciones", label: "Notificaciones", icon: Bell, badge: "noLeidas" },
   { to: "/perfil", label: "Mi cuenta", icon: User },
 ];

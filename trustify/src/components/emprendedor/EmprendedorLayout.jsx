@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Store, Package, Inbox, Star, LogOut, ExternalLink, QrCode, TrendingUp, LineChart, Menu, X, CreditCard } from "lucide-react";
+import { Store, Package, MessageCircle, Star, LogOut, ExternalLink, QrCode, TrendingUp, LineChart, Menu, X, CreditCard } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { logout } from "@/services/authApi";
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { to: "/negocio", label: "Mi Mini Landing", icon: Store, end: true },
   { to: "/negocio/catalogo", label: "Catálogo", icon: Package },
-  { to: "/negocio/solicitudes", label: "Solicitudes", icon: Inbox },
+  { to: "/negocio/solicitudes", label: "Mensajes", icon: MessageCircle },
   { to: "/negocio/reputacion", label: "Reputación", icon: Star },
   { to: "/negocio/analitica", label: "Analítica", icon: LineChart },
   { to: "/negocio/formalizacion", label: "Formalización", icon: TrendingUp },
