@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
-  Home, Search, MessageCircle, Bell, User, HelpCircle, LogOut, ExternalLink, Menu, X, ShieldCheck,
+  Home, Search, MessageCircle, Bell, User, HelpCircle, LogOut, Menu, X, ShieldCheck,
+  PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import NotificationBell from "@/components/shared/NotificationBell";
 import { logout, listarNotificaciones } from "@/services/authApi";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/panel", label: "Inicio", icon: Home, end: true },
+  { to: "/buscar", label: "Explorar negocios", icon: Search },
   { to: "/mis-solicitudes", label: "Mensajes", icon: MessageCircle },
   { to: "/notificaciones", label: "Notificaciones", icon: Bell, badge: "noLeidas" },
   { to: "/perfil", label: "Mi cuenta", icon: User },
@@ -19,14 +22,18 @@ const NAV = [
 // llevan el ícono de "abrir en otra pantalla", igual que "Ver sitio
 // público" en el panel del emprendedor.
 const NAV_EXTERNAS = [
-  { to: "/buscar", label: "Explorar negocios", icon: Search },
   { to: "/ayuda", label: "Ayuda", icon: HelpCircle },
 ];
 
 export default function ClienteLayout() {
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [colapsado, setColapsado] = useState(() => localStorage.getItem("checkbiz-cliente-sidebar-colapsado") === "true");
   const [noLeidas, setNoLeidas] = useState(0);
+
+  useEffect(() => {
+    localStorage.setItem("checkbiz-cliente-sidebar-colapsado", String(colapsado));
+  }, [colapsado]);
 
   useEffect(() => {
     listarNotificaciones().then((d) => setNoLeidas(d.noLeidas)).catch(() => {});
@@ -37,21 +44,22 @@ export default function ClienteLayout() {
     navigate("/login");
   }
 
-  function itemClasses(isActive) {
+  function itemClasses(isActive, compacto = false) {
     return cn(
-      "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+      "flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors",
+      compacto ? "justify-center px-2" : "gap-2.5 px-3",
       isActive ? "bg-trust/10 text-trust" : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
     );
   }
 
-  function renderNav(onClick) {
+  function renderNav(onClick, compacto = false) {
     return (
       <>
         {NAV.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.end} onClick={onClick} className={({ isActive }) => itemClasses(isActive)}>
+          <NavLink key={item.to} to={item.to} end={item.end} onClick={onClick} title={compacto ? item.label : undefined} className={({ isActive }) => itemClasses(isActive, compacto)}>
             <item.icon className="size-[18px]" />
-            <span className="flex-1">{item.label}</span>
-            {item.badge === "noLeidas" && noLeidas > 0 && (
+            {!compacto && <span className="flex-1">{item.label}</span>}
+            {!compacto && item.badge === "noLeidas" && noLeidas > 0 && (
               <span className="grid size-5 place-items-center rounded-full bg-danger text-[10px] font-bold text-white">
                 {noLeidas > 9 ? "9+" : noLeidas}
               </span>
@@ -60,10 +68,9 @@ export default function ClienteLayout() {
         ))}
         <div className="my-2 border-t border-border" />
         {NAV_EXTERNAS.map((item) => (
-          <NavLink key={item.to} to={item.to} onClick={onClick} className={({ isActive }) => itemClasses(isActive)}>
+          <NavLink key={item.to} to={item.to} onClick={onClick} title={compacto ? item.label : undefined} className={({ isActive }) => itemClasses(isActive, compacto)}>
             <item.icon className="size-[18px]" />
-            <span className="flex-1">{item.label}</span>
-            <ExternalLink className="size-3.5 text-muted-foreground" />
+            {!compacto && <span className="flex-1">{item.label}</span>}
           </NavLink>
         ))}
       </>
@@ -72,25 +79,39 @@ export default function ClienteLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-border bg-card lg:flex">
-        <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-          <Logo />
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-border bg-card transition-[width] duration-200 lg:flex",
+        colapsado ? "w-20" : "w-64"
+      )}>
+        <div className={cn("flex h-16 items-center border-b border-border", colapsado ? "justify-center px-2" : "px-6")}>
+          <Logo showText={!colapsado} />
         </div>
 
-        <div className="px-4 py-3">
+        <div className={cn("py-3", colapsado ? "flex justify-center px-2" : "px-4")}>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-trust/25 bg-trust/10 px-2.5 py-1 text-[11px] font-semibold text-trust">
-            <ShieldCheck className="size-3.5" /> Panel del cliente
+            <ShieldCheck className="size-3.5 shrink-0" /> {!colapsado && "Panel del cliente"}
           </span>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-2">{renderNav()}</nav>
+        <nav className={cn("flex-1 space-y-1 py-2", colapsado ? "px-2" : "px-3")}>{renderNav(undefined, colapsado)}</nav>
 
-        <div className="border-t border-border p-3">
+        <div className={cn("space-y-1 border-t border-border", colapsado ? "p-2" : "p-3")}>
+          <button
+            type="button"
+            onClick={() => setColapsado((v) => !v)}
+            title={colapsado ? "Expandir menú" : "Contraer menú"}
+            aria-label={colapsado ? "Expandir menú" : "Contraer menú"}
+            className={cn("flex w-full items-center rounded-lg py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground", colapsado ? "justify-center px-2" : "gap-2.5 px-3")}
+          >
+            {colapsado ? <PanelLeftOpen className="size-[18px]" /> : <PanelLeftClose className="size-[18px]" />}
+            {!colapsado && "Contraer menú"}
+          </button>
           <button
             onClick={salir}
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-danger hover:bg-danger/10"
+            title={colapsado ? "Cerrar sesión" : undefined}
+            className={cn("flex w-full items-center rounded-lg py-2.5 text-sm font-medium text-danger hover:bg-danger/10", colapsado ? "justify-center px-2" : "gap-2.5 px-3")}
           >
-            <LogOut className="size-[18px]" /> Cerrar sesión
+            <LogOut className="size-[18px]" /> {!colapsado && "Cerrar sesión"}
           </button>
         </div>
       </aside>
@@ -105,25 +126,29 @@ export default function ClienteLayout() {
         </button>
         <Logo />
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <ThemeToggle />
-          <button onClick={salir} className="grid size-9 place-items-center rounded-lg text-danger hover:bg-danger/10">
-            <LogOut className="size-[18px]" />
-          </button>
         </div>
       </header>
 
       {menuAbierto && (
         <nav className="fixed inset-x-0 top-16 z-20 space-y-1 border-b border-border bg-card p-3 shadow-lg lg:hidden">
           {renderNav(() => setMenuAbierto(false))}
+          <div className="mt-2 border-t border-border pt-2">
+            <button onClick={salir} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-danger hover:bg-danger/10">
+              <LogOut className="size-[18px]" /> Cerrar sesión
+            </button>
+          </div>
         </nav>
       )}
 
-      <div className="hidden justify-end border-b border-border bg-card px-8 py-3 lg:flex lg:ml-64">
+      <div className={cn("hidden justify-end gap-2 border-b border-border bg-card px-8 py-3 lg:flex", colapsado ? "lg:ml-20" : "lg:ml-64")}>
+        <NotificationBell />
         <ThemeToggle />
       </div>
 
-      <main className="px-4 py-6 lg:ml-64 lg:px-8 lg:py-8">
-        <Outlet />
+      <main className={cn("px-4 py-6 transition-[margin] duration-200 lg:px-8 lg:py-8", colapsado ? "lg:ml-20" : "lg:ml-64")}>
+        <Outlet context={{ dentroClienteShell: true }} />
       </main>
     </div>
   );
