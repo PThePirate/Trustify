@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useOutletContext } from "react-router-dom";
 import { Search, Palette, Code2, Stethoscope, Box, Scale, Sparkles, GraduationCap, Wrench, Tag, ShieldCheck } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -16,6 +16,7 @@ export default function BuscarPage() {
   const [texto, setTexto] = useState("");
   const [categorias, setCategorias] = useState([]);
   const navigate = useNavigate();
+  const { dentroClienteShell = false } = useOutletContext() || {};
 
   useEffect(() => {
     listarCategoriasDisponibles().then(setCategorias);
@@ -34,10 +35,12 @@ export default function BuscarPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <Link to="/"><Logo /></Link>
-        <ThemeToggle />
-      </header>
+      {!dentroClienteShell && (
+        <header className="flex h-16 items-center justify-between border-b border-border px-6">
+          <Link to="/"><Logo /></Link>
+          <ThemeToggle />
+        </header>
+      )}
 
       <div className="mx-auto max-w-2xl px-6 py-16 text-center">
         <span className="mx-auto inline-flex items-center gap-1.5 rounded-full border border-trust/25 bg-trust/10 px-3 py-1.5 text-xs font-semibold text-trust">

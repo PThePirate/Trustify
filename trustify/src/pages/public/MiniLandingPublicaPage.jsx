@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useOutletContext } from "react-router-dom";
 import {
   MapPin, Star, ShieldCheck, MessageCircle, FileText, Package,
-  Loader2, ShieldAlert, CheckCircle2, XCircle, Store, Home, AlertCircle, X, Flag, User,
+  Loader2, ShieldAlert, CheckCircle2, XCircle, Store, Home, AlertCircle, X, Flag,
   BadgeCheck, GraduationCap, Languages, Video,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
-import NotificationBell from "@/components/shared/NotificationBell";
 import { obtenerNegocioPublico, registrarClicWhatsapp, resolverImagenNegocio } from "@/services/negocioApi";
 import { crearSolicitud } from "@/services/solicitudApi";
 import { reportarNegocio } from "@/services/denunciaApi";
@@ -54,6 +53,7 @@ export default function MiniLandingPublicaPage() {
   const [exitoReporte, setExitoReporte] = useState(false);
   const [idioma, setIdioma] = useState("es");
   const navigate = useNavigate();
+  const { dentroClienteShell = false } = useOutletContext() || {};
 
   useEffect(() => {
     setNegocio(null);
@@ -151,20 +151,12 @@ export default function MiniLandingPublicaPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <Link to="/"><Logo /></Link>
-        <div className="flex items-center gap-3">
-          {isLoggedIn() && (
-            <>
-              <NotificationBell />
-              <Link to="/perfil" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-                <User className="size-4" /> Mi perfil
-              </Link>
-            </>
-          )}
+      {!dentroClienteShell && (
+        <header className="flex h-16 items-center justify-between border-b border-border px-6">
+          <Link to="/"><Logo /></Link>
           <ThemeToggle />
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Portada */}
       <div
