@@ -1,5 +1,8 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Landmark, GraduationCap, Users } from "lucide-react";
+import {
+  LayoutDashboard, LogOut, Landmark, GraduationCap, UsersRound, BadgeCheck,
+  MessageSquare, Clock3,
+} from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { institucionalLogout, obtenerInstitucionActual } from "@/services/institucionalApi";
@@ -10,8 +13,11 @@ const NAV_CAMARA = [
 ];
 
 const NAV_UNIVERSIDAD = [
-  { to: "/institucional", label: "Dashboard CACES", icon: GraduationCap, end: true },
-  { to: "/institucional/alumni", label: "Seguimiento de alumni", icon: Users },
+  { to: "/institucional", label: "Resumen", icon: LayoutDashboard, end: true },
+  { to: "/institucional/comunidad", label: "Comunidad", icon: UsersRound },
+  { to: "/institucional/formalizacion", label: "Formalización", icon: BadgeCheck },
+  { to: "/institucional/demanda", label: "Demanda y reputación", icon: MessageSquare },
+  { to: "/institucional/permanencia", label: "Permanencia", icon: Clock3 },
 ];
 
 export default function InstitucionalLayout() {
