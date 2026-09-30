@@ -23,6 +23,8 @@
 .biometry-guide{position:absolute;z-index:1;width:55%;height:75%;border:2px solid rgba(255,255,255,.76);border-radius:47% 47% 43% 43%;box-shadow:0 0 0 100vmax rgba(5,21,29,.12);pointer-events:none}
 .biometry-stage-label{position:absolute;z-index:2;bottom:1rem;left:50%;width:max-content;max-width:90%;padding:.35rem .75rem;transform:translateX(-50%);border:1px solid hsl(var(--trust)/.23);border-radius:999px;background:hsl(var(--card)/.9);color:hsl(var(--foreground));font-size:.7rem;font-weight:700;backdrop-filter:blur(8px)}
 .biometry-stage-close{position:absolute;z-index:3;right:.7rem;top:.7rem;display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:rgba(7,26,34,.75);color:white}
+.biometry-scan-overlay{position:absolute;inset:0;z-index:2;overflow:hidden;background:linear-gradient(180deg,hsl(var(--verified)/.16),transparent 55%)}
+.biometry-scan-line{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,hsl(var(--verified)),transparent);box-shadow:0 0 14px 3px hsl(var(--verified)/.65)}
 .biometry-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin-top:1rem}
 .biometry-actions button{min-width:0;font-size:.83rem}
 .biometry-error{display:flex;align-items:flex-start;gap:.5rem;margin-top:.85rem;padding:.7rem .8rem;border:1px solid hsl(var(--danger)/.3);border-radius:.7rem;background:hsl(var(--danger)/.09);color:hsl(var(--danger));font-size:.8rem}
