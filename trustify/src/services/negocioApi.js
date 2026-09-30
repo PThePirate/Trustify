@@ -4,7 +4,7 @@
  */
 import { getToken, logout } from "@/services/authApi";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
 const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
 
 function authHeaders() {
@@ -27,17 +27,18 @@ async function apiUpload(path, file) {
   const formData = new FormData();
   formData.append("foto", file);
   let res;
+  const tokenEnviado = getToken();
   try {
     res = await fetch(`${API_BASE}${path}`, {
       method: "POST",
-      headers: authHeaders(),
+      headers: tokenEnviado ? { Authorization: `Bearer ${tokenEnviado}` } : {},
       body: formData,
     });
   } catch {
     throw new Error("No se pudo conectar con el servidor. Verifica que el backend esté corriendo.");
   }
 
-  if (res.status === 401) logout();
+  if (res.status === 401 && getToken() === tokenEnviado) logout();
 
   let data = null;
   try {
@@ -58,10 +59,11 @@ async function api(path, { method = "GET", body, query, auth = true } = {}) {
     ? "?" + new URLSearchParams(Object.entries(query).filter(([, v]) => v !== undefined)).toString()
     : "";
   let res;
+  const tokenEnviado = auth ? getToken() : null;
   try {
     res = await fetch(`${API_BASE}${path}${qs}`, {
       method,
-      headers: { "Content-Type": "application/json", ...(auth ? authHeaders() : {}) },
+      headers: { "Content-Type": "application/json", ...(tokenEnviado ? { Authorization: `Bearer ${tokenEnviado}` } : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
@@ -72,7 +74,7 @@ async function api(path, { method = "GET", body, query, auth = true } = {}) {
   // 401 incluso en rutas públicas (revisa el token antes de mirar si la
   // ruta exige sesión). En una llamada sin auth, ese 401 no significa que
   // haya que cerrar sesión.
-  if (res.status === 401 && auth) logout();
+  if (res.status === 401 && auth && getToken() === tokenEnviado) logout();
 
   if (res.status === 204) return null; // sin contenido (ej. eliminar)
 
@@ -103,6 +105,22 @@ export async function obtenerMiNegocio() {
 
 export async function actualizarNegocio(datos) {
   return api("/negocio/mio", { method: "PUT", body: datos });
+}
+
+export async function guardarLandingBloques(bloques) {
+  return api("/negocio/mio/landing/bloques", { method: "PUT", body: { bloques } });
+}
+
+export async function subirImagenLanding(file) {
+  return apiUpload("/negocio/mio/landing/imagen", file);
+}
+
+export async function subirVideoLanding(file) {
+  return apiUpload("/negocio/mio/landing/video", file);
+}
+
+export async function obtenerMediosPlan() {
+  return api("/negocio/mio/medios");
 }
 
 export async function cambiarPublicacion(publicar) {
@@ -176,8 +194,8 @@ export async function subirFotoItemCatalogo(id, file) {
 // ---------------------------------------------------------------------
 // Perfil público (A6) — sin autenticación, cualquiera puede verlo
 // ---------------------------------------------------------------------
-export async function obtenerNegocioPublico(slug) {
-  return api(`/negocios/publico/${slug}`, { auth: false });
+export async function obtenerNegocioPublico(slug, { registrarVisita = true } = {}) {
+  return api(`/negocios/publico/${slug}`, { auth: registrarVisita && Boolean(getToken()) });
 }
 
 // ---------------------------------------------------------------------
@@ -211,11 +229,6 @@ export async function registrarEscaneoQr(codigo) {
 // ---------------------------------------------------------------------
 export async function obtenerMiAnalitica() {
   return api("/negocio/mio/analitica");
-}
-
-// Sin sesión: lo dispara cualquier visitante al abrir el enlace de WhatsApp.
-export async function registrarClicWhatsapp(slug) {
-  return api(`/negocios/publico/${slug}/clic-whatsapp`, { method: "POST", auth: false });
 }
 
 // ---------------------------------------------------------------------

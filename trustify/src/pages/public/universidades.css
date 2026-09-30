@@ -1,0 +1,51 @@
+.university-landing { isolation: isolate; --campus-blue: #467dec; --campus-violet: #9870dc; --campus-green: #31aa8b; --campus-gold: #dfad45; background: radial-gradient(ellipse at 0 40%, #31aa8b0d, transparent 45%), radial-gradient(ellipse at 100% 75%, #9870dc12, transparent 45%), hsl(var(--background)); }
+.university-landing > main { position: relative; }
+.university-landing > header { background: hsl(var(--background) / .88); backdrop-filter: blur(16px); border-bottom: 1px solid hsl(var(--border)); }
+.university-landing > header nav a, .university-landing > header a.text-white, .university-landing > header button.text-white { color: hsl(var(--foreground)); }
+.university-landing > header button.text-white { border-color: hsl(var(--border)); }
+.university-constellation { position: absolute; inset: 70px -8vw auto; height: 520px; z-index: -1; pointer-events: none; overflow: hidden; }
+.university-constellation > svg { position: absolute; width: 100%; height: 100%; fill: none; stroke: var(--campus-blue); stroke-width: 1; opacity: .22; }
+.university-constellation ellipse { stroke-dasharray: 3 9; transform-origin: center; animation: campus-orbit 80s linear infinite; }
+.university-constellation ellipse:last-child { stroke: var(--campus-violet); animation-direction: reverse; }
+.university-constellation .university-signal { stroke: var(--campus-green); stroke-width: 3; stroke-dasharray: 40 1550; animation: campus-signal 10s linear infinite; }
+.university-aura { position: absolute; width: 450px; height: 350px; filter: blur(65px); border-radius: 50%; opacity: .16; animation: campus-drift 12s ease-in-out infinite alternate; }
+.university-aura-blue { background: var(--campus-blue); left: 0; top: 50px; }
+.university-aura-violet { background: var(--campus-violet); right: 0; top: 80px; animation-delay: -6s; }
+.university-object { position: absolute; display: grid; place-items: center; width: 70px; height: 70px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); border-radius: 22px; background: hsl(var(--card) / .75); box-shadow: 0 15px 35px -20px currentColor; color: var(--campus-blue); animation: campus-float 7s ease-in-out infinite; }
+.university-object svg { width: 32px; height: 32px; }
+.university-object-0 { left: 9%; top: 35px; rotate: -12deg; }
+.university-object-1 { right: 10%; top: 75px; color: var(--campus-violet); rotate: 12deg; animation-delay: -2s; }
+.university-object-2 { left: 10%; top: 230px; color: var(--campus-green); animation-delay: -4s; }
+.university-object-3 { right: 10%; top: 270px; color: var(--campus-gold); rotate: -8deg; }
+.university-object-4 { left: 22%; bottom: 10px; width: 44px; height: 44px; color: var(--campus-gold); animation-delay: -3s; }
+.university-object-5 { right: 23%; bottom: 10px; width: 48px; height: 48px; animation-delay: -5s; }
+.university-star { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--campus-gold); animation: campus-twinkle 4s ease-in-out infinite; }
+.university-star:nth-child(even) { background: var(--campus-green); }
+.university-landing main > .text-center { padding: 36px 0 65px; }
+.university-landing h1 { text-wrap: balance; }
+.university-landing main > section { position: relative; }
+.university-landing main > section::before { content: ''; position: absolute; top: -30px; left: 0; height: 3px; width: 100px; border-radius: 8px; background: linear-gradient(90deg, var(--campus-blue), var(--campus-green), var(--campus-gold)); }
+.university-landing .grid > div { --campus-accent: var(--campus-blue); }
+.university-landing .grid > div:nth-child(2) { --campus-accent: var(--campus-green); }
+.university-landing .grid > div:nth-child(3) { --campus-accent: var(--campus-violet); }
+.university-landing .grid > div:nth-child(4) { --campus-accent: var(--campus-gold); }
+.university-landing .grid .h-full { border-top: 3px solid var(--campus-accent); background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--campus-accent) 10%, transparent), transparent 65%); }
+.university-landing .grid .h-full > span { color: var(--campus-accent); background: color-mix(in srgb, var(--campus-accent) 13%, hsl(var(--card))); transition: rotate .3s ease; }
+.university-landing .grid .h-full:hover > span { rotate: -8deg; }
+.university-landing .university-preview { box-shadow: 0 20px 70px -40px var(--campus-blue); border-top: 3px solid var(--campus-blue); }
+.university-landing .university-preview__bars em { background: linear-gradient(90deg, var(--campus-blue), var(--campus-green)); transform-origin: left; animation: campus-bar 1.4s ease-out both; }
+.university-landing .university-preview__bars li:nth-child(even) em { background: linear-gradient(90deg, var(--campus-violet), var(--campus-blue)); }
+.university-landing .university-preview__kpi { border-bottom: 3px solid var(--campus-blue); }
+.university-landing .university-preview__kpi:nth-child(2) { border-bottom-color: var(--campus-green); }
+.university-landing .university-preview__kpi:nth-child(3) { border-bottom-color: var(--campus-violet); }
+.university-landing .university-preview__kpi:nth-child(4) { border-bottom-color: var(--campus-gold); }
+.university-landing main > div:last-child > div { background-image: radial-gradient(ellipse at left top, #467dec20, transparent 60%), radial-gradient(ellipse at right bottom, #9870dc25, transparent 60%); }
+@keyframes campus-float { 50% { translate: 0 -16px; } }
+@keyframes campus-orbit { to { rotate: 360deg; } }
+@keyframes campus-signal { to { stroke-dashoffset: -1590; } }
+@keyframes campus-drift { to { translate: 40px 25px; scale: 1.15; } }
+@keyframes campus-twinkle { 0%, 100% { opacity: .2; scale: .6; } 50% { opacity: .9; scale: 1.3; } }
+@keyframes campus-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (max-width: 1000px) { .university-object { opacity: .35; width: 48px; height: 48px; } .university-object-0, .university-object-2 { left: 1%; } .university-object-1, .university-object-3 { right: 1%; } }
+@media (max-width: 640px) { .university-landing main > .text-center { padding: 35px 0 20px; } .university-constellation { height: 620px; } .university-object-0, .university-object-1 { top: 0; } .university-object-2, .university-object-3 { top: auto; bottom: 5px; } .university-object-4, .university-object-5 { display: none; } }
+@media (prefers-reduced-motion: reduce) { .university-landing *, .university-landing *::before { animation: none !important; transition: none !important; } }

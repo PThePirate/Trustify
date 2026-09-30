@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Outlet, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import LandingPage from "@/pages/public/LandingPage";
 import MiniLandingPublicaPage from "@/pages/public/MiniLandingPublicaPage";
@@ -7,11 +7,15 @@ import BuscarPage from "@/pages/public/BuscarPage";
 import ResultadosBusquedaPage from "@/pages/public/ResultadosBusquedaPage";
 import MisSolicitudesPage from "@/pages/public/MisSolicitudesPage";
 import PerfilPage from "@/pages/public/PerfilPage";
+import PerfilClientePublicoPage from "@/pages/public/PerfilClientePublicoPage";
 import NotificacionesPage from "@/pages/public/NotificacionesPage";
 import AyudaPage from "@/pages/public/AyudaPage";
 import ContratoPage from "@/pages/public/ContratoPage";
+import PrivacidadPage from "@/pages/public/PrivacidadPage";
 import ComoFuncionaPage from "@/pages/public/ComoFuncionaPage";
 import UniversidadesPage from "@/pages/public/UniversidadesPage";
+import PublicPlanesPage from "@/pages/public/PlanesPage";
+import SolicitarReunionPage from "@/pages/public/SolicitarReunionPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import OtpVerificationPage from "@/pages/auth/OtpVerificationPage";
@@ -20,7 +24,12 @@ import FotoVerificacionPage from "@/pages/auth/FotoVerificacionPage";
 import OnboardingPage from "@/pages/public/OnboardingPage";
 import ClienteLayout from "@/components/cliente/ClienteLayout";
 import ClienteInicioPage from "@/pages/cliente/ClienteInicioPage";
-import { isLoggedIn, obtenerPerfil } from "@/services/authApi";
+import MiRedPage from "@/pages/cliente/MiRedPage";
+import HistorialClientePage from "@/pages/cliente/HistorialClientePage";
+import CompradorVerificadoPage from "@/pages/cliente/CompradorVerificadoPage";
+import RecordatoriosPage from "@/pages/cliente/RecordatoriosPage";
+import SeguridadClientePage from "@/pages/cliente/SeguridadClientePage";
+import { isLoggedIn } from "@/services/authApi";
 
 // Módulo B — Emprendedor
 import RequireAuth from "@/components/auth/RequireAuth";
@@ -28,6 +37,8 @@ import ActivarEmprendedorPage from "@/pages/emprendedor/ActivarEmprendedorPage";
 import OnboardingEmprendedorPage from "@/pages/emprendedor/OnboardingEmprendedorPage";
 import EmprendedorLayout from "@/components/emprendedor/EmprendedorLayout";
 import NegocioEditorPage from "@/pages/emprendedor/NegocioEditorPage";
+import NegocioInicioPage from "@/pages/emprendedor/NegocioInicioPage";
+import NegocioAyudaPage from "@/pages/emprendedor/NegocioAyudaPage";
 import CatalogoPage from "@/pages/emprendedor/CatalogoPage";
 import BandejaSolicitudesPage from "@/pages/emprendedor/BandejaSolicitudesPage";
 import ReputacionPage from "@/pages/emprendedor/ReputacionPage";
@@ -57,32 +68,26 @@ import InstitucionalLayout from "@/components/institucional/InstitucionalLayout"
 import InstitucionalLoginPage from "@/pages/institucional/InstitucionalLoginPage";
 import InstitucionalIndexPage from "@/pages/institucional/InstitucionalIndexPage";
 import SeguimientoAlumniPage from "@/pages/institucional/SeguimientoAlumniPage";
+import DashboardCacesPage from "@/pages/institucional/DashboardCacesPage";
+import UniversidadPanelPage from "@/pages/institucional/UniversidadPanelPage";
+import { obtenerInstitucionActual } from "@/services/institucionalApi";
+
+function SoloUniversidad() {
+  return obtenerInstitucionActual()?.tipo === "universidad" ? <Outlet /> : <Navigate to="/institucional" replace />;
+}
 
 function ClienteAwareLayout() {
-  return isLoggedIn() ? <ClienteLayout /> : <Outlet />;
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  return isLoggedIn() && params.get("vista") !== "negocio" && params.get("vistaPrevia") !== "1"
+    ? <ClienteLayout />
+    : <Outlet />;
 }
 
 function AyudaAwareLayout() {
-  const [rol, setRol] = useState(null);
-
-  useEffect(() => {
-    if (!isLoggedIn()) {
-      setRol("publico");
-      return;
-    }
-
-    obtenerPerfil()
-      .then((usuario) => setRol(usuario.rolEmprendedor ? "emprendedor" : "cliente"))
-      .catch(() => setRol("publico"));
-  }, []);
-
-  if (rol === null) {
-    return <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Cargando…</div>;
-  }
-
-  if (rol === "cliente") return <ClienteLayout />;
-  if (rol === "emprendedor") return <EmprendedorLayout />;
-  return <Outlet />;
+  // /negocio/ayuda tiene su propia ruta. /ayuda es la ayuda del cliente y
+  // puede montar el panel inmediatamente, sin una segunda petición de perfil.
+  return isLoggedIn() ? <ClienteLayout /> : <Outlet />;
 }
 
 /**
@@ -94,6 +99,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <ScrollToPageTop />
         <Routes>
           {/* MÓDULO F — Público / Marketing */}
           <Route path="/" element={<LandingPage />} />
@@ -105,6 +111,7 @@ export default function App() {
           <Route element={<ClienteAwareLayout />}>
             {/* A6 — Mini Landing Page pública de un negocio */}
             <Route path="/negocio/publico/:slug" element={<MiniLandingPublicaPage />} />
+            <Route path="/usuarios/:id" element={<PerfilClientePublicoPage />} />
             {/* A4/A5 — Búsqueda y resultados */}
             <Route path="/buscar" element={<BuscarPage />} />
             <Route path="/buscar/resultados" element={<ResultadosBusquedaPage />} />
@@ -121,6 +128,11 @@ export default function App() {
             }
           >
             <Route path="/panel" element={<ClienteInicioPage />} />
+            <Route path="/mi-red" element={<MiRedPage />} />
+            <Route path="/historial" element={<HistorialClientePage />} />
+            <Route path="/comprador-verificado" element={<CompradorVerificadoPage />} />
+            <Route path="/recordatorios" element={<RecordatoriosPage />} />
+            <Route path="/seguridad" element={<SeguridadClientePage />} />
             {/* A7/A8 — Mis solicitudes */}
             <Route path="/mis-solicitudes" element={<MisSolicitudesPage />} />
             {/* A9 — Perfil del comprador */}
@@ -146,12 +158,15 @@ export default function App() {
 
           {/* A2 — Contrato de Adhesión y Términos y Condiciones, público */}
           <Route path="/contrato" element={<ContratoPage />} />
+          <Route path="/privacidad" element={<PrivacidadPage />} />
 
           {/* F3 — Cómo funciona, recorrido completo por rol */}
           <Route path="/como-funciona" element={<ComoFuncionaPage />} />
 
           {/* F4 — Página B2B para universidades y cámaras */}
           <Route path="/universidades" element={<UniversidadesPage />} />
+          <Route path="/planes" element={<PublicPlanesPage />} />
+          <Route path="/solicitar-reunion" element={<SolicitarReunionPage />} />
 
           {/* MÓDULO B — Emprendedor */}
           <Route
@@ -179,14 +194,18 @@ export default function App() {
               </RequireAuth>
             }
           >
-            <Route index element={<NegocioEditorPage />} />
+            <Route index element={<NegocioInicioPage />} />
+            <Route path="editar" element={<NegocioEditorPage />} />
             <Route path="catalogo" element={<CatalogoPage />} />
             <Route path="solicitudes" element={<BandejaSolicitudesPage />} />
+            <Route path="notificaciones" element={<NotificacionesPage />} />
             <Route path="reputacion" element={<ReputacionPage />} />
             <Route path="analitica" element={<AnaliticaPage />} />
             <Route path="formalizacion" element={<FormalizacionPage />} />
             <Route path="qr" element={<QrVerificacionPage />} />
             <Route path="planes" element={<PlanesPage />} />
+            <Route path="ayuda" element={<NegocioAyudaPage />} />
+            <Route path="perfil" element={<PerfilPage contexto="negocio" />} />
           </Route>
 
           {/* MÓDULO E — Admin (ruta y login completamente separados) */}
@@ -223,11 +242,25 @@ export default function App() {
             }
           >
             <Route index element={<InstitucionalIndexPage />} />
-            {/* C3 — solo tiene sentido para universidades; una cámara nunca ve este link en su nav */}
-            <Route path="alumni" element={<SeguimientoAlumniPage />} />
+            <Route element={<SoloUniversidad />}>
+              <Route path="comunidad" element={<UniversidadPanelPage section="comunidad" />} />
+              <Route path="formalizacion" element={<UniversidadPanelPage section="formalizacion" />} />
+              <Route path="demanda" element={<UniversidadPanelPage section="demanda" />} />
+              <Route path="permanencia" element={<UniversidadPanelPage section="permanencia" />} />
+              <Route path="caces" element={<DashboardCacesPage />} />
+              <Route path="alumni" element={<SeguimientoAlumniPage />} />
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
   );
+}
+
+function ScrollToPageTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+  return null;
 }

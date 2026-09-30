@@ -1,0 +1,41 @@
+.universidad-panel {
+  --uni-ink: #183247;
+  --uni-brand: #1f5d78;
+  --uni-border: color-mix(in srgb, var(--border) 88%, var(--uni-brand));
+  color: var(--uni-ink);
+}
+
+.dark .universidad-panel {
+  --uni-ink: #f9f4ec;
+  --uni-brand: #79b9c7;
+  --uni-border: color-mix(in srgb, var(--border) 88%, var(--uni-brand));
+}
+
+.universidad-panel .panel {
+  border-color: var(--uni-border);
+  box-shadow: 0 5px 18px rgb(24 50 71 / 5%);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.universidad-panel .panel:hover {
+  border-color: color-mix(in srgb, var(--uni-brand) 42%, var(--border));
+  box-shadow: 0 8px 22px rgb(24 50 71 / 8%);
+}
+
+.universidad-panel button:focus-visible,
+.universidad-panel [tabindex="0"]:focus-visible {
+  outline: 2px solid var(--uni-brand);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .universidad-panel .panel {
+    border-radius: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .universidad-panel .panel {
+    transition: none;
+  }
+}

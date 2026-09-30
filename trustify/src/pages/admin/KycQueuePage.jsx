@@ -56,7 +56,7 @@ function ModalRechazo({ abierto, onCancelar, onConfirmar, enviando }) {
   );
 }
 
-function MiniaturaFoto({ id }) {
+function MiniaturaFoto({ id, cara }) {
   const [url, setUrl] = useState(null);
   const [error, setError] = useState(false);
 
@@ -64,7 +64,7 @@ function MiniaturaFoto({ id }) {
     let objectUrl = null;
     let cancelado = false;
     setError(false);
-    obtenerFotoVerificacionUrl(id)
+    obtenerFotoVerificacionUrl(id, cara)
       .then((u) => {
         if (cancelado) {
           URL.revokeObjectURL(u);
@@ -78,7 +78,7 @@ function MiniaturaFoto({ id }) {
       cancelado = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [id]);
+  }, [id, cara]);
 
   if (error) {
     return (
@@ -95,7 +95,7 @@ function MiniaturaFoto({ id }) {
   return (
     <img
       src={url}
-      alt="Selfie con cédula"
+      alt={`${cara === "frente" ? "Frente" : "Reverso"} de la cédula`}
       className="size-20 shrink-0 rounded-xl border border-border object-cover sm:size-24"
     />
   );
@@ -105,7 +105,10 @@ function TarjetaVerificacion({ item, onAprobar, onRechazar, procesando }) {
   const { usuario } = item;
   return (
     <div className="panel panel-hover flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
-      <MiniaturaFoto id={item.id} />
+      {item.estado === "en_revision" && <div className="flex gap-2">
+        <div className="text-center"><MiniaturaFoto id={item.id} cara="frente" /><span className="text-xs text-muted-foreground">Frente</span></div>
+        {item.fotoReversoUrl && <div className="text-center"><MiniaturaFoto id={item.id} cara="reverso" /><span className="text-xs text-muted-foreground">Reverso</span></div>}
+      </div>}
 
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2">
@@ -123,9 +126,12 @@ function TarjetaVerificacion({ item, onAprobar, onRechazar, procesando }) {
             <Mail className="size-3.5" /> {usuario.correo}
           </span>
           <span className="flex items-center gap-1.5 sm:col-span-2">
-            <Calendar className="size-3.5" /> Foto subida el {formatearFecha(item.creadoEn)}
+            <Calendar className="size-3.5" /> Documento enviado el {formatearFecha(item.creadoEn)}
           </span>
         </div>
+
+        {item.estado === "en_revision" && !item.fotoReversoUrl && <p className="mt-2 text-xs text-pending">Registro anterior sin reverso: solicita una nueva captura de ambas caras.</p>}
+        {item.estado !== "en_revision" && <p className="mt-2 text-xs text-muted-foreground">Las imágenes fueron eliminadas tras la decisión.</p>}
 
         {item.estado === "rechazada" && item.motivoRechazo && (
           <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
@@ -136,7 +142,7 @@ function TarjetaVerificacion({ item, onAprobar, onRechazar, procesando }) {
 
       {item.estado === "en_revision" && (
         <div className="flex shrink-0 gap-2">
-          <Button variant="verified" size="sm" onClick={() => onAprobar(item.id)} disabled={procesando}>
+          <Button variant="verified" size="sm" onClick={() => onAprobar(item.id)} disabled={procesando || !item.fotoReversoUrl}>
             {procesando ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
             Aprobar
           </Button>
@@ -214,7 +220,7 @@ export default function KycQueuePage() {
       <div className="mb-6">
         <h1 className="font-display text-2xl font-bold sm:text-3xl">Verificación de identidad</h1>
         <p className="mt-1 text-muted-foreground">
-          Capa 3 del esquema de identidad — selfie con cédula. Aprueba o rechaza cada solicitud.
+          Capa 3 documental — revisa el frente y el reverso de la cédula. La biometría facial es una capa independiente.
         </p>
       </div>
 

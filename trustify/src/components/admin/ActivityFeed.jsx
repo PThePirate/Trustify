@@ -21,7 +21,7 @@ export default function ActivityFeed({ items }) {
     return <p className="text-sm text-muted-foreground">Sin actividad reciente.</p>;
   }
   return (
-    <ul className="space-y-4">
+    <ul className="admin-activity-list space-y-4">
       {items.map((item) => {
         const conf = ICONOS[item.tipo] || { Icon: Activity, tono: "text-muted-foreground bg-muted" };
         return (

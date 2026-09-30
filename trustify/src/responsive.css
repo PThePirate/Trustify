@@ -1,0 +1,90 @@
+/* Adaptaciones de espacio y entrada táctil; tablas conservan su scroll local. */
+html{scroll-padding-top:5rem}body{min-width:320px}#root{min-width:0}img,video{max-width:100%}main{min-width:0}input,textarea,select{max-width:100%}
+/* Shared panels: intrinsic sizing prevents long names and URLs widening grids. */
+:where(.client-ui,.admin-experience,.institutional-shell,.business-shell) main :where(.grid,.flex)>*{min-width:0}
+:where(.client-ui,.admin-experience,.institutional-shell,.business-shell) main :where(p,h1,h2,h3){overflow-wrap:anywhere}
+:where(.client-ui,.admin-experience,.institutional-shell,.business-shell) aside nav{overflow-y:auto;min-height:0}
+@media(max-width:1199px) and (min-width:1024px){
+ .auth-experience .auth-brand-panel .px-14{padding-inline:2rem}
+ .auth-experience .auth-brand-panel h2{font-size:2rem}
+ .auth-experience .auth-form-panel{padding-inline:1.5rem}
+}
+@media(max-width:1023px){
+ :where(.client-ui,.admin-experience,.institutional-shell) main{padding-inline:1rem}
+ .auth-experience .auth-form-panel{padding-top:6rem;padding-bottom:2rem;min-width:0}
+ :where(.client-ui,.admin-experience,.institutional-shell,.business-shell) main table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+ :where(.client-ui,.admin-experience,.institutional-shell,.business-shell) main th,:where(.client-ui,.admin-experience,.institutional-shell,.business-shell) main td{min-width:90px}
+ .admin-experience .admin-welcome{flex-wrap:wrap}
+}
+@media(max-width:639px){
+ :where(.client-ui,.admin-experience,.institutional-shell) main{padding-block:1rem}
+ :where(.client-ui,.admin-experience,.institutional-shell) main>.grid.grid-cols-2{grid-template-columns:minmax(0,1fr)}
+ :where(.client-ui,.admin-experience,.institutional-shell) main form.flex{flex-wrap:wrap}
+ :where(.client-ui,.admin-experience,.institutional-shell) main form.flex>input{flex-basis:100%;min-width:0}
+ .auth-experience .auth-form-content{max-width:100%;padding:1.25rem 1rem}
+ .auth-experience .auth-form-content h1{font-size:1.8rem;line-height:1.2}
+ .auth-experience .kyc-sides,.auth-experience .biometry-actions{grid-template-columns:minmax(0,1fr)}
+ .auth-experience .auth-form-content form{min-width:0}
+ [role=dialog]{max-width:calc(100vw - 1.5rem);max-height:calc(100dvh - 1.5rem);overflow-y:auto;overscroll-behavior:contain}
+ .EmojiPickerReact{max-height: min(420px,65dvh)!important}
+ .client-ui main .client-extra-split{grid-template-columns:minmax(0,1fr)}
+ .admin-experience .admin-welcome-art{max-width:100%;height:150px}
+ .admin-experience .admin-control-map{max-width:100%}
+}
+@media(hover:none) and (pointer:coarse){
+ :where(.client-ui,.admin-experience,.institutional-shell,.auth-experience) :where(button,a[role=button]){min-height:44px}
+ :where(.client-ui,.admin-experience,.institutional-shell) nav a{min-height:44px}
+}
+@media(max-width:1199px){
+ .business-shell .landing-studio-grid{grid-template-columns:190px minmax(0,1fr)}
+ .business-shell .landing-studio-settings{grid-column:1/-1;border-left:0;border-top:1px solid hsl(var(--border))}
+ .business-shell .business-scene{padding:1.5rem}
+ .business-shell .business-page .xl\:sticky{position:static}
+}
+@media(max-width:1023px){
+ .business-shell>nav.fixed{max-height:calc(100dvh - 4rem);overflow-y:auto;overscroll-behavior:contain;z-index:45}
+ .business-shell .business-section-banner{padding:1.3rem}
+ .business-shell .business-score-stage{gap:1.5rem}
+ .business-shell .business-page{width:100%}
+ .plans-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+@media(max-width:767px){
+ input:not([type=checkbox]):not([type=radio]),textarea,select{font-size:16px!important}
+ .container{padding-inline:1rem}
+ .business-shell main{padding-inline:1rem}
+ .business-shell .landing-studio-grid{grid-template-columns:minmax(0,1fr)}
+ .business-shell .landing-studio-library{border-right:0;border-bottom:1px solid hsl(var(--border))}
+ .business-shell .landing-studio-tools{max-height:240px}
+ .business-shell .landing-studio-toolgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .business-shell .landing-studio-fields{grid-template-columns:minmax(0,1fr)}
+ .business-shell .landing-studio-top{padding:1rem}
+ .business-shell .landing-studio-actions{width:100%}
+ .business-shell .landing-studio-actions>*{flex:1;min-height:44px}
+ .business-shell .business-section-banner h1{font-size:1.5rem;line-height:1.3}
+ .business-shell .business-score-stage{padding:1rem}
+ .business-shell .business-route{gap:.3rem}
+ .business-shell .business-route-card{padding:1rem}
+ .business-shell .business-page h2{overflow-wrap:anywhere}
+ .business-shell .business-preview-phone{max-width:100%}
+ .business-shell .business-scene{margin-bottom:1rem}
+ .business-shell form.flex{flex-wrap:wrap}
+ .business-shell form.flex>div.relative{min-width:180px}
+ .business-shell .plans-table-scroll table{font-size:.8rem}
+ .business-shell .business-page .overflow-hidden>table{display:block;max-width:100%;overflow-x:auto}
+}
+@media(max-width:479px){
+ .business-shell .business-scene{padding:1.2rem}
+ .business-shell .landing-studio-toolgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .business-shell .landing-studio-canvas{padding:.4rem}
+ .business-shell .landing-studio-page{padding:.75rem}
+ .business-shell .landing-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .business-shell .landing-columns{grid-template-columns:minmax(0,1fr)}
+ .business-shell .business-page .flex.gap-2>input{min-width:0}
+}
+@media(hover:none) and (pointer:coarse){
+ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+ .business-sidebar nav a{min-height:44px}
+ .landing-studio-toolgrid button{min-height:88px}
+ .business-shell .group .group-hover\:opacity-100{opacity:1;background:linear-gradient(transparent 50%,#0008)}
+ .business-kpi:hover,.business-surface:hover{transform:none}
+}

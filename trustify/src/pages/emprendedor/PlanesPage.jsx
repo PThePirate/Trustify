@@ -1,216 +1,168 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  Check, X, Loader2, AlertCircle, Sparkles, CircleDollarSign, ArrowLeft,
+  ArrowLeft, ArrowRight, BadgeCheck, BarChart3, Check, CircleHelp,
+  FileImage, LayoutTemplate, Loader2, MessageCircle, ShieldCheck,
+  Sparkles, Store, Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { listarPlanes, obtenerMiSuscripcion, cambiarPlan } from "@/services/negocioApi";
+import { listarPlanes, obtenerMiSuscripcion, obtenerMediosPlan, cambiarPlan } from "@/services/negocioApi";
+import "./planesPanel.css";
 
-const ETIQUETAS = { basico: "Básico", pro: "Pro", elite: "Elite" };
-
-const CARACTERISTICAS = [
-  { campo: "limiteCatalogo", label: (p) => `Hasta ${p.limiteCatalogo} ítems en el catálogo` },
-  { campo: "incluyeVideo", label: () => "Video de presentación" },
-  { campo: "incluyeAnaliticaAvanzada", label: () => "Analítica avanzada" },
-  { campo: "incluyeMultiusuario", label: () => "Multiusuario" },
-  { campo: "incluyeTraduccion", label: () => "Traducción ES↔EN" },
-  { campo: "incluyeCertificadoPdf", label: () => "Certificado PDF" },
-  { campo: "incluyeWhatsappBusinessApi", label: () => "WhatsApp Business API" },
+const NAMES = { basico: "Acceso inicial", pro: "Básico", elite: "Plus" };
+const OFFERS = [
+  { id: "pro", name: "Básico", price: 10, photos: 30, videos: 5, icon: Store, description: "Tu negocio visible, listo para recibir consultas.", badge: "Para empezar" },
+  { id: "elite", name: "Plus", price: 20, photos: 50, videos: 10, icon: Sparkles, description: "Más espacio para mostrar y entender tu crecimiento.", badge: "Más posibilidades" },
+];
+const ROWS = [
+  ["Perfil del negocio, catálogo, precios de referencia, categoría y reseñas", "Incluido", "Incluido"],
+  ["Fotos", "30", "50"],
+  ["Videos de hasta 45 segundos", "5", "10"],
+  ["Sello Verificado · verificación de identidad", "Incluido", "Incluido"],
+  ["Sello Formalizado, con RUC", "Opcional", "Opcional"],
+  ["Chat con clientes · solicitudes de mensaje", "Incluido", "Incluido"],
+  ["Estadísticas", "Básicas: visitas, solicitudes y reseñas del mes", "Completas"],
 ];
 
-function precioDe(plan, ciclo) {
-  return ciclo === "semestral" ? plan.precioSemestral : plan.precioMensual;
-}
-
-function TarjetaPlan({ plan, ciclo, esActual, onElegir }) {
-  const precio = precioDe(plan, ciclo);
-  const destacado = plan.nombre === "pro";
+function LandingPreview() {
   return (
-    <div className={`panel relative flex flex-col p-5 ${destacado ? "ring-2 ring-trust/40" : ""}`}>
-      {destacado && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-trust px-3 py-1 text-xs font-semibold text-white">
-          Más elegido
-        </span>
-      )}
-      <h3 className="font-display text-lg font-bold">{ETIQUETAS[plan.nombre] ?? plan.nombre}</h3>
-      <p className="mt-2 font-display text-3xl font-bold">
-        {precio > 0 ? `$${Number(precio).toFixed(2)}` : "Gratis"}
-        {precio > 0 && (
-          <span className="text-sm font-normal text-muted-foreground">
-            {" "}/ {ciclo === "semestral" ? "6 meses" : "mes"}
-          </span>
-        )}
-      </p>
-
-      <ul className="mt-4 flex-1 space-y-2 text-sm">
-        {CARACTERISTICAS.map((c) => {
-          const activo = c.campo === "limiteCatalogo" ? true : plan[c.campo];
-          return (
-            <li key={c.campo} className="flex items-start gap-2">
-              {activo ? (
-                <Check className="mt-0.5 size-4 shrink-0 text-verified" />
-              ) : (
-                <X className="mt-0.5 size-4 shrink-0 text-muted-foreground/40" />
-              )}
-              <span className={activo ? "text-foreground" : "text-muted-foreground/60"}>{c.label(plan)}</span>
-            </li>
-          );
-        })}
-      </ul>
-
-      <Button
-        className="mt-5"
-        variant={esActual ? "outline" : "trust"}
-        disabled={esActual}
-        onClick={() => onElegir(plan)}
-      >
-        {esActual ? "Tu plan actual" : "Elegir este plan"}
-      </Button>
+    <div className="panel-plan-preview" aria-hidden="true">
+      <div className="panel-plan-preview-browser"><i /><i /><i /><span>tusitio.checkbiz.ec</span></div>
+      <div className="panel-plan-preview-cover"><div className="panel-plan-preview-cover-mark"><Sparkles size={24} /></div></div>
+      <div className="panel-plan-preview-body">
+        <div className="panel-plan-preview-avatar"><Store size={25} /></div>
+        <div className="panel-plan-preview-lines"><b>Tu negocio</b><span>Tu historia merece un espacio propio</span></div>
+        <div className="panel-plan-preview-verified"><BadgeCheck size={13} /> Perfil público</div>
+        <div className="panel-plan-preview-tile"><FileImage size={19} /><span>Tu trabajo</span></div>
+        <div className="panel-plan-preview-tile"><MessageCircle size={19} /><span>Conversaciones</span></div>
+        <div className="panel-plan-preview-contact">Contáctame <ArrowRight size={14} /></div>
+      </div>
+      <div className="panel-plan-preview-float panel-plan-preview-float-one"><ShieldCheck size={17} /> Tu identidad</div>
+      <div className="panel-plan-preview-float panel-plan-preview-float-two"><BarChart3 size={17} /> Tus visitas</div>
     </div>
   );
 }
 
-function ResumenCheckout({ plan, ciclo, onConfirmar, onCancelar, procesando, error }) {
-  const precio = precioDe(plan, ciclo);
-  return (
-    <div className="panel mx-auto max-w-md p-6">
-      <button onClick={onCancelar} className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" /> Volver a los planes
-      </button>
-
-      <h2 className="flex items-center gap-2 font-display text-xl font-bold">
-        <Sparkles className="size-5 text-trust" /> Confirmar plan {ETIQUETAS[plan.nombre] ?? plan.nombre}
-      </h2>
-
-      <div className="mt-4 flex items-center justify-between rounded-xl bg-muted/30 p-4">
-        <span className="text-sm text-muted-foreground">
-          Ciclo {ciclo === "semestral" ? "semestral" : "mensual"}
-        </span>
-        <span className="font-display text-xl font-bold">
-          {precio > 0 ? `$${Number(precio).toFixed(2)}` : "Gratis"}
-        </span>
-      </div>
-
-      <div className="mt-4 flex items-start gap-2 rounded-lg border border-border bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground">
-        <CircleDollarSign className="mt-0.5 size-4 shrink-0" />
-        CheckBiz no procesa pagos dentro de la app — es parte de nuestro núcleo intocable. Al confirmar, tu
-        plan se activa de inmediato para la demo; la facturación real de la suscripción se coordina directo
-        con el equipo de CheckBiz.
-      </div>
-
-      {error && (
-        <p className="mt-4 flex items-center gap-1.5 text-sm text-danger"><AlertCircle className="size-4" /> {error}</p>
-      )}
-
-      <Button className="mt-5 w-full" variant="trust" disabled={procesando} onClick={onConfirmar}>
-        {procesando ? <Loader2 className="size-4 animate-spin" /> : "Confirmar y activar"}
-      </Button>
-    </div>
-  );
-}
-
-export default function PlanesPage() {
-  const [planes, setPlanes] = useState(null);
-  const [suscripcion, setSuscripcion] = useState(null);
-  const [ciclo, setCiclo] = useState("mensual");
-  const [seleccion, setSeleccion] = useState(null);
-  const [procesando, setProcesando] = useState(false);
+export default function PlanesPage({ onActivated, primeraLanding = false }) {
+  const [data, setData] = useState(null);
   const [error, setError] = useState("");
-  const [errorCheckout, setErrorCheckout] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
 
-  function cargar() {
-    Promise.all([listarPlanes(), obtenerMiSuscripcion()])
-      .then(([p, s]) => {
-        setPlanes(p);
-        setSuscripcion(s);
-      })
-      .catch((err) => setError(err.message));
+  function load() {
+    setError("");
+    Promise.all([listarPlanes(), obtenerMiSuscripcion(), obtenerMediosPlan().catch(() => null)])
+      .then(([planes, suscripcion, medios]) => setData({ planes, suscripcion, medios }))
+      .catch((e) => setError(e.message));
   }
-  useEffect(cargar, []);
+  useEffect(load, []);
 
-  async function confirmar() {
-    setErrorCheckout("");
-    setProcesando(true);
+  async function activate() {
+    if (busy || !selected) return;
+    setBusy(true);
+    setError("");
     try {
-      const res = await cambiarPlan(seleccion.nombre, ciclo);
-      setSuscripcion(res);
-      setSeleccion(null);
-    } catch (err) {
-      setErrorCheckout(err.message);
+      const suscripcion = await cambiarPlan(selected.id, "mensual");
+      setData((d) => ({ ...d, suscripcion }));
+      obtenerMediosPlan().then((medios) => setData((d) => ({ ...d, medios }))).catch(() => {});
+      setSelected(null);
+      setMessage("Plan actualizado en demostración. No se realizó ningún cobro.");
+      onActivated?.();
+    } catch (e) {
+      setError(e.message);
     } finally {
-      setProcesando(false);
+      setBusy(false);
     }
   }
 
-  if (error) {
-    return <p className="flex items-center gap-1.5 text-sm text-danger"><AlertCircle className="size-4" /> {error}</p>;
-  }
-  if (!planes || !suscripcion) {
-    return <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Cargando…</div>;
-  }
+  if (!data) return <div className="business-surface p-6">{error ? <><p role="alert" className="text-danger">{error}</p><Button onClick={load}>Reintentar</Button></> : <p className="flex gap-2"><Loader2 className="size-4 animate-spin" />Cargando tu suscripción…</p>}</div>;
 
-  if (seleccion) {
-    return (
-      <ResumenCheckout
-        plan={seleccion}
-        ciclo={ciclo}
-        onConfirmar={confirmar}
-        onCancelar={() => { setSeleccion(null); setErrorCheckout(""); }}
-        procesando={procesando}
-        error={errorCheckout}
-      />
-    );
-  }
+  const { planes, suscripcion } = data;
+  const current = suscripcion.plan;
+  const planActivo = ["pro", "elite"].includes(current.nombre) && suscripcion.estado === "activa" && suscripcion.venceEn && new Date(suscripcion.venceEn) > new Date();
+
+  if (selected) return (
+    <div className="panel-plan-confirm business-surface mx-auto max-w-xl p-7">
+      <Button variant="ghost" disabled={busy} onClick={() => { setSelected(null); setError(""); }}><ArrowLeft />Volver a los planes</Button>
+      <div className="panel-plan-confirm-icon"><selected.icon size={32} /></div>
+      <h1 className="mt-5 text-2xl font-bold">Confirmar plan {selected.name}</h1>
+      <p className="mt-3 text-3xl font-bold">${selected.price} <span className="text-sm font-normal">/ mes · IVA incluido</span></p>
+      <p className="mt-5 text-muted-foreground">Esta activación es una demostración: cambia tu plan, pero no realiza cobros, pagos recurrentes ni emite factura.</p>
+      <p className="mt-3 text-sm text-muted-foreground">El límite de fotos y videos se ajustará al plan que elijas.</p>
+      {error && <p role="alert" className="mt-4 text-danger">{error}</p>}
+      <Button className="mt-6 w-full" disabled={busy} onClick={activate}>{busy ? "Actualizando…" : "Activar en demostración"}</Button>
+    </div>
+  );
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold sm:text-3xl">Suscripción y planes</h1>
-          <p className="mt-1 text-muted-foreground">
-            Tu plan actual es <span className="font-semibold text-foreground">{ETIQUETAS[suscripcion.plan.nombre]}</span>
-            {" "}({suscripcion.totalCatalogoUsado}/{suscripcion.plan.limiteCatalogo} del catálogo usados).
-            {suscripcion.venceEn && (
-              <> Vence el {new Date(suscripcion.venceEn).toLocaleDateString()}.</>
-            )}
-          </p>
+    <div className="business-page panel-plans-page">
+      <section className="panel-plans-hero">
+        <div className="panel-plans-hero-copy">
+          <span className="panel-plans-kicker"><LayoutTemplate size={16} /> {primeraLanding && !planActivo ? "Tu primera Mini Landing" : "Tu espacio para crecer"}</span>
+          <h1>{primeraLanding && !planActivo ? "Tu negocio merece su propio lugar." : "Un plan para la siguiente etapa de tu negocio."}</h1>
+          <p>{primeraLanding && !planActivo ? "Elige el plan que quieres usar para crear tu Mini Landing. Podrás contar tu historia, mostrar tu trabajo y recibir consultas desde un perfil público." : "Compara lo que incluye cada plan y elige el espacio que necesita tu negocio."}</p>
+          <div className="panel-plans-hero-facts">
+            <span><ShieldCheck size={17} /> Una sola cuenta</span>
+            <span><LayoutTemplate size={17} /> Página propia</span>
+            <span><MessageCircle size={17} /> Contacto directo</span>
+          </div>
+          <div className="panel-plans-current"><span className="panel-plans-current-dot" /> Tu plan actual: <strong>{NAMES[current.nombre] || current.nombre}</strong>{suscripcion.venceEn && <span> · Hasta el {new Date(suscripcion.venceEn).toLocaleDateString("es-EC")}</span>}</div>
         </div>
+        <LandingPreview />
+      </section>
 
-        <div className="flex items-center gap-1 self-start rounded-full border border-border bg-muted/30 p-1">
-          {[
-            { valor: "mensual", label: "Mensual" },
-            { valor: "semestral", label: "Semestral" },
-          ].map((op) => (
-            <button
-              key={op.valor}
-              onClick={() => setCiclo(op.valor)}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                ciclo === op.valor ? "bg-trust text-white" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {op.label}
-            </button>
-          ))}
-        </div>
+      {message && <p role="status" className="panel-plans-message">{message}</p>}
+
+      <div className="panel-plans-heading"><div><h2>Elige cómo empezar</h2><p>Ambos planes permiten crear tu Mini Landing y conectar con clientes.</p></div><span>IVA incluido · mensual</span></div>
+      <div className="panel-plans-offers">
+        {OFFERS.map((o) => {
+          const api = planes.find((p) => p.nombre === o.id);
+          const aligned = api && Number(api.precioMensual) === o.price;
+          const actual = current.nombre === o.id && planActivo;
+          const Icon = o.icon;
+          return (
+            <article className={`panel-plan-offer ${o.id === "elite" ? "panel-plan-offer-plus" : ""}`} key={o.id}>
+              <div className="panel-plan-offer-art" aria-hidden="true"><div className="panel-plan-offer-rings" /><Icon size={45} strokeWidth={1.5} /></div>
+              <div className="panel-plan-offer-content">
+                <span className="panel-plan-offer-badge">{o.badge}</span>
+                <h3>{o.name}</h3>
+                <p className="panel-plan-offer-description">{o.description}</p>
+                <div className="panel-plan-offer-price"><strong>${o.price}</strong><span>/ mes</span></div>
+                <ul>
+                  <li><Check size={17} /> Perfil, catálogo, categoría y reseñas</li>
+                  <li><FileImage size={17} /> {o.photos} fotos para mostrar tu trabajo</li>
+                  <li><Video size={17} /> {o.videos} videos de hasta 45 segundos</li>
+                  <li><ShieldCheck size={17} /> Sello Verificado y Formalizado opcional</li>
+                  <li><MessageCircle size={17} /> Chat y solicitudes de clientes</li>
+                  <li><BarChart3 size={17} /> Estadísticas {o.id === "elite" ? "completas" : "básicas"}</li>
+                </ul>
+                <Button variant={actual ? "outline" : "trust"} disabled={actual || !aligned} onClick={() => { setSelected(o); setError(""); }}>
+                  {actual ? "Tu plan actual" : primeraLanding ? `Elegir ${o.name}` : "Ver cambio de plan"}{!actual && <ArrowRight size={17} />}
+                </Button>
+                {!aligned && <p className="panel-plan-offer-warning">El servidor debe actualizar esta tarifa antes de permitir el cambio.</p>}
+              </div>
+            </article>
+          );
+        })}
       </div>
 
-      {suscripcion.plan.nombre !== "basico" && (
-        <Badge variant="verified" className="mb-4">
-          <Check className="size-3.5" /> Suscripción activa
-        </Badge>
-      )}
+      <div className="panel-plans-note"><CircleHelp size={19} /><p>La activación actual es una demostración: no se realiza ningún cobro. El editor aplica el límite de fotos y videos de tu plan activo.</p></div>
+      {data.medios && <p className="panel-plans-capacity">Medios publicados: {data.medios.fotosUsadas}/{data.medios.fotosPermitidas} fotos · {data.medios.videosUsados}/{data.medios.videosPermitidos} videos.</p>}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {planes.map((plan) => (
-          <TarjetaPlan
-            key={plan.nombre}
-            plan={plan}
-            ciclo={ciclo}
-            esActual={plan.nombre === suscripcion.plan.nombre}
-            onElegir={setSeleccion}
-          />
-        ))}
-      </div>
+      <section className="panel-plans-detail business-surface">
+        <div className="panel-plans-detail-heading"><div><h2>Compara los detalles</h2><p>Lo que tendrás disponible al publicar tu negocio.</p></div><BadgeCheck size={30} /></div>
+        <div className="plans-table-scroll"><table className="w-full min-w-[560px] text-left text-sm"><thead><tr><th className="p-4">Beneficio</th><th className="p-4">Básico</th><th className="p-4">Plus</th></tr></thead><tbody>{ROWS.map(([name, basic, plus]) => <tr className="border-t border-border" key={name}><th scope="row" className="p-4 font-medium">{name}</th><td className="p-4">{basic}</td><td className="p-4">{plus}</td></tr>)}</tbody></table></div>
+        <p className="mt-4 text-sm text-muted-foreground">Un plan no aprueba automáticamente tu identidad ni formaliza tu negocio.</p>
+      </section>
+
+      <section className="panel-plans-extras">
+        <div><Store size={23} /><h3>¿Tienes otro emprendimiento?</h3><p>Negocio adicional: $7 al mes en Básico o $14 al mes en Plus. Su contratación aún no está habilitada en este panel.</p></div>
+        <div><Sparkles size={23} /><h3>Beneficio para egresados</h3><p>Egresados de hasta 5 años de una universidad con convenio: 25% de descuento en Básico durante 1 año ($7,50 al mes), después de verificar el título. El descuento automático aún no está habilitado.</p></div>
+        <div><ShieldCheck size={23} /><h3>Renovación y facturación</h3><p>La oferta contempla pagos en la web, renovación mensual y un correo antes de cada cobro. La demostración no procesa pagos recurrentes ni emite facturas.</p></div>
+      </section>
+      <Link to="/planes" className="panel-plans-public-link">Consultar todos los planes y convenios <ArrowRight size={16} /></Link>
+      {current.limiteCatalogo != null && <p className="panel-plans-capacity">Catálogo actual: {suscripcion.totalCatalogoUsado} ítems usados · Capacidad habilitada: {current.limiteCatalogo >= 32767 ? "sin límite práctico" : current.limiteCatalogo}.</p>}
     </div>
   );
 }

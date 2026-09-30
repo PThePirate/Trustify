@@ -44,12 +44,7 @@ export default function MiniLandingPreview() {
 
         {/* Trust Score + rating */}
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-border bg-muted/40 p-3">
-            <p className="text-[11px] text-muted-foreground">Trust Score</p>
-            <p className="flex items-center gap-1.5 font-display text-xl font-bold text-trust">
-              <TrendingUp className="size-4" /> 92
-            </p>
-          </div>
+          <div className="rounded-xl border border-border bg-muted/40 p-3"><p className="text-[11px] text-muted-foreground">Comunidad</p><p className="mt-1 text-sm font-semibold text-trust">Universitaria</p></div>
           <div className="rounded-xl border border-border bg-muted/40 p-3">
             <p className="text-[11px] text-muted-foreground">Reseñas</p>
             <p className="flex items-center gap-1 font-display text-xl font-bold">
@@ -60,7 +55,7 @@ export default function MiniLandingPreview() {
 
         {/* Capas de verificación */}
         <div className="mt-3 flex items-center gap-1.5">
-          {["Estructura", "Teléfono", "Foto", "SRI"].map((c, i) => (
+          {["Verificado", "Formalizado"].map((c, i) => (
             <motion.span
               key={c}
               initial={{ scale: 0, opacity: 0 }}
@@ -73,10 +68,10 @@ export default function MiniLandingPreview() {
           ))}
         </div>
 
-        {/* Botón WhatsApp */}
-        <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-action py-2.5 text-sm font-semibold text-[hsl(var(--action-ink))] transition-colors hover:brightness-95">
-          <MessageCircle className="size-4" /> Contactar por WhatsApp
-        </button>
+        {/* Chat interno */}
+        <div className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-action py-2.5 text-sm font-semibold text-[hsl(var(--action-ink))] transition-colors hover:brightness-95">
+          <MessageCircle className="size-4" /> Contacto por chat
+        </div>
       </div>
 
       {/* Tarjetita flotante: solicitud confirmada */}
@@ -90,10 +85,10 @@ export default function MiniLandingPreview() {
           <span className="grid size-6 place-items-center rounded-full bg-verified/15 text-verified">
             <BadgeCheck className="size-3.5" />
           </span>
-          Pedido confirmado
+          Solicitud aceptada
         </p>
         <p className="mt-1 text-[10px] text-muted-foreground">
-          Reseña desbloqueada
+          Conversación directa
         </p>
       </motion.div>
 
@@ -104,8 +99,8 @@ export default function MiniLandingPreview() {
         transition={{ delay: 1.5, duration: 0.6 }}
         className="glass absolute -left-6 -bottom-5 hidden rounded-2xl p-3 shadow-glow sm:block animate-float"
       >
-        <p className="text-[10px] text-muted-foreground">Visitas hoy</p>
-        <p className="font-display text-lg font-bold text-trust">+248</p>
+        <p className="text-[10px] text-muted-foreground">Perfil ilustrativo</p>
+        <p className="font-display text-lg font-bold text-trust">Tu negocio aquí</p>
       </motion.div>
     </motion.div>
   );

@@ -90,19 +90,15 @@ export default function ContratoPage() {
           <Seccion id="verificacion-identidad" titulo="2. Verificación de identidad y datos personales">
             <p>
               Al registrarte aceptas que CheckBiz valide tu cédula (Módulo
-              10), tu número de teléfono mediante un código de un solo uso, y
-              — si activas un perfil de emprendedor — que se realice un cruce
-              con bases públicas (SENESCYT/SRI) para confirmar actividad
-              académica o comercial registrada a tu nombre. En la versión
-              actual de este piloto, ese cruce está simulado: todavía no
-              consultamos SENESCYT ni el SRI en tiempo real, y lo dejaremos
-              explícito en la propia pantalla de activación mientras siga así.
+              10) y tu correo mediante un código de un solo uso. El cruce con
+              bases públicas (SENESCYT/SRI) y la biometría facial están
+              pendientes; activar un perfil de emprendedor no los aprueba.
             </p>
             <p>
-              La foto de verificación (selfie con cédula) se almacena de
-              forma privada: solo tú y el equipo de revisión pueden acceder a
-              ella; nunca se publica en tu perfil ni es visible por otros
-              usuarios.
+              Las fotos del frente y reverso de la cédula se guardan de forma
+              temporal y privada para que el equipo administrador revise el
+              documento. Se eliminan del servidor al aprobar o rechazar la
+              solicitud y nunca se publican en tu perfil.
             </p>
             <p>
               Puedes solicitar la eliminación de tu cuenta en cualquier
@@ -135,7 +131,7 @@ export default function ContratoPage() {
             </p>
           </Seccion>
 
-          <Seccion id="cuentas-institucionales" titulo="5. Cuentas institucionales (cámaras y universidades)">
+          <Seccion id="cuentas-institucionales" titulo="5. Cuentas institucionales (universidades)">
             <p>
               Las cuentas institucionales acceden únicamente a datos
               agregados o a información de sus propios egresados que hayan
@@ -164,3 +160,4 @@ export default function ContratoPage() {
     </div>
   );
 }
+

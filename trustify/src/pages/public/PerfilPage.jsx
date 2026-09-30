@@ -1,21 +1,26 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   User, Mail, Contact, Phone, ShieldCheck, CheckCircle2, XCircle,
   FileText, Store, Loader2, AlertCircle, Save, Camera, HelpCircle, GraduationCap, Clock,
-  Lock, ShieldAlert, Trash2, X,
+  Lock, ShieldAlert, Trash2, X, Heart, Bookmark, ImagePlus, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
-  obtenerPerfil, actualizarPerfil, logout, subirFotoPerfil, obtenerFotoPerfilUrl,
+  obtenerPerfil, leerPerfilSesion, actualizarPerfil, logout,
   cambiarPassword, eliminarCuenta,
 } from "@/services/authApi";
+import { imagenPerfilPublico } from "@/services/perfilPublicoApi";
+import { buscarNegocios } from "@/services/negocioApi";
+import { leerEspacio } from "@/services/clienteEspacioLocal";
 import {
   listarUniversidades, solicitarVerificacionAlumni, misVerificacionesAlumni,
 } from "@/services/alumniApi";
+import AvatarEditor from "@/components/cliente/AvatarEditor";
+import BannerEditor from "@/components/cliente/BannerEditor";
 
 const ALUMNI_ESTADO_INFO = {
   pendiente: { label: "En revisión", variant: "pending" },
@@ -108,46 +113,12 @@ function VerificacionAlumni() {
 
 /** Avatar del comprador (A9) — foto propia si la subió, iniciales si no. */
 function AvatarPerfil({ usuario, onActualizado }) {
-  const [fotoUrl, setFotoUrl] = useState(null);
-  const [subiendo, setSubiendo] = useState(false);
-  const [error, setError] = useState("");
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    let objectUrl = null;
-    let cancelado = false;
-    if (usuario.fotoPerfilUrl) {
-      obtenerFotoPerfilUrl().then((u) => {
-        if (cancelado || !u) return;
-        objectUrl = u;
-        setFotoUrl(u);
-      });
-    }
-    return () => {
-      cancelado = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [usuario.fotoPerfilUrl]);
-
-  async function elegirArchivo(e) {
-    const archivo = e.target.files?.[0];
-    if (!archivo) return;
-    setError("");
-    setSubiendo(true);
-    try {
-      const actualizado = await subirFotoPerfil(archivo);
-      onActualizado(actualizado);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSubiendo(false);
-      e.target.value = "";
-    }
-  }
+  const fotoUrl = usuario?.id && usuario?.fotoPerfilUrl ? `${imagenPerfilPublico(usuario.id, "foto")}?v=${encodeURIComponent(usuario.fotoPerfilUrl)}` : null;
+  const [editorAbierto, setEditorAbierto] = useState(false);
 
   return (
     <div className="relative shrink-0">
-      <div className="grid size-16 place-items-center overflow-hidden rounded-2xl bg-trust/10 font-display text-xl font-bold text-trust">
+      <div className="grid size-24 place-items-center overflow-hidden rounded-3xl border-4 border-card bg-trust/10 font-display text-2xl font-bold text-trust shadow-lg">
         {fotoUrl ? (
           <img src={fotoUrl} alt="Foto de perfil" className="size-full object-cover" />
         ) : (
@@ -155,15 +126,14 @@ function AvatarPerfil({ usuario, onActualizado }) {
         )}
       </div>
       <button
-        onClick={() => inputRef.current?.click()}
-        disabled={subiendo}
+        type="button"
+        onClick={() => setEditorAbierto(true)}
         title="Cambiar foto de perfil"
-        className="absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full bg-trust text-white shadow-sm hover:bg-trust/90 disabled:opacity-60"
+        className="absolute -bottom-1 -right-1 grid size-8 place-items-center rounded-full bg-trust text-white shadow-sm hover:bg-trust/90"
       >
-        {subiendo ? <Loader2 className="size-3.5 animate-spin" /> : <Camera className="size-3.5" />}
+        <Camera className="size-4" />
       </button>
-      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={elegirArchivo} />
-      {error && <p className="absolute top-full mt-1 w-40 text-xs text-danger">{error}</p>}
+      {editorAbierto && <AvatarEditor onClose={() => setEditorAbierto(false)} onActualizado={onActualizado} />}
     </div>
   );
 }
@@ -171,8 +141,9 @@ function AvatarPerfil({ usuario, onActualizado }) {
 const CAPAS = [
   { n: 1, nombre: "Estructura (cédula)" },
   { n: 2, nombre: "Correo verificado" },
-  { n: 3, nombre: "Foto revisada" },
-  { n: 4, nombre: "SENESCYT/SRI" },
+  { n: 3, nombre: "Cédula revisada" },
+  { n: 4, nombre: "Biometría facial (pendiente)" },
+  { n: 5, nombre: "SENESCYT/SRI (pendiente)" },
 ];
 
 /** B12 — cambiar contraseña estando ya logueado (distinto del flujo de recuperación sin sesión). */
@@ -227,7 +198,7 @@ function CambiarPasswordForm() {
   );
 }
 
-/** B12 — desactiva la cuenta (no la borra) y cierra la sesión de inmediato, igual que el veto. */
+/** Elimina la identidad de acceso y conserva el historial compartido anonimizado. */
 function EliminarCuentaSection({ onEliminada }) {
   const [abierto, setAbierto] = useState(false);
   const [password, setPassword] = useState("");
@@ -253,8 +224,9 @@ function EliminarCuentaSection({ onEliminada }) {
         <ShieldAlert className="size-4" /> Eliminar cuenta
       </h2>
       <p className="mt-1.5 text-sm text-muted-foreground">
-        Desactiva tu cuenta de inmediato — tu sesión se cierra al instante en todos tus dispositivos.
-        Tu historial de solicitudes y reseñas se conserva, ya que otras personas dependen de él.
+        Tu cuenta se elimina de inmediato y se cierran tus sesiones en todos los dispositivos.
+        Tus solicitudes, reseñas y conversaciones se conservan sin tus datos personales, ya que otras personas dependen de ellas.
+        Si tienes un negocio, dejará de estar publicado.
       </p>
       {!abierto ? (
         <Button variant="outline" className="mt-4 border-danger/30 text-danger hover:bg-danger/10" onClick={() => setAbierto(true)}>
@@ -282,19 +254,23 @@ function EliminarCuentaSection({ onEliminada }) {
   );
 }
 
-export default function PerfilPage() {
-  const [usuario, setUsuario] = useState(null);
-  const [form, setForm] = useState({ nombreCompleto: "", telefono: "" });
+export default function PerfilPage({ contexto = "cliente" }) {
+  const [usuario, setUsuario] = useState(leerPerfilSesion);
+  const [form, setForm] = useState(() => { const u = leerPerfilSesion(); return { nombreCompleto: u?.nombreCompleto || "", telefono: u?.telefono || "", nombreUsuario: u?.nombreUsuario || "", descripcionPerfil: u?.descripcionPerfil || "", estadoPerfil: u?.estadoPerfil || "" }; });
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
   const [exito, setExito] = useState(false);
+  const bannerUrl = usuario?.id && usuario?.bannerPerfilUrl ? `${imagenPerfilPublico(usuario.id, "banner")}?v=${encodeURIComponent(usuario.bannerPerfilUrl)}` : null;
+  const [editandoBanner, setEditandoBanner] = useState(false);
+  const [negociosDisponibles, setNegociosDisponibles] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
+    buscarNegocios({}).then(setNegociosDisponibles).catch(() => setNegociosDisponibles([]));
     obtenerPerfil()
       .then((u) => {
         setUsuario(u);
-        setForm({ nombreCompleto: u.nombreCompleto, telefono: u.telefono });
+        setForm({ nombreCompleto: u.nombreCompleto, telefono: u.telefono, nombreUsuario: u.nombreUsuario || "", descripcionPerfil: u.descripcionPerfil || "", estadoPerfil: u.estadoPerfil || "", negocioFavoritoSlug: u.negocioFavoritoSlug || "", negociosGuardadosSlugs: u.negociosGuardadosSlugs || [] });
       })
       .catch((err) => setError(err.message));
   }, []);
@@ -334,21 +310,28 @@ export default function PerfilPage() {
   const capaCumplida = (n) => {
     if (n <= 2) return usuario.kycLayer >= n;
     if (n === 3) return usuario.fotoVerificacionEstado === "aprobada";
-    return usuario.senescytSriEstado === "verificado";
+    return false; // Las capas biométrica y de bases externas siguen pendientes.
   };
+  const slugsGuardados = [...new Set([...leerEspacio().guardados.map(g => g.slug), ...(form.negociosGuardadosSlugs || []), form.negocioFavoritoSlug].filter(Boolean))];
+  const candidatos = negociosDisponibles.filter(n => slugsGuardados.includes(n.slug));
 
   return (
-    <div className="mx-auto max-w-2xl">
-        <div className="mb-6 flex items-center gap-4">
+    <div className="client-profile mx-auto max-w-5xl">
+        <div className="client-profile-cover mb-6 flex items-end gap-4 pt-20 sm:pt-24">
+          {bannerUrl && <img className="client-profile-banner-image" src={bannerUrl} alt="Tu banner de perfil" />}
+          <button type="button" className="client-profile-banner-edit" onClick={() => setEditandoBanner(true)}><ImagePlus size={17} /> Editar banner</button>
+          {editandoBanner && <BannerEditor bannerUrl={bannerUrl} onClose={() => setEditandoBanner(false)} onActualizado={setUsuario} />}
           <AvatarPerfil usuario={usuario} onActualizado={setUsuario} />
-          <div>
-            <h1 className="font-display text-2xl font-bold">{usuario.nombreCompleto}</h1>
+          <div className="min-w-0 pb-1">
+            <h1 className="truncate font-display text-2xl font-bold">{form.nombreUsuario || usuario.nombreCompleto}</h1>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {usuario.rolCliente && <Badge variant="trust">Cliente</Badge>}
               {usuario.rolEmprendedor && <Badge variant="verified">Emprendedor</Badge>}
             </div>
           </div>
         </div>
+
+        <div className="client-profile-intro panel mb-6 p-5"><div className="flex flex-wrap items-center gap-2"><span className="client-profile-status-dot" /><strong>{form.estadoPerfil || "Disponible para conectar"}</strong></div><p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{form.descripcionPerfil || "Añade una descripción para contar un poco sobre ti."}</p><div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-trust"><span className="flex items-center gap-2"><Sparkles size={15} /> Así se presenta tu perfil a otros usuarios al pulsar tu foto en una reseña.</span>{usuario.id && <Link to={`/usuarios/${usuario.id}`} state={{ volverA: contexto === "negocio" ? "/negocio/perfil" : "/perfil" }} className="font-bold underline">Ver mi perfil público ↗</Link>}</div></div>
 
         {/* Identidad verificada */}
         <div className="panel mb-6 p-5">
@@ -376,11 +359,11 @@ export default function PerfilPage() {
 
         {/* Accesos rápidos */}
         <div className="mb-6 grid gap-3 sm:grid-cols-2">
-          <Link to="/mis-solicitudes" className="panel panel-hover flex items-center gap-3 p-4">
+          <Link to={contexto === "negocio" ? "/negocio/solicitudes" : "/mis-solicitudes"} className="panel panel-hover flex items-center gap-3 p-4">
             <FileText className="size-5 text-trust" />
             <div>
-              <p className="font-medium">Mis solicitudes</p>
-              <p className="text-xs text-muted-foreground">Ver, confirmar y reseñar</p>
+              <p className="font-medium">{contexto === "negocio" ? "Mensajes del negocio" : "Mis solicitudes"}</p>
+              <p className="text-xs text-muted-foreground">{contexto === "negocio" ? "Responder a clientes" : "Ver, confirmar y reseñar"}</p>
             </div>
           </Link>
           {usuario.rolEmprendedor && (
@@ -403,7 +386,24 @@ export default function PerfilPage() {
 
         {/* Datos personales */}
         <form onSubmit={guardar} className="panel space-y-4 p-6">
-          <h2 className="font-display text-base font-bold">Mis datos</h2>
+          <h2 className="font-display text-base font-bold">Editar mi perfil</h2>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div><Label htmlFor="nombreUsuario">Nombre de usuario</Label><Input id="nombreUsuario" maxLength={24} value={form.nombreUsuario} onChange={e => setForm(f => ({ ...f, nombreUsuario: e.target.value.replace(/[^A-Za-z0-9_./,]/g, "") }))} placeholder="Tu.Nombre" /><p className="mt-1 text-xs text-muted-foreground">De 3 a 24 caracteres. Letras mayúsculas y minúsculas, números, _, /, . y ,.</p></div>
+            <div><Label htmlFor="estadoPerfil">Estado</Label><Input id="estadoPerfil" maxLength={80} value={form.estadoPerfil} onChange={e => setForm(f => ({ ...f, estadoPerfil: e.target.value }))} placeholder="Disponible para nuevas ideas" /><p className="mt-1 text-xs text-muted-foreground">Una frase breve que aparecerá en tu perfil.</p></div>
+          </div>
+          <div><Label htmlFor="descripcionPerfil">Sobre mí</Label><textarea id="descripcionPerfil" className="client-profile-description" maxLength={300} value={form.descripcionPerfil} onChange={e => setForm(f => ({ ...f, descripcionPerfil: e.target.value }))} placeholder="Cuéntanos quién eres y qué te interesa…" rows={5} /><p className="mt-1 text-right text-xs text-muted-foreground">{form.descripcionPerfil.length}/300</p></div>
+
+          <div className="client-profile-collection">
+            <div><h3 className="flex items-center gap-2 font-display font-bold"><Heart size={18} /> Mi red visible</h3><p className="mt-1 text-sm text-muted-foreground">Elige un negocio favorito y hasta cinco guardados para mostrar en tu perfil público.</p></div>
+            {candidatos.length ? <div className="client-profile-picks">{candidatos.map(negocio => {
+              const elegido = (form.negociosGuardadosSlugs || []).includes(negocio.slug);
+              return <div key={negocio.slug} className="client-profile-pick"><span className="min-w-0 flex-1 truncate font-medium">{negocio.nombreComercial}</span><button type="button" className={form.negocioFavoritoSlug === negocio.slug ? "selected" : ""} onClick={() => setForm(f => ({ ...f, negocioFavoritoSlug: f.negocioFavoritoSlug === negocio.slug ? "" : negocio.slug }))} aria-label={`Marcar ${negocio.nombreComercial} como favorito`} aria-pressed={form.negocioFavoritoSlug === negocio.slug}><Heart size={16} /> Favorito</button><button type="button" className={elegido ? "selected" : ""} onClick={() => setForm(f => ({ ...f, negociosGuardadosSlugs: elegido ? f.negociosGuardadosSlugs.filter(slug => slug !== negocio.slug) : f.negociosGuardadosSlugs.length < 5 ? [...f.negociosGuardadosSlugs, negocio.slug] : f.negociosGuardadosSlugs }))} aria-label={`${elegido ? "Quitar" : "Mostrar"} ${negocio.nombreComercial} en guardados`} aria-pressed={elegido}><Bookmark size={16} /> {elegido ? "Visible" : "Mostrar"}</button></div>;
+            })}</div> : <p className="text-sm text-muted-foreground">Guarda negocios desde Explorar para elegirlos aquí. <Link to="/buscar" className="text-trust underline">Explorar negocios</Link></p>}
+            <span className="text-xs text-muted-foreground">{(form.negociosGuardadosSlugs || []).length}/5 guardados visibles</span>
+          </div>
+
+          <h3 className="border-t border-border pt-4 font-display font-bold">Datos de identidad</h3>
 
           <div>
             <Label htmlFor="nombre">Nombre completo</Label>

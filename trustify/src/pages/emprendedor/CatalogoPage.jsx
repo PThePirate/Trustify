@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Package, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Check, Sparkles, Languages, Image as ImageIcon,
+  Package, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Check, Sparkles, Languages, Image as ImageIcon, Search, Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,13 @@ export default function CatalogoPage() {
   const [error, setError] = useState("");
   const [limiteAlcanzado, setLimiteAlcanzado] = useState(false);
   const [subiendoFotoId, setSubiendoFotoId] = useState(null);
+  const [busqueda, setBusqueda] = useState("");
+  const [filtro, setFiltro] = useState("todos");
+  const [fotoAmpliada, setFotoAmpliada] = useState(null);
+  const filtrados = useMemo(() => (items || []).filter(item => {
+    const coincideTexto = item.nombre.toLocaleLowerCase("es").includes(busqueda.trim().toLocaleLowerCase("es"));
+    return coincideTexto && (filtro === "todos" || (filtro === "disponibles" ? item.activo : !item.activo));
+  }), [items, busqueda, filtro]);
 
   function cargar() {
     listarCatalogo().then(setItems).catch((err) => setError(err.message));
@@ -68,6 +75,7 @@ export default function CatalogoPage() {
   useEffect(cargar, []);
 
   function empezarEdicion(item) {
+    setError("");
     setEditandoId(item.id);
     setForm({ nombre: item.nombre, precioReferencial: item.precioReferencial ?? "", nombreEn: item.nombreEn ?? "" });
   }
@@ -87,10 +95,11 @@ export default function CatalogoPage() {
       const datos = {
         nombre: form.nombre.trim(),
         precioReferencial: form.precioReferencial === "" ? null : Number(form.precioReferencial),
-        nombreEn: form.nombreEn.trim() || null,
+        nombreEn: suscripcion?.plan.incluyeTraduccion ? (form.nombreEn.trim() || null) : null,
       };
       if (editandoId) {
-        await actualizarItemCatalogo(editandoId, { ...datos, activo: true });
+        const actual = items.find((item) => item.id === editandoId);
+        await actualizarItemCatalogo(editandoId, { ...datos, fotoUrl: actual?.fotoUrl ?? null, activo: actual?.activo ?? true });
       } else {
         await crearItemCatalogo(datos);
       }
@@ -127,8 +136,19 @@ export default function CatalogoPage() {
     }
   }
 
+  async function alternarDisponible(item) {
+    setError("");
+    try {
+      await actualizarItemCatalogo(item.id, { nombre: item.nombre, precioReferencial: item.precioReferencial, fotoUrl: item.fotoUrl, nombreEn: item.nombreEn, activo: !item.activo });
+      cargar();
+    } catch (err) {
+      setError(err.message || "No se pudo cambiar la disponibilidad");
+      setLimiteAlcanzado(err.codigo === "LIMITE_CATALOGO_ALCANZADO");
+    }
+  }
+
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="business-page">
       <div className="mb-6">
         <h1 className="font-display text-2xl font-bold sm:text-3xl">Catálogo</h1>
         <p className="mt-1 text-muted-foreground">
@@ -136,11 +156,16 @@ export default function CatalogoPage() {
         </p>
         {suscripcion && (
           <p className="mt-1 text-sm text-muted-foreground">
-            {items?.length ?? suscripcion.totalCatalogoUsado}/{suscripcion.plan.limiteCatalogo} ítems usados en tu plan{" "}
-            {suscripcion.plan.nombre === "basico" ? "Básico" : suscripcion.plan.nombre === "pro" ? "Pro" : "Elite"}.
+            {suscripcion.totalCatalogoUsado}/{suscripcion.plan.limiteCatalogo >= 32767 ? "∞" : suscripcion.plan.limiteCatalogo} ítems disponibles en tu plan{" "}
+            {suscripcion.plan.nombre === "basico" ? "Acceso inicial" : suscripcion.plan.nombre === "pro" ? "Básico" : "Plus"}.
           </p>
         )}
       </div>
+
+      {suscripcion && <div className="business-section-banner mb-6">
+        <div className="relative z-10 flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm font-semibold text-trust">Tu vitrina de productos y servicios</p><p className="mt-1 font-display text-2xl font-bold">{items?.filter((item) => item.activo).length ?? 0} de {suscripcion.plan.limiteCatalogo >= 32767 ? "∞" : suscripcion.plan.limiteCatalogo} espacios usados</p></div><Link to="/negocio/planes" className="text-sm font-semibold text-trust hover:underline">Ver capacidad del plan</Link></div>
+        {suscripcion.plan.limiteCatalogo < 32767 && <div className="relative z-10 mt-4 h-2 overflow-hidden rounded-full bg-card/70"><div className="h-full rounded-full bg-verified transition-all" style={{ width: `${Math.min(100, ((items?.filter((item) => item.activo).length ?? 0) / Math.max(1, suscripcion.plan.limiteCatalogo)) * 100)}%` }} /></div>}
+      </div>}
 
       <form onSubmit={guardar} className="panel mb-6 p-5">
         <p className="mb-3 text-sm font-semibold">
@@ -193,7 +218,7 @@ export default function CatalogoPage() {
         ) : (
           <p className="mt-3 flex items-start gap-1.5 text-xs text-muted-foreground">
             <Sparkles className="mt-0.5 size-3.5 shrink-0 text-trust" />
-            La traducción de catálogo (ES↔EN, self-service) es una función de los planes Pro y Elite.{" "}
+            La edición del catálogo en inglés está disponible en el plan Plus.{" "}
             <Link to="/negocio/planes" className="font-medium text-trust hover:underline">Mejora tu plan</Link>
           </p>
         )}
@@ -216,6 +241,14 @@ export default function CatalogoPage() {
         </div>
       )}
 
+      {items?.length > 0 && <div className="catalog-toolbar" aria-label="Explorar catálogo">
+        <div><strong>Productos publicados</strong><p>Encuentra y administra cada diseño de tu vitrina.</p></div>
+        <label className="catalog-search"><Search size={17} /><input value={busqueda} onChange={e => setBusqueda(e.target.value)} placeholder="Buscar camiseta…" aria-label="Buscar productos" /></label>
+        <div className="catalog-filters" role="group" aria-label="Filtrar disponibilidad">
+          {[["todos", "Todos", items.length], ["disponibles", "Disponibles", items.filter(item => item.activo).length], ["agotados", "Agotados", items.filter(item => !item.activo).length]].map(([valor, label, total]) => <button key={valor} type="button" aria-pressed={filtro === valor} onClick={() => setFiltro(valor)}>{label} <span>{total}</span></button>)}
+        </div>
+      </div>}
+
       {items === null ? (
         <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Cargando…</div>
       ) : items.length === 0 ? (
@@ -225,16 +258,23 @@ export default function CatalogoPage() {
           <p className="text-sm text-muted-foreground">Agrega el primero arriba.</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {items.map((item) => (
-            <div key={item.id} className="panel flex items-center justify-between gap-3 p-4">
+        filtrados.length === 0 ? <div className="panel p-8 text-center text-muted-foreground">No hay productos que coincidan con este filtro.</div> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {filtrados.map((item) => (
+            <div key={item.id} className="business-surface business-catalog-card overflow-hidden">
+              <div className="catalog-card-media">
+                {item.fotoUrl ? <img src={resolverImagenNegocio(item.fotoUrl)} alt={item.nombre} loading="lazy" /> : <Package className="size-12 text-trust/60" />}
+                <span className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold ${item.activo ? "bg-verified text-primary-ink" : "bg-card text-foreground"}`}>{item.activo ? "Disponible" : "Agotado"}</span>
+                {item.fotoUrl && <button type="button" className="catalog-view-photo" onClick={() => setFotoAmpliada(item)}><Eye size={16} /> Ver foto completa</button>}
+              </div>
+              <div className="p-4">
               <div className="flex items-center gap-3">
                 <FotoItem
                   fotoUrl={item.fotoUrl}
                   subiendo={subiendoFotoId === item.id}
                   onSeleccionar={(file) => subirFoto(item.id, file)}
                 />
-                <div>
+                <div className="min-w-0">
+                  <span className="catalog-item-kind">{item.nombre.toLocaleLowerCase("es").startsWith("camiseta") ? "Camiseta" : "Producto o servicio"}</span>
                   <p className="font-medium">{item.nombre}</p>
                   {item.nombreEn && (
                     <p className="flex items-center gap-1 text-xs text-muted-foreground"><Languages className="size-3" /> {item.nombreEn}</p>
@@ -242,18 +282,23 @@ export default function CatalogoPage() {
                   <p className="text-sm text-muted-foreground">{formatearPrecio(item.precioReferencial)}</p>
                 </div>
               </div>
-              <div className="flex gap-1.5">
-                <button onClick={() => empezarEdicion(item)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">
+              <div className="mt-4 flex items-center justify-between gap-1.5 border-t border-border pt-3">
+                <button type="button" role="switch" aria-checked={item.activo} aria-label={`Marcar ${item.nombre} como ${item.activo ? "agotado" : "disponible"}`} onClick={() => alternarDisponible(item)} className="catalog-availability"><span className={`catalog-switch ${item.activo ? "is-on" : ""}`} aria-hidden="true"><span /></span><span>{item.activo ? "Disponible" : "Agotado"}</span></button>
+                <div className="flex gap-1">
+                <button type="button" aria-label={`Editar ${item.nombre}`} onClick={() => empezarEdicion(item)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">
                   <Pencil className="size-4" />
                 </button>
-                <button onClick={() => eliminar(item.id)} className="grid size-8 place-items-center rounded-lg text-danger hover:bg-danger/10">
+                <button type="button" aria-label={`Eliminar ${item.nombre}`} onClick={() => eliminar(item.id)} className="grid size-8 place-items-center rounded-lg text-danger hover:bg-danger/10">
                   <Trash2 className="size-4" />
                 </button>
+                </div>
+              </div>
               </div>
             </div>
           ))}
         </div>
       )}
+      {fotoAmpliada && <div className="catalog-photo-backdrop" role="presentation" onClick={() => setFotoAmpliada(null)}><div className="catalog-photo-dialog" role="dialog" aria-modal="true" aria-label={`Foto de ${fotoAmpliada.nombre}`} onClick={e => e.stopPropagation()}><div className="catalog-photo-head"><strong>{fotoAmpliada.nombre}</strong><button type="button" aria-label="Cerrar foto" onClick={() => setFotoAmpliada(null)}><X size={20} /></button></div><img src={resolverImagenNegocio(fotoAmpliada.fotoUrl)} alt={fotoAmpliada.nombre} /></div></div>}
     </div>
   );
 }

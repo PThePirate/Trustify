@@ -16,6 +16,7 @@ export default function QrVerificacionPage() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [copiado, setCopiado] = useState(false);
+  const [formato, setFormato] = useState("afiche");
 
   useEffect(() => {
     obtenerMiQr()
@@ -24,7 +25,7 @@ export default function QrVerificacionPage() {
         const destino = `${window.location.origin}/qr/${res.codigo}`;
         setUrl(destino);
         const png = await QRCode.toDataURL(destino, {
-          width: 480,
+          width: 1200,
           margin: 2,
           color: { dark: "#172A36", light: "#FFFCF6" },
         });
@@ -56,15 +57,16 @@ export default function QrVerificacionPage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl">
-      <div className="mb-6">
+    <div className="business-page">
+      <div className="business-section-banner mb-6">
         <h1 className="font-display text-2xl font-bold sm:text-3xl">QR de verificación física</h1>
         <p className="mt-1 text-muted-foreground">
           Imprímelo o muéstralo en tu local o taller — al escanearlo, cualquiera llega directo a tu Mini Landing Page.
         </p>
       </div>
 
-      <div className="panel flex flex-col items-center gap-5 p-8 text-center">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+      <div className="business-surface business-qr-stage flex flex-col items-center gap-5 p-8 text-center">
         {!qr || !dataUrl ? (
           <div className="flex h-[480px] w-full max-w-[480px] items-center justify-center gap-2 rounded-2xl bg-muted/30 text-muted-foreground">
             <Loader2 className="size-5 animate-spin" /> Generando tu código…
@@ -99,6 +101,9 @@ export default function QrVerificacionPage() {
           </>
         )}
       </div>
+      <aside className="business-surface p-6"><h2 className="text-xl font-bold">Listo para tu espacio</h2><p className="mt-1 text-sm text-muted-foreground">Escoge una presentación y usa la impresión del navegador.</p><div className="mt-5 grid gap-2">{[["afiche", "Afiche", "Para pared o vitrina"], ["stand", "Stand de escritorio", "Para mostrador"], ["sticker", "Sticker", "Para empaque o tarjeta"]].map(([id, label, detail]) => <button key={id} onClick={() => setFormato(id)} className={`rounded-xl border p-4 text-left transition-colors ${formato === id ? "border-trust bg-trust/10" : "border-border hover:bg-muted/40"}`}><strong className="block text-sm">{label}</strong><span className="text-xs text-muted-foreground">{detail}</span></button>)}</div><Button variant="trust" className="mt-5 w-full" disabled={!dataUrl} onClick={() => window.print()}>Imprimir {formato}</Button><p className="mt-4 text-xs text-muted-foreground">Para que el QR funcione fuera de tu computadora, el enlace debe estar disponible públicamente; localhost solo abre en este dispositivo.</p></aside>
+      </div>
+      {dataUrl && <div className={`business-print business-print-${formato}`}><img src={dataUrl} alt="QR para imprimir" /><strong>Conoce nuestro negocio verificado en CheckBiz</strong><span>Escanea para ver nuestro perfil y contactarnos.</span></div>}
 
       <div className="panel mt-4 flex items-start gap-2 p-4 text-sm text-muted-foreground">
         <QrCode className="mt-0.5 size-4 shrink-0 text-trust" />

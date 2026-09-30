@@ -11,7 +11,7 @@ import { isLoggedIn } from "@/services/authApi";
 const PREGUNTAS_COMPRADOR = [
   {
     p: "¿Por qué necesito verificar mi cuenta para contactar a un negocio?",
-    r: "CheckBiz no permite anonimato: tanto el vendedor como el comprador se identifican con cédula. Basta con validar tu número (Módulo 10) y confirmar tu teléfono con un código de 6 dígitos — con eso ya puedes enviar solicitudes.",
+    r: "Para contactar a un negocio necesitas registrar tu cédula y confirmar tu correo con el código de 6 dígitos que te enviamos. Puedes revisar el estado de tu verificación en Mi cuenta.",
   },
   {
     p: "¿CheckBiz procesa el pago de lo que compro?",
@@ -23,18 +23,18 @@ const PREGUNTAS_COMPRADOR = [
   },
   {
     p: "¿Cómo reporto un negocio sospechoso o un mal comportamiento?",
-    r: "Entra al perfil público del negocio y usa el botón \"Reportar\" (junto al de WhatsApp). Tu reporte llega directo al equipo de moderación, que revisa y puede vetar la cédula si corresponde.",
+    r: "Entra al perfil público del negocio y usa el botón \"Reportar\" junto a Contáctenos. Tu reporte llega al equipo de moderación, que revisa el caso.",
   },
 ];
 
 const PREGUNTAS_EMPRENDEDOR = [
   {
     p: "¿Cuántas capas de verificación existen y cuáles son obligatorias?",
-    r: "Cinco: estructura de cédula, teléfono (OTP), foto con cédula, cruce con SENESCYT/SRI y biometría (en roadmap). Cuantas más capas cumplas, más alto tu Trust Score y más cerca de la insignia \"Emprendedor Verificado\".",
+    r: "En Mi cuenta puedes consultar el registro de cédula, correo, revisión de ambas caras del documento y SENESCYT/SRI. La consulta a SENESCYT/SRI está simulada durante el piloto. La biometría facial es una capa separada y sigue pendiente.",
   },
   {
-    p: "¿Cuánto demora la revisión de mi foto de verificación?",
-    r: "La revisa manualmente el equipo de moderación durante el piloto. Mientras esté \"en revisión\" puedes seguir usando tu cuenta con las capas que ya tengas aprobadas.",
+    p: "¿Cuánto demora la revisión de mi cédula?",
+    r: "El equipo administrador revisa manualmente el frente y reverso. Mientras esté \"en revisión\" puedes seguir usando tu cuenta con las capas que ya tengas aprobadas. Las imágenes se eliminan después de la decisión.",
   },
   {
     p: "¿Qué pasa si mi cédula queda vetada?",
@@ -42,7 +42,7 @@ const PREGUNTAS_EMPRENDEDOR = [
   },
   {
     p: "¿Para qué sirve la Ruta de Formalización y el simulador RIMPE?",
-    r: "Te muestra qué te falta para pasar de negocio semilla a formalizado, y el simulador estima en qué categoría RIMPE calificarías según tus ingresos anuales — antes de que decidas registrarte de verdad ante el SRI.",
+    r: "La ruta organiza ocho requisitos en dos niveles: Verificado y Formalizado. El simulador estima en qué categoría RIMPE calificarías según tus ingresos anuales; no confirma tu registro ante el SRI.",
   },
   {
     p: "¿Qué gano si mejoro mi plan de suscripción?",
@@ -55,6 +55,7 @@ function ItemFAQ({ pregunta, abierta, onToggle }) {
     <div className="panel overflow-hidden">
       <button
         onClick={onToggle}
+        aria-expanded={abierta}
         className="flex w-full items-center justify-between gap-3 p-4 text-left"
       >
         <span className="font-medium">{pregunta.p}</span>
@@ -93,7 +94,7 @@ export default function AyudaPage() {
   const conSesion = isLoggedIn();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="client-help min-h-screen bg-background">
       {!conSesion && (
         <header className="flex h-16 items-center justify-between border-b border-border px-6">
           <Link to="/"><Logo /></Link>
@@ -108,8 +109,8 @@ export default function AyudaPage() {
         </header>
       )}
 
-      <div className="mx-auto max-w-2xl px-6 py-10">
-        <div className="mb-8 text-center">
+      <div className="mx-auto max-w-5xl px-6 py-10">
+        <div className="client-page-heading mb-8 text-center">
           <span className="mx-auto mb-3 grid size-12 place-items-center rounded-2xl bg-trust/10 text-trust">
             <HelpCircle className="size-6" />
           </span>

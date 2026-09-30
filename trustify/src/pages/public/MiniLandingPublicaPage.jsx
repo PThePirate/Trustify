@@ -1,21 +1,24 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link, useOutletContext } from "react-router-dom";
+import { useParams, useNavigate, Link, useOutletContext, useSearchParams } from "react-router-dom";
 import {
   MapPin, Star, ShieldCheck, MessageCircle, FileText, Package,
   Loader2, ShieldAlert, CheckCircle2, XCircle, Store, Home, AlertCircle, X, Flag,
-  BadgeCheck, GraduationCap, Languages, Video,
+  BadgeCheck, GraduationCap, Languages, Video, Bookmark,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
-import { obtenerNegocioPublico, registrarClicWhatsapp, resolverImagenNegocio } from "@/services/negocioApi";
-import { crearSolicitud } from "@/services/solicitudApi";
+import { obtenerNegocioPublico, resolverImagenNegocio } from "@/services/negocioApi";
+import { crearSolicitud, contactarNegocio } from "@/services/solicitudApi";
 import { reportarNegocio } from "@/services/denunciaApi";
 import { isLoggedIn } from "@/services/authApi";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { alternarGuardado, obtenerGuardadosSlugs, suscribirEspacio } from "@/services/clienteEspacioLocal";
+import LandingBloquesVista from "@/components/emprendedor/LandingBloques";
+import { leerColoresLanding, estiloColoresLanding } from "@/components/emprendedor/landingColores";
+import "@/components/emprendedor/landingColores.css";
 
-const NIVEL_LABEL = { semilla: "Semilla", asesoria: "En asesoría", formalizado: "Formalizado" };
 const ICONO_INSIGNIA = { "badge-check": BadgeCheck, "graduation-cap": GraduationCap, "shield-check": ShieldCheck, languages: Languages };
 
 /** Convierte enlaces de YouTube/Vimeo a su URL de embed; cualquier otro enlace se asume un archivo de video directo. */
@@ -24,16 +27,11 @@ function urlEmbedVideo(url) {
   if (yt) return { tipo: "iframe", src: `https://www.youtube.com/embed/${yt[1]}` };
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
   if (vimeo) return { tipo: "iframe", src: `https://player.vimeo.com/video/${vimeo[1]}` };
-  return { tipo: "video", src: url };
+  return { tipo: "video", src: resolverImagenNegocio(url) };
 }
 
 function formatearPrecio(p) {
   return p === null || p === undefined ? "Precio a consultar" : `$${Number(p).toFixed(2)}`;
-}
-
-function urlWhatsApp(numero, mensaje) {
-  const limpio = numero.replace(/\D/g, "");
-  return `https://wa.me/593${limpio.replace(/^0/, "")}?text=${encodeURIComponent(mensaje)}`;
 }
 
 export default function MiniLandingPublicaPage() {
@@ -44,6 +42,7 @@ export default function MiniLandingPublicaPage() {
   const [descripcion, setDescripcion] = useState("");
   const [fechaEstimada, setFechaEstimada] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [contactando, setContactando] = useState(false);
   const [errorSolicitud, setErrorSolicitud] = useState("");
   const [exitoSolicitud, setExitoSolicitud] = useState(false);
   const [mostrarReporte, setMostrarReporte] = useState(false);
@@ -52,16 +51,31 @@ export default function MiniLandingPublicaPage() {
   const [errorReporte, setErrorReporte] = useState("");
   const [exitoReporte, setExitoReporte] = useState(false);
   const [idioma, setIdioma] = useState("es");
+  const [guardado, setGuardado] = useState(() => obtenerGuardadosSlugs().includes(slug));
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const esVistaPrevia = searchParams.get("vistaPrevia") === "1";
   const { dentroClienteShell = false } = useOutletContext() || {};
 
   useEffect(() => {
     setNegocio(null);
     setError("");
-    obtenerNegocioPublico(slug)
+    obtenerNegocioPublico(slug, { registrarVisita: !esVistaPrevia })
       .then(setNegocio)
       .catch((err) => setError(err.message));
-  }, [slug]);
+  }, [slug, esVistaPrevia]);
+  useEffect(() => suscribirEspacio(() => setGuardado(obtenerGuardadosSlugs().includes(slug))), [slug]);
+  useEffect(() => {
+    if (negocio && searchParams.get("contactar") === "1" && isLoggedIn()) {
+      navigate(`/negocio/publico/${slug}`, { replace: true });
+      abrirChat();
+    }
+  }, [negocio, searchParams, slug]);
+
+  function guardarNegocio() {
+    if (!isLoggedIn()) { navigate("/login"); return; }
+    alternarGuardado(slug, negocio);
+  }
 
   useDocumentMeta(
     negocio ? `${negocio.nombreComercial} — CheckBiz` : undefined,
@@ -77,6 +91,22 @@ export default function MiniLandingPublicaPage() {
     }
     setErrorSolicitud("");
     setMostrarForm(true);
+  }
+
+  async function abrirChat() {
+    if (!isLoggedIn()) { navigate("/login", { state: { from: `/negocio/publico/${slug}?contactar=1` } }); return; }
+    setContactando(true);
+    setErrorSolicitud("");
+    try {
+      const solicitud = await contactarNegocio(slug);
+      navigate(`/mis-solicitudes?chat=${solicitud.id}`);
+    } catch (err) {
+      if (err.message?.includes("propio negocio")) {
+        navigate("/negocio/solicitudes");
+        return;
+      }
+      setErrorSolicitud(err.message || "No se pudo abrir la conversación");
+    } finally { setContactando(false); }
   }
 
   async function enviarSolicitud(e) {
@@ -149,8 +179,9 @@ export default function MiniLandingPublicaPage() {
   const iniciales = negocio.nombreComercial.split(" ").map((p) => p[0]).slice(0, 2).join("");
   const hayTraduccion = negocio.catalogo.some((item) => item.nombreEn);
 
+  const coloresLanding = leerColoresLanding(negocio.landingBloques);
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${coloresLanding ? "landing-colors-public" : ""}`} style={coloresLanding ? { ...estiloColoresLanding(coloresLanding), backgroundColor: coloresLanding.colorFondo, color: coloresLanding.colorTexto } : undefined}>
       {!dentroClienteShell && (
         <header className="flex h-16 items-center justify-between border-b border-border px-6">
           <Link to="/"><Logo /></Link>
@@ -160,7 +191,7 @@ export default function MiniLandingPublicaPage() {
 
       {/* Portada */}
       <div
-        className="relative h-48 sm:h-64"
+        className="relative z-0 h-48 overflow-hidden sm:h-64"
         style={{
           background: negocio.fotoPortadaUrl
             ? `url(${resolverImagenNegocio(negocio.fotoPortadaUrl)}) center/cover`
@@ -168,13 +199,13 @@ export default function MiniLandingPublicaPage() {
         }}
       />
 
-      <div className="mx-auto max-w-3xl px-6">
+      <div className="relative z-10 mx-auto max-w-3xl px-6">
         {/* Identidad */}
-        <div className="-mt-12 flex items-end gap-4">
-          <div className="grid size-24 shrink-0 place-items-center rounded-2xl border-4 border-background bg-trust/10 font-display text-2xl font-bold text-trust shadow-lg">
+        <div className="relative z-10 -mt-12 flex items-end gap-4">
+          <div className="relative size-24 shrink-0 overflow-hidden rounded-2xl border-4 border-background bg-trust/10 font-display text-2xl font-bold text-trust shadow-lg">
             {negocio.logoUrl ? (
-              <img src={resolverImagenNegocio(negocio.logoUrl)} alt={negocio.nombreComercial} className="size-full rounded-2xl object-cover" />
-            ) : iniciales}
+              <img src={resolverImagenNegocio(negocio.logoUrl)} alt={negocio.nombreComercial} className="absolute inset-0 h-full w-full object-cover" />
+            ) : <span className="grid h-full w-full place-items-center">{iniciales}</span>}
           </div>
           <div className="mb-1 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -193,29 +224,26 @@ export default function MiniLandingPublicaPage() {
               {negocio.ciudad && (
                 <span className="flex items-center gap-1"><MapPin className="size-3.5" /> {negocio.ciudad}</span>
               )}
-              <Badge variant="outline">{NIVEL_LABEL[negocio.nivelFormalizacion] ?? negocio.nivelFormalizacion}</Badge>
             </div>
           </div>
         </div>
 
-        {negocio.descripcionCorta && (
-          <p className="mt-4 text-muted-foreground">{negocio.descripcionCorta}</p>
+        {(negocio.slogan || negocio.descripcionCorta) && (
+          <div className="mt-4">{negocio.slogan && <p className="mb-2 font-display text-lg font-semibold text-trust">{negocio.slogan}</p>}{negocio.descripcionCorta && <p className="text-muted-foreground">{negocio.descripcionCorta}</p>}</div>
         )}
+
+        {negocio.landingBloques?.some(b => b.tipo !== "tema") && <div className="mt-8"><LandingBloquesVista bloques={negocio.landingBloques} negocio={negocio} onContact={abrirChat} /></div>}
 
         {/* Botones de acción */}
         <div className="mt-5 flex flex-wrap gap-3">
-          <a
-            href={urlWhatsApp(negocio.whatsapp, `Hola, vi tu perfil de ${negocio.nombreComercial} en CheckBiz`)}
-            target="_blank"
-            rel="noreferrer"
-            onClick={() => registrarClicWhatsapp(negocio.slug).catch(() => {})}
-          >
-            <Button variant="verified" size="lg">
-              <MessageCircle className="size-4" /> Contactar por WhatsApp
-            </Button>
-          </a>
+          <Button variant="verified" size="lg" onClick={abrirChat} disabled={contactando}>
+            {contactando ? <Loader2 className="size-4 animate-spin" /> : <MessageCircle className="size-4" />} Contáctenos
+          </Button>
           <Button variant="outline" size="lg" onClick={abrirSolicitud}>
             <FileText className="size-4" /> Iniciar Solicitud de Pedido
+          </Button>
+          <Button variant="outline" size="lg" onClick={guardarNegocio} aria-pressed={guardado}>
+            <Bookmark className={`size-4 ${guardado ? "fill-current" : ""}`} /> {guardado ? "Guardado en mi red" : "Guardar en mi red"}
           </Button>
           <button
             onClick={abrirReporte}
@@ -224,6 +252,7 @@ export default function MiniLandingPublicaPage() {
             <Flag className="size-3.5" /> Reportar
           </button>
         </div>
+        {errorSolicitud && !mostrarForm && <div role="alert" className="mt-3 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2.5 text-sm text-danger"><AlertCircle className="size-4 shrink-0" /><span>{errorSolicitud} {errorSolicitud.toLowerCase().includes("verifica") && <Link to="/comprador-verificado" className="font-semibold underline">Verificar mi cuenta</Link>}</span></div>}
         {exitoSolicitud && (
           <div className="mt-3 flex items-start gap-2 rounded-lg border border-verified/30 bg-verified/10 px-3 py-2.5 text-sm text-verified">
             <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
@@ -417,7 +446,7 @@ export default function MiniLandingPublicaPage() {
                     />
                   )}
                   <div className="flex flex-1 items-center justify-between gap-2">
-                    <span className="font-medium">{idioma === "en" && item.nombreEn ? item.nombreEn : item.nombre}</span>
+                    <span className="font-medium">{idioma === "en" && item.nombreEn ? item.nombreEn : item.nombre}{!item.activo && <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">Agotado</span>}</span>
                     <span className="text-sm text-muted-foreground">{formatearPrecio(item.precioReferencial)}</span>
                   </div>
                 </div>
@@ -447,7 +476,10 @@ export default function MiniLandingPublicaPage() {
               {negocio.resenas.map((r) => (
                 <div key={r.id} className="panel p-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{r.clienteNombre}</span>
+                    {r.clienteId ? <Link to={`/usuarios/${r.clienteId}`} className="client-review-author" title={`Ver el perfil de ${r.clienteNombre}`}>
+                      <span className="client-review-avatar">{r.clienteTieneFoto ? <img src={`${import.meta.env.VITE_API_URL || "/api"}/perfiles/${r.clienteId}/foto`} alt="" /> : r.clienteNombre?.replace("@", "").slice(0, 2).toUpperCase()}</span>
+                      <span>{r.clienteNombre}</span>
+                    </Link> : <span className="font-medium">{r.clienteNombre}</span>}
                     <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((n) => (
                         <Star key={n} className={`size-3.5 ${n <= r.estrellas ? "fill-pending text-pending" : "text-muted-foreground/30"}`} />

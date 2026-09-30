@@ -17,6 +17,7 @@ export default function ImageSlot({
   alt = "",
   label,
   caption,
+  placeholderLabel = "Foto de ejemplo",
   Icon = ImageIcon,
   className,
 }) {
@@ -40,9 +41,9 @@ export default function ImageSlot({
                 {label}
               </span>
             )}
-            <span className="text-[10px] uppercase tracking-wide text-foreground/40">
-              Foto de ejemplo
-            </span>
+            {placeholderLabel && <span className="text-[10px] uppercase tracking-wide text-foreground/40">
+              {placeholderLabel}
+            </span>}
           </div>
         </div>
       )}

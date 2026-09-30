@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import StatCard from "@/components/admin/StatCard";
 import ActivityFeed from "@/components/admin/ActivityFeed";
+import AdminControlMap from "@/components/admin/AdminControlMap";
 import { obtenerEstadisticas, listarActividadReciente } from "@/services/adminApi";
 
 const CAPAS_LABELS = ["Capa 1", "Capa 2", "Capa 3", "Capa 4", "Capa 5"];
@@ -49,7 +50,8 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-8">
+      <div className="admin-welcome mb-8">
+        <div className="admin-welcome-art" aria-hidden="true"><span className="admin-shield-orbit" /><ShieldCheck className="admin-big-shield" /><span className="admin-art-icon admin-art-users"><Users /></span><span className="admin-art-icon admin-art-store"><Store /></span><span className="admin-art-icon admin-art-log"><ScrollText /></span><svg viewBox="0 0 300 160"><path d="M35 40L150 80L265 35M150 80L235 140" /></svg></div>
         <h1 className="font-display text-2xl font-bold sm:text-3xl">Panel general</h1>
         <p className="mt-1 text-muted-foreground">
           Bienvenido de vuelta. Esto es lo que necesita tu atención hoy.
@@ -66,7 +68,7 @@ export default function AdminDashboardPage() {
             <p className="font-semibold">
               {stats.kycPendientes} {stats.kycPendientes === 1 ? "verificación" : "verificaciones"} esperando revisión
             </p>
-            <p className="text-sm text-muted-foreground">Capa 3 del esquema de identidad — selfie con cédula.</p>
+            <p className="text-sm text-muted-foreground">Capa 3 documental — frente y reverso de la cédula.</p>
           </div>
           <Link to="/admin/kyc">
             <span className="flex items-center gap-1 text-sm font-semibold text-trust hover:underline">
@@ -76,6 +78,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      <AdminControlMap />
       {/* Métricas */}
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
@@ -139,7 +142,7 @@ export default function AdminDashboardPage() {
 
           <h2 className="mb-3 mt-8 font-display text-base font-bold">Accesos</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <TarjetaAcceso to="/admin/kyc" icon={ShieldCheck} titulo="Verificación KYC" desc="Aprueba o rechaza las fotos de identidad de Capa 3." />
+            <TarjetaAcceso to="/admin/kyc" icon={ShieldCheck} titulo="Verificación KYC" desc="Revisa ambas caras de la cédula y decide la Capa 3." />
             <TarjetaAcceso to="/admin/denuncias" icon={Flag} titulo="Denuncias" desc="Revisa reportes de clientes sobre negocios o usuarios." />
             <TarjetaAcceso to="/admin/veto" icon={Ban} titulo="Veto por cédula" desc="Bloqueo permanente e irreversible de cuentas." />
             <TarjetaAcceso to="/admin/categorias" icon={Tags} titulo="Categorías" desc="Gestión del catálogo maestro de categorías." />

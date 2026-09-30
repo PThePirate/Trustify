@@ -4,7 +4,7 @@ import {
   Eye, MessageCircle, TrendingUp, TrendingDown, Minus, Loader2, AlertCircle, Table2, LineChart as LineChartIcon, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { obtenerMiAnalitica } from "@/services/negocioApi";
+import { obtenerMiAnalitica, misSolicitudesRecibidas } from "@/services/negocioApi";
 
 function TarjetaMetrica({ icon: Icon, etiqueta, valor, nota, tono = "bg-trust/10 text-trust" }) {
   return (
@@ -52,7 +52,7 @@ function GraficaVisitas({ serie }) {
 
   const anchoUtil = ANCHO - PAD.left - PAD.right;
   const altoUtil = ALTO - PAD.top - PAD.bottom;
-  const x = (i) => PAD.left + (i / (serie.length - 1)) * anchoUtil;
+  const x = (i) => PAD.left + (i / Math.max(1, serie.length - 1)) * anchoUtil;
   const y = (v) => PAD.top + altoUtil - (v / max) * altoUtil;
 
   function puntos(campo) {
@@ -78,7 +78,7 @@ function GraficaVisitas({ serie }) {
       {/* Leyenda — dos series, siempre visible */}
       <div className="mb-3 flex items-center gap-4 text-xs font-medium text-muted-foreground">
         <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-trust" /> Visitas al perfil</span>
-        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-verified" /> Clics a WhatsApp</span>
+        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-verified" /> Chats iniciados</span>
       </div>
 
       <div className="relative">
@@ -134,7 +134,7 @@ function GraficaVisitas({ serie }) {
         >
           <p className="font-semibold">{activo.fecha}</p>
           <p className="text-trust">Visitas: {activo.visitas}</p>
-          <p className="text-verified">Clics WhatsApp: {activo.clicsWhatsapp}</p>
+          <p className="text-verified">Chats iniciados: {activo.clicsWhatsapp}</p>
         </div>
       )}
       </div>
@@ -160,7 +160,7 @@ function TablaSerie({ serie }) {
               <tr>
                 <th className="px-3 py-2 text-left font-medium">Fecha</th>
                 <th className="px-3 py-2 text-right font-medium">Visitas</th>
-                <th className="px-3 py-2 text-right font-medium">Clics WhatsApp</th>
+                <th className="px-3 py-2 text-right font-medium">Chats iniciados</th>
               </tr>
             </thead>
             <tbody>
@@ -181,31 +181,48 @@ function TablaSerie({ serie }) {
 
 export default function AnaliticaPage() {
   const [datos, setDatos] = useState(null);
+  const [solicitudes, setSolicitudes] = useState([]);
   const [error, setError] = useState("");
+  const [actualizando, setActualizando] = useState(false);
+  const [errorSolicitudes, setErrorSolicitudes] = useState("");
 
-  useEffect(() => {
-    obtenerMiAnalitica().then(setDatos).catch((err) => setError(err.message));
-  }, []);
+  async function cargar() {
+    setActualizando(true);
+    setError("");
+    setErrorSolicitudes("");
+    await Promise.all([
+      obtenerMiAnalitica().then(setDatos).catch((err) => setError(err.message)),
+      misSolicitudesRecibidas().then(setSolicitudes).catch((err) => setErrorSolicitudes(err.message)),
+    ]);
+    setActualizando(false);
+  }
+  useEffect(() => { cargar(); }, []);
+  function descargar() {
+    const filas = [["Métrica", "Valor"], ["Visitas", datos.totalVisitas], ["Chats iniciados", datos.totalClicsWhatsapp], ["Conversión", datos.tasaConversion], [], ["Fecha", "Visitas", "Chats iniciados"], ...datos.serieDiaria.map(p => [p.fecha, p.visitas, p.clicsWhatsapp])];
+    const url = URL.createObjectURL(new Blob(["\uFEFF" + filas.map(f => f.join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" }));
+    const enlace = document.createElement("a"); enlace.href = url; enlace.download = "analitica-checkbiz.csv"; enlace.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 
   if (error) {
-    return <p className="flex items-center gap-1.5 text-sm text-danger"><AlertCircle className="size-4" /> {error}</p>;
+    return <div role="alert"><p className="text-danger">{error}</p><Button onClick={cargar} disabled={actualizando}>Reintentar</Button></div>;
   }
   if (!datos) {
     return <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Cargando…</div>;
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-6">
+    <div className="business-page">
+      <div className="business-section-banner mb-6">
+        <div className="mb-4 flex gap-2"><Button onClick={cargar} disabled={actualizando}>{actualizando ? "Actualizando…" : "Actualizar datos"}</Button><Button variant="outline" onClick={descargar}>Descargar CSV</Button></div>
         <h1 className="font-display text-2xl font-bold sm:text-3xl">Panel de Analítica</h1>
         <p className="mt-1 text-muted-foreground">
-          Visitas a tu Mini Landing Page y clics a WhatsApp — con datos reales, desde que se publicó tu perfil.
+          Visitas de cuentas con sesión: una por cuenta y día, excluyendo al propietario. Los accesos anónimos y el historial anterior sin identificar no se cuentan. Los chats cuentan conversaciones creadas desde Contáctenos, no mensajes ni usuarios únicos.
         </p>
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <TarjetaMetrica icon={Eye} etiqueta="Visitas al perfil" valor={datos.totalVisitas} tono="bg-trust/10 text-trust" />
-        <TarjetaMetrica icon={MessageCircle} etiqueta="Clics a WhatsApp" valor={datos.totalClicsWhatsapp} tono="bg-verified/10 text-verified" />
+        <TarjetaMetrica icon={MessageCircle} etiqueta="Chats iniciados" valor={datos.totalClicsWhatsapp} tono="bg-verified/10 text-verified" />
         <TarjetaMetrica
           icon={TrendingUp}
           etiqueta="Tasa de conversión"
@@ -213,6 +230,12 @@ export default function AnaliticaPage() {
           nota="visita → contacto"
           tono="bg-pending/10 text-pending"
         />
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Actividad de este mes">
+        <TarjetaMetrica icon={Eye} etiqueta="Visitas de este mes" valor={datos.visitasMes ?? 0} />
+        <TarjetaMetrica icon={MessageCircle} etiqueta="Solicitudes de este mes" valor={datos.solicitudesMes ?? 0} />
+        <TarjetaMetrica icon={Sparkles} etiqueta="Reseñas de este mes" valor={datos.resenasMes ?? 0} />
       </div>
 
       {datos.avanzadaDisponible ? (
@@ -230,18 +253,18 @@ export default function AnaliticaPage() {
             </div>
           </div>
 
-          <div className="panel p-5">
+          <div className="business-chart panel p-5">
             <h2 className="mb-4 flex items-center gap-2 font-display text-base font-bold">
               <LineChartIcon className="size-4" /> Últimos 30 días
             </h2>
-            <GraficaVisitas serie={datos.serieDiaria} />
+            {datos.serieDiaria.length > 0 ? <GraficaVisitas serie={datos.serieDiaria} /> : <p>Aún no hay datos diarios.</p>}
             <TablaSerie serie={datos.serieDiaria} />
           </div>
         </>
       ) : (
         <div className="panel flex flex-col items-center gap-2 py-12 text-center">
           <Sparkles className="size-8 text-trust/60" />
-          <p className="font-medium">La analítica avanzada es una función de los planes Pro y Elite</p>
+          <p className="font-medium">La analítica avanzada está disponible en el plan Plus</p>
           <p className="max-w-sm text-sm text-muted-foreground">
             Comparativas semana a semana, mes a mes y la gráfica de los últimos 30 días.
           </p>
@@ -250,6 +273,18 @@ export default function AnaliticaPage() {
           </Link>
         </div>
       )}
+      {datos.avanzadaDisponible && <div className="business-surface mt-6 p-5">
+        <h2 className="text-lg font-bold">Cuándo llegan más solicitudes</h2>
+        {errorSolicitudes && <p role="alert" className="mt-2 text-danger">No se pudieron cargar las solicitudes: {errorSolicitudes}</p>}
+        <p className="mt-1 text-sm text-muted-foreground">Distribución de solicitudes recibidas según su fecha de creación; aún no identifica la ciudad de origen.</p>
+        {solicitudes.length === 0 ? <p className="mt-5 text-sm text-muted-foreground">Cuando recibas solicitudes, verás aquí los días y horarios con más actividad.</p> : <div className="mt-5 grid gap-6 lg:grid-cols-2">
+          {[{ label: "Por día", names: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"], index: (d) => d.getDay() }, { label: "Por horario", names: ["00–05", "06–11", "12–17", "18–23"], index: (d) => Math.floor(d.getHours() / 6) }].map((grupo) => {
+            const valores = grupo.names.map((_, i) => solicitudes.filter((s) => grupo.index(new Date(s.creadoEn)) === i).length);
+            const max = Math.max(1, ...valores);
+            return <div key={grupo.label}><h3 className="mb-4 font-semibold">{grupo.label}</h3><div className="space-y-3">{grupo.names.map((nombre, i) => <div key={nombre} className="grid grid-cols-[3.5rem_1fr_2rem] items-center gap-3 text-xs"><span className="text-muted-foreground">{nombre}</span><div className="h-3 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-trust" style={{ width: `${valores[i] / max * 100}%` }} /></div><strong>{valores[i]}</strong></div>)}</div></div>;
+          })}
+        </div>}
+      </div>}
     </div>
   );
 }

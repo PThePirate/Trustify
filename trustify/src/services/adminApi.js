@@ -2,20 +2,26 @@
  * adminApi.js — capa de datos del panel de administrador.
  *
  * Conectado al backend real (checkbiz-backend, Kotlin + Spring Boot).
- * Por defecto apunta a http://localhost:4000/api — cambia VITE_API_URL
+ * Por defecto apunta a /api — cambia VITE_API_URL
  * en un .env si tu backend corre en otra URL (ver .env.example).
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
 const TOKEN_KEY = "checkbiz_admin_token";
 
 function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  if (token) return token;
+  const anterior = localStorage.getItem(TOKEN_KEY);
+  if (anterior) { sessionStorage.setItem(TOKEN_KEY, anterior); localStorage.removeItem(TOKEN_KEY); }
+  return anterior;
 }
 function setToken(token) {
-  localStorage.setItem(TOKEN_KEY, token);
+  sessionStorage.setItem(TOKEN_KEY, token);
+  localStorage.removeItem(TOKEN_KEY);
 }
 function clearToken() {
+  sessionStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(TOKEN_KEY);
 }
 
@@ -31,12 +37,13 @@ function authHeaders() {
  */
 async function api(path, { method = "GET", body, auth = true } = {}) {
   let res;
+  const tokenEnviado = auth ? getToken() : null;
   try {
     res = await fetch(`${API_BASE}${path}`, {
       method,
       headers: {
         "Content-Type": "application/json",
-        ...(auth ? authHeaders() : {}),
+        ...(tokenEnviado ? { Authorization: `Bearer ${tokenEnviado}` } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -46,7 +53,7 @@ async function api(path, { method = "GET", body, auth = true } = {}) {
     );
   }
 
-  if (res.status === 401 && auth) {
+  if (res.status === 401 && auth && getToken() === tokenEnviado) {
     clearToken();
   }
 
@@ -106,8 +113,8 @@ export async function decidirFoto(id, { estado, motivoRechazo }) {
  * devolvemos una URL de objeto local para usarla en el <img>.
  * El caller debe llamar URL.revokeObjectURL(url) cuando ya no la necesite.
  */
-export async function obtenerFotoVerificacionUrl(id) {
-  const res = await fetch(`${API_BASE}/admin/kyc/fotos/${id}/archivo`, {
+export async function obtenerFotoVerificacionUrl(id, cara = "frente") {
+  const res = await fetch(`${API_BASE}/admin/kyc/fotos/${id}/archivo/${cara}`, {
     headers: authHeaders(),
   });
   if (!res.ok) {
@@ -217,3 +224,4 @@ export async function asignarInsigniaCoBranded(id, negocioSlug) {
 export async function revocarInsigniaCoBranded(id, negocioId) {
   return api(`/admin/insignias/${id}/asignar/${negocioId}`, { method: "DELETE" });
 }
+

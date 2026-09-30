@@ -8,29 +8,30 @@ export default function PublicFooter() {
         <div className="space-y-2">
           <Logo />
           <p className="max-w-sm text-sm text-muted-foreground">
-            Marketplace de identidad digital verificada. Convertimos la
-            desconfianza del comercio local en un activo de reputación.
+            Negocios verificados de tu comunidad universitaria.
           </p>
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 md:justify-start">
+            <Link to="/planes" className="text-sm font-medium text-trust hover:underline">Planes para tu negocio</Link>
             <Link to="/ayuda" className="text-sm font-medium text-trust hover:underline">
               Centro de Ayuda
             </Link>
             <Link to="/universidades" className="text-sm font-medium text-trust hover:underline">
-              Universidades y cámaras
+              Universidades
             </Link>
             <Link to="/contrato" className="text-sm font-medium text-trust hover:underline">
-              Términos y Contrato de Adhesión
+              Términos y Condiciones
             </Link>
+            <Link to="/privacidad" className="text-sm font-medium text-trust hover:underline">Política de Privacidad</Link>
           </div>
         </div>
         <div className="text-xs text-muted-foreground">
-          <p>Business Week — UEES · Prototipo académico</p>
+          
           <p className="mt-1">
-            © {new Date().getFullYear()} CheckBiz. Confianza verificada, sin
-            intermediarios.
+            © {new Date().getFullYear()} CheckBiz.
           </p>
         </div>
       </div>
     </footer>
   );
 }
+

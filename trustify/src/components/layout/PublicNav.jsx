@@ -4,17 +4,18 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
+import { Menu, X } from "lucide-react";
 
 const LINKS = [
+  { label: "Inicio", to: "/" },
   { label: "Cómo funciona", to: "/como-funciona" },
-  { label: "Identidad", href: "#identidad" },
-  { label: "Producto", href: "#producto" },
-  { label: "Métricas", href: "#metricas" },
+  { label: "Planes", to: "/planes" },
   { label: "Universidades", to: "/universidades" },
 ];
 
 export default function PublicNav() {
   const [scrolled, setScrolled] = useState(false);
+  const [abierto, setAbierto] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -38,7 +39,7 @@ export default function PublicNav() {
           <Logo />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-5 lg:flex">
           {LINKS.map((l) => {
             const className = cn(
               "text-sm transition-colors",
@@ -55,6 +56,7 @@ export default function PublicNav() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <button className="grid size-11 place-items-center rounded-lg border border-border bg-card text-foreground lg:hidden" aria-label={abierto ? "Cerrar navegación" : "Abrir navegación"} aria-expanded={abierto} aria-controls="public-mobile-nav" onClick={() => setAbierto(v => !v)}>{abierto ? <X size={20} /> : <Menu size={20} />}</button>
           <ThemeToggle
             className={cn(
               !scrolled &&
@@ -74,6 +76,7 @@ export default function PublicNav() {
           </Button>
         </div>
       </div>
+      {abierto && <nav id="public-mobile-nav" className="grid max-h-[calc(100dvh-4rem)] gap-1 overflow-y-auto border-b border-border bg-card p-4 text-foreground shadow-xl lg:hidden">{LINKS.map(l => <Link key={l.to} to={l.to} className="rounded-lg p-3 hover:bg-muted" onClick={() => setAbierto(false)}>{l.label}</Link>)}<Link to="/login" className="rounded-lg p-3 font-bold text-trust" onClick={() => setAbierto(false)}>Iniciar sesión</Link></nav>}
     </header>
   );
 }

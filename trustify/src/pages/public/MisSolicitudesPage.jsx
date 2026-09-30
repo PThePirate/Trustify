@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
-  FileText, Loader2, CheckCircle2, Star, AlertCircle, Home,
-  Calendar, Store, MessageSquareText, MessageCircle, ChevronUp,
+  Loader2, CheckCircle2, Star, AlertCircle,
+  Archive, Calendar, Store, MessageSquareText, MessageCircle, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { misSolicitudes, confirmarSolicitud, dejarResena } from "@/services/solicitudApi";
+import { misSolicitudes, confirmarSolicitud, dejarResena, eliminarMensajeDirecto, archivarConversacion } from "@/services/solicitudApi";
 import HiloMensajes from "@/components/mensajes/HiloMensajes";
+import TarjetaPerfilChat from "@/components/mensajes/TarjetaPerfilChat";
+import { resolverImagenNegocio } from "@/services/negocioApi";
 
 const ESTADO_INFO = {
   enviada: { label: "Enviada", variant: "pending" },
@@ -18,6 +20,13 @@ const ESTADO_INFO = {
 
 function formatearFecha(iso) {
   return new Date(iso).toLocaleDateString("es-EC", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function AvatarNegocio({ negocio, className = "size-10" }) {
+  const imagen = negocio.logoUrl || negocio.fotoPortadaUrl;
+  return <span className={`grid shrink-0 place-items-center overflow-hidden rounded-full bg-trust/15 font-bold text-trust ${className}`}>
+    {imagen ? <img src={resolverImagenNegocio(imagen)} alt="" className="size-full object-cover" /> : negocio.nombreComercial.slice(0, 2).toUpperCase()}
+  </span>;
 }
 
 function FormularioResena({ solicitudId, onListo }) {
@@ -71,15 +80,26 @@ function FormularioResena({ solicitudId, onListo }) {
 }
 
 export default function MisSolicitudesPage() {
+  const [searchParams] = useSearchParams();
   const [solicitudes, setSolicitudes] = useState(null);
   const [confirmandoId, setConfirmandoId] = useState(null);
   const [error, setError] = useState("");
-  const [hiloAbiertoId, setHiloAbiertoId] = useState(null);
+  const [hiloAbiertoId, setHiloAbiertoId] = useState(searchParams.get("chat"));
+  const [filtro, setFiltro] = useState('todas');
+  const [perfilAbiertoId, setPerfilAbiertoId] = useState(null);
 
   function cargar() {
-    misSolicitudes().then(setSolicitudes).catch((err) => setError(err.message));
+    misSolicitudes().then((lista) => { setSolicitudes(lista); setError(""); }).catch((err) => setError(err.message));
   }
+
+  const visibles = solicitudes?.filter(s => filtro === 'archivadas' ? s.archivada : !s.archivada && (filtro === 'todas' || (filtro === 'activas' && s.estado !== 'confirmada' && s.estado !== 'cancelada') || (filtro === 'por-resenar' && s.estado === 'confirmada' && !s.resena))) ?? [];
+  const seleccion = visibles.find((s) => s.id === hiloAbiertoId) ?? visibles[0];
   useEffect(cargar, []);
+  useEffect(() => {
+    const chatId = searchParams.get("chat");
+    if (!chatId || !solicitudes?.some(s => s.id === chatId)) return;
+    setHiloAbiertoId(chatId);
+  }, [solicitudes, searchParams]);
 
   async function confirmar(id) {
     setConfirmandoId(id);
@@ -94,95 +114,41 @@ export default function MisSolicitudesPage() {
     }
   }
 
-  return (
-    <div className="mx-auto max-w-2xl">
-        <div className="mb-6">
-          <h1 className="font-display text-2xl font-bold sm:text-3xl">Mensajes</h1>
-          <p className="mt-1 text-muted-foreground">
-            Todas tus conversaciones con negocios en un solo lugar. El pago y la entrega se acuerdan
-            directamente con el prestador, fuera de la app.
-          </p>
-        </div>
+  async function ocultar(id) {
+    setError("");
+    try {
+      await eliminarMensajeDirecto(id);
+      setSolicitudes((actual) => actual.filter((item) => item.id !== id));
+      if (hiloAbiertoId === id) setHiloAbiertoId(null);
+    } catch (err) { setError(err.message); }
+  }
 
-        {error && (
-          <p className="mb-4 flex items-center gap-1.5 text-sm text-danger"><AlertCircle className="size-4" /> {error}</p>
-        )}
+  async function archivar(id, archivada) {
+    setError("");
+    try {
+      await archivarConversacion(id, archivada);
+      setSolicitudes(actual => actual.map(item => item.id === id ? { ...item, archivada } : item));
+    } catch (err) { setError(err.message); }
+  }
 
-        {solicitudes === null ? (
-          <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Cargando…</div>
-        ) : solicitudes.length === 0 ? (
-          <div className="panel flex flex-col items-center gap-2 py-16 text-center">
-            <FileText className="size-8 text-muted-foreground/50" />
-            <p className="font-medium">Todavía no has hecho ninguna solicitud</p>
-            <Link to="/buscar" className="mt-2">
-              <Button variant="trust" size="sm"><Home className="size-4" /> Buscar negocios</Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {solicitudes.map((s) => {
-              const info = ESTADO_INFO[s.estado] ?? { label: s.estado, variant: "outline" };
-              return (
-                <div key={s.id} className="panel p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Link to={`/negocio/publico/${s.negocio.slug}`} className="flex items-center gap-1.5 font-semibold hover:text-trust">
-                      <Store className="size-4" /> {s.negocio.nombreComercial}
-                    </Link>
-                    <Badge variant={info.variant}>{info.label}</Badge>
-                  </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{s.descripcion}</p>
-                  <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Calendar className="size-3.5" /> Enviada el {formatearFecha(s.creadoEn)}</span>
-                    {s.fechaEstimada && <span>Fecha estimada: {s.fechaEstimada}</span>}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setHiloAbiertoId(hiloAbiertoId === s.id ? null : s.id)}
-                    >
-                      {hiloAbiertoId === s.id ? <ChevronUp className="size-4" /> : <MessageCircle className="size-4" />}
-                      {hiloAbiertoId === s.id ? "Ocultar conversación" : "Ver conversación"}
-                    </Button>
-
-                    {s.estado !== "confirmada" && s.estado !== "cancelada" && (
-                      <Button
-                        variant="verified"
-                        size="sm"
-                        onClick={() => confirmar(s.id)}
-                        disabled={confirmandoId === s.id}
-                      >
-                        {confirmandoId === s.id ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
-                        Confirmar que recibí el producto/servicio
-                      </Button>
-                    )}
-                  </div>
-
-                  {hiloAbiertoId === s.id && <HiloMensajes solicitudId={s.id} estado={s.estado} />}
-
-                  {s.estado === "confirmada" && !s.resena && (
-                    <FormularioResena solicitudId={s.id} onListo={cargar} />
-                  )}
-
-                  {s.resena && (
-                    <div className="mt-3 flex items-start gap-2 rounded-lg bg-muted/30 p-3">
-                      <MessageSquareText className="mt-0.5 size-4 shrink-0 text-verified" />
-                      <div>
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map((n) => (
-                            <Star key={n} className={`size-3.5 ${n <= s.resena.estrellas ? "fill-pending text-pending" : "text-muted-foreground/30"}`} />
-                          ))}
-                        </div>
-                        {s.resena.comentario && <p className="mt-1 text-sm text-muted-foreground">{s.resena.comentario}</p>}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+  return <div className="client-inner-page client-messages mx-auto max-w-6xl">
+    <div className="client-page-heading mb-5"><h1 className="font-display text-2xl font-bold sm:text-3xl">Mensajes directos</h1><p className="mt-1 text-sm text-muted-foreground">Conversa con los negocios desde CheckBiz.</p></div>
+    {error && <p role="alert" className="mb-4 flex items-center gap-2 text-sm text-danger"><AlertCircle className="size-4" />{error}</p>}
+    <div className="grid min-h-[620px] overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[280px_minmax(0,1fr)]">
+      <aside className="border-b border-border md:border-b-0 md:border-r">
+        <div className="border-b border-border p-4"><h2 className="font-semibold">Mensajes directos</h2><div className="mt-3 flex flex-wrap gap-1">{[['todas', 'Todas'], ['activas', 'Activas'], ['por-resenar', 'Por reseñar'], ['archivadas', 'Archivadas']].map(([id, label]) => <button key={id} type="button" aria-pressed={filtro === id} onClick={() => setFiltro(id)} className={`rounded-lg px-2.5 py-1.5 text-xs ${filtro === id ? 'bg-trust/15 text-trust' : 'text-muted-foreground hover:bg-muted'}`}>{label}</button>)}</div></div>
+        <div className="max-h-[540px] overflow-y-auto p-2">{solicitudes === null ? error ? <button type="button" onClick={cargar} className="p-4 text-sm text-trust underline">Reintentar</button> : <p className="p-4 text-sm text-muted-foreground">Cargando conversaciones…</p> : visibles.length === 0 ? <p className="p-4 text-sm text-muted-foreground">No hay conversaciones aquí.</p> : visibles.map((s) => <div key={s.id} className={`group flex items-center gap-2 rounded-xl pr-2 ${seleccion?.id === s.id ? 'bg-trust/15' : 'hover:bg-muted/60'}`}><button type="button" onClick={() => s.negocio.propietarioId && setPerfilAbiertoId(s.negocio.propietarioId)} aria-label={`Ver perfil de ${s.negocio.nombreUsuario || s.negocio.nombreComercial}`} className="ml-3 hover:ring-2 hover:ring-trust"><AvatarNegocio negocio={s.negocio} /></button><button type="button" onClick={() => setHiloAbiertoId(s.id)} className="min-w-0 flex-1 py-3 text-left"><strong className="block truncate text-sm">{s.negocio.nombreComercial}</strong><small className="block truncate text-muted-foreground">{s.descripcion}</small></button><button type="button" onClick={() => ocultar(s.id)} aria-label={`Eliminar mensaje directo con ${s.negocio.nombreComercial}`} title="Quitar de mis mensajes directos" className="rounded-lg p-1.5 text-muted-foreground opacity-60 hover:bg-danger/10 hover:text-danger group-hover:opacity-100"><X className="size-4" /></button></div>)}</div>
+      </aside>
+      <section className="flex min-w-0 flex-col p-4 sm:p-6">{!seleccion ? <div className="grid flex-1 place-content-center text-center text-muted-foreground"><MessageCircle className="mx-auto mb-3 size-10" /><p>Elige una conversación o contacta a un negocio.</p><Link to="/buscar" className="mt-3 text-sm text-trust underline">Explorar negocios</Link></div> : <>
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4"><div className="flex items-center gap-3"><button type="button" onClick={() => seleccion.negocio.propietarioId && setPerfilAbiertoId(seleccion.negocio.propietarioId)} aria-label="Ver perfil del emprendedor" className="rounded-full hover:ring-2 hover:ring-trust"><AvatarNegocio negocio={seleccion.negocio} className="size-11" /></button><div><Link to={`/negocio/publico/${seleccion.negocio.slug}`} className="text-lg font-bold hover:text-trust">{seleccion.negocio.nombreComercial}</Link>{seleccion.negocio.nombreUsuario && <p className="text-xs text-trust">{seleccion.negocio.nombreUsuario}</p>}<p className="mt-1 text-xs text-muted-foreground"><Calendar className="mr-1 inline size-3.5" />Desde {formatearFecha(seleccion.creadoEn)}</p></div></div><Badge variant={ESTADO_INFO[seleccion.estado]?.variant ?? 'outline'}>{ESTADO_INFO[seleccion.estado]?.label ?? seleccion.estado}</Badge></header>
+        {seleccion.descripcion !== 'Conversación iniciada desde la Mini Landing' && <div className="mt-4 rounded-xl bg-muted/40 p-3 text-sm"><strong className="text-xs text-muted-foreground">Solicitud original</strong><p className="mt-1">{seleccion.descripcion}</p></div>}
+        <div className="min-h-0 flex-1"><HiloMensajes key={seleccion.id} solicitudId={seleccion.id} estado={seleccion.estado} avatarNegocioUrl={seleccion.negocio.logoUrl || seleccion.negocio.fotoPortadaUrl ? resolverImagenNegocio(seleccion.negocio.logoUrl || seleccion.negocio.fotoPortadaUrl) : null} amplio /></div>
+        <Button variant="outline" size="sm" className="mt-4 self-start" onClick={() => archivar(seleccion.id, !seleccion.archivada)}><Archive className="size-4" />{seleccion.archivada ? "Desarchivar conversación" : "Archivar conversación"}</Button>
+        {seleccion.estado !== 'confirmada' && seleccion.estado !== 'cancelada' && seleccion.descripcion !== 'Conversación iniciada desde la Mini Landing' && <Button variant="outline" size="sm" className="mt-4 self-start" disabled={confirmandoId === seleccion.id} onClick={() => confirmar(seleccion.id)}><CheckCircle2 className="size-4" />Confirmar que recibí el producto/servicio</Button>}
+        {seleccion.estado === 'confirmada' && !seleccion.resena && <FormularioResena solicitudId={seleccion.id} onListo={cargar} />}
+        {seleccion.resena && <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground"><MessageSquareText className="size-4" />Reseña publicada: {seleccion.resena.estrellas} estrellas</p>}
+      </>}</section>
     </div>
-  );
+    {perfilAbiertoId && <TarjetaPerfilChat usuarioId={perfilAbiertoId} onClose={() => setPerfilAbiertoId(null)} />}
+  </div>;
 }

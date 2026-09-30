@@ -1,12 +1,14 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, ShieldCheck, Ban, Flag, Tags, ScrollText, LogOut, ShieldAlert, CreditCard, Award,
+  LayoutDashboard, ShieldCheck, Ban, Flag, Tags, ScrollText, LogOut, ShieldAlert, CreditCard, Award, Fingerprint, Sparkles, ScanLine, LockKeyhole,
 } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import GlobalSearch from "@/components/admin/GlobalSearch";
 import { adminLogout } from "@/services/adminApi";
 import { cn } from "@/lib/utils";
+import "./adminDecoration.css";
+import PanelMobileNav from "@/components/layout/PanelMobileNav";
 
 const SECCIONES = [
   {
@@ -47,8 +49,11 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="admin-experience min-h-screen bg-background">
+      <div className="admin-atmosphere" aria-hidden="true"><span /><span /><svg viewBox="0 0 1200 800" preserveAspectRatio="none"><path d="M-20 650 C200 650 150 100 550 150 S950 700 1220 350" /><path className="admin-signal" d="M-20 650 C200 650 150 100 550 150 S950 700 1220 350" /></svg>{Array.from({length:16},(_,i)=><i key={i} style={{left:`${(i*31+4)%96}%`,top:`${(i*19+8)%94}%`,animationDelay:`-${i*.8}s`}} />)}</div>
       {/* Sidebar */}
+      <div className="admin-decoration-shapes" aria-hidden="true"><span className="admin-shape-ring" /><span className="admin-shape-ring admin-shape-ring-two" /><span className="admin-shape-grid" /><span className="admin-shape-prism" /><span className="admin-shape-prism admin-shape-prism-two" /><svg viewBox="0 0 180 220"><path d="M90 20L150 50V115Q150 165 90 195Q30 165 30 115V50Z" /><path d="M65 100L82 117L119 75" /><circle cx="90" cy="107" r="75" /></svg></div>
+      <div className="admin-floating-tools" aria-hidden="true">{[Fingerprint,ScanLine,LockKeyhole,Sparkles].map((Icon,index)=><span key={index} className={`admin-tool admin-tool-${index}`}><Icon /></span>)}</div>
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-border bg-card lg:flex">
         <div className="flex h-16 items-center gap-2 border-b border-border px-6">
           <Logo />
@@ -102,6 +107,7 @@ export default function AdminLayout() {
 
       {/* Topbar móvil */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
+        <PanelMobileNav items={SECCIONES.flatMap(s => s.items)} />
         <Logo />
         <div className="flex items-center gap-2">
           <ThemeToggle />

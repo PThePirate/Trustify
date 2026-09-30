@@ -4,7 +4,7 @@
  */
 import { getToken, logout } from "@/services/authApi";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 function authHeaders() {
   const token = getToken();
@@ -13,17 +13,18 @@ function authHeaders() {
 
 async function api(path, { method = "GET", body } = {}) {
   let res;
+  const tokenEnviado = getToken();
   try {
     res = await fetch(`${API_BASE}${path}`, {
       method,
-      headers: { "Content-Type": "application/json", ...authHeaders() },
+      headers: { "Content-Type": "application/json", ...(tokenEnviado ? { Authorization: `Bearer ${tokenEnviado}` } : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
     throw new Error("No se pudo conectar con el servidor. Verifica que el backend esté corriendo.");
   }
 
-  if (res.status === 401) logout();
+  if (res.status === 401 && getToken() === tokenEnviado) logout();
 
   let data = null;
   try {
@@ -38,3 +39,8 @@ async function api(path, { method = "GET", body } = {}) {
 export async function reportarNegocio({ negocioSlug, motivo }) {
   return api("/denuncias", { method: "POST", body: { negocioSlug, motivo } });
 }
+
+export async function misDenuncias() {
+  return api("/denuncias/mias");
+}
+

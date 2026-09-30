@@ -8,26 +8,26 @@ import {
 
 /** Los 4 pilares del "Núcleo Intocable" (propuesta, sección 1.2). */
 export const PILARES = [
-  { icon: Ban, title: "No procesa dinero", desc: "El pago se acuerda libremente entre las partes, fuera de la app. CheckBiz nunca retiene fondos." },
-  { icon: Percent, title: "No cobra comisiones", desc: "Cero comisión sobre la mano de obra o el producto final. Monetizamos la confianza, no la transacción." },
-  { icon: Truck, title: "No hace logística", desc: "Sin entregas, despachos ni garantías. Eliminamos toda la carga operativa." },
-  { icon: UserCheck, title: "No permite anonimato", desc: "KYC bidireccional obligatorio: vendedor y comprador se identifican con cédula." },
+ { icon: Ban, title: "No tocamos tu dinero", desc: "Acuerda el pago directamente con tu cliente. CheckBiz no retiene fondos." },
+ { icon: Percent, title: "No cobramos comisión", desc: "Pagas un plan fijo para publicar. No cobramos por lo que vendes." },
+ { icon: Truck, title: "Tú coordinas la entrega", desc: "Acuerda dónde, cómo y cuándo entregar tus productos o servicios." },
+ { icon: UserCheck, title: "Todos se identifican", desc: "Quien vende y quien compra verifican su identidad para conversar." },
 ];
 
 /** Los 3 pasos del flujo (propuesta, sección 3.1). */
 export const PASOS = [
-  { icon: Search, title: "Busca", desc: "Filtra por categoría, ciudad o universidad de origen y encuentra al prestador correcto." },
-  { icon: ShieldCheck, title: "Verifica", desc: "Revisa el Trust Score, las capas de verificación y las reseñas auditadas del perfil." },
-  { icon: MessageCircle, title: "Contacta", desc: "Un clic a WhatsApp y acuerdas presupuesto, entrega y pago directo con la persona." },
+  { icon: Search, title: "Busca", desc: "Explora gratis y sin cuenta. Filtra por categoría, ciudad o universidad." },
+  { icon: ShieldCheck, title: "Verifica", desc: "Revisa sus sellos y las reseñas de clientes verificados." },
+  { icon: MessageCircle, title: "Contacta", desc: "Abre un chat interno para hablar con el negocio y acordar los detalles del servicio." },
 ];
 
 /** Esquema de identidad en 5 capas (propuesta, sección 9.2). */
 export const CAPAS = [
   { n: 1, icon: Hash, title: "Estructura", subtitle: "Módulo 10", desc: "Valida que el número de cédula sea matemáticamente correcto. Filtro instantáneo y sin costo.", estado: "Implementado", tone: "verified" },
-  { n: 2, icon: Smartphone, title: "Titularidad telefónica", subtitle: "OTP", desc: "Confirma una línea móvil real asociada a la cédula vía código por SMS o WhatsApp.", estado: "Implementado", tone: "verified" },
-  { n: 3, icon: Camera, title: "Foto de verificación", subtitle: "Cédula + rostro", desc: "Selfie sosteniendo la cédula junto al rostro, con revisión manual del equipo en el piloto.", estado: "Prioridad 1", tone: "trust" },
-  { n: 4, icon: Database, title: "Bases públicas", subtitle: "SENESCYT / SRI", desc: "Cruza la cédula con actividad real registrada: título académico o RUC activo. En este piloto la consulta a SENESCYT/SRI está simulada — no se conecta a esas bases todavía.", estado: "Simulado en este piloto", tone: "pending" },
-  { n: 5, icon: ScanFace, title: "Biometría", subtitle: "Matching facial", desc: "Verificación automática tipo banco/telecom vía alianza con proveedor de KYC.", estado: "Roadmap", tone: "pending" },
+  { n: 2, icon: Smartphone, title: "Correo verificado", subtitle: "OTP", desc: "Confirma el correo mediante un código de seis dígitos.", estado: "Implementado", tone: "verified" },
+  { n: 3, icon: Camera, title: "KYC documental", subtitle: "Frente y reverso", desc: "Un administrador revisa ambas caras de la cédula. Las imágenes se eliminan después de la decisión.", estado: "Implementado", tone: "trust" },
+  { n: 4, icon: ScanFace, title: "Biometría facial", subtitle: "Comparación de rostro", desc: "Comparará el rostro en vivo con la foto de la cédula sin conservar la captura. Pendiente de un motor aprobado.", estado: "Pendiente", tone: "pending" },
+  { n: 5, icon: Database, title: "Bases públicas", subtitle: "SENESCYT / SRI", desc: "Cruce con registros externos cuando exista una integración real. No se marca como verificado en este piloto.", estado: "Pendiente", tone: "pending" },
 ];
 
 /** Métricas de unidad económica (sección 7.3). value numérico para el contador. */
@@ -61,12 +61,12 @@ export const CATEGORIAS = [
 
 /** "Qué hace CheckBiz" — grid de características. */
 export const CARACTERISTICAS = [
-  { icon: ShieldCheck, title: "Mini Landing Page verificada", desc: "Carta de presentación llave en mano con catálogo, galería y sello de identidad." },
-  { icon: TrendingUp, title: "Trust Score en vivo", desc: "Puntaje de reputación calculado con reseñas auditadas y solicitudes confirmadas." },
-  { icon: QrCode, title: "QR de verificación física", desc: "Muestra tu identidad verificada en el local o taller. El fin del anonimato, en vivo." },
-  { icon: FileCheck2, title: "Contrato de adhesión digital", desc: "Firma con validez legal (registro de IP, fecha y hora) bajo la Ley de Comercio Electrónico." },
-  { icon: Building2, title: "Ruta de formalización + RIMPE", desc: "De negocio semilla a formalizado, con simulador de cuota y conexión contable." },
-  { icon: Languages, title: "Potencial exportable", desc: "Catálogo con traducción automática ES↔EN e insignia para negocios listos a exportar." },
+ { icon: ShieldCheck, title: "Tu Mini Landing Page", desc: "Presenta tu negocio con catálogo, imágenes y los sellos de tu perfil." },
+ { icon: Star, title: "Reseñas de clientes", desc: "Solo reseña un cliente verificado que conversó con el negocio." },
+ { icon: MessageCircle, title: "Conversaciones directas", desc: "Recibe solicitudes y acuerda los detalles por chat, con texto, enlaces y emojis." },
+ { icon: FileCheck2, title: "Términos claros", desc: "Términos y Condiciones y Declaración Responsable del Emprendedor." },
+ { icon: Building2, title: "Orientación para formalizarte", desc: "Orientación sobre RUC y RIMPE y contacto con consultorios contables." },
+ { icon: GraduationCap, title: "Tu comunidad universitaria", desc: "Vincula tu emprendimiento con tu universidad o instituto." },
 ];
 
 /** Negocios de muestra (estilo showcase de proyectos). */
@@ -90,10 +90,13 @@ export const COMPARATIVA = {
 
 /** Preguntas frecuentes (adelanta objeciones del jurado). */
 export const FAQ = [
-  { q: "¿Por qué no cobran comisión si todos lo hacen?", a: "Cobrar comisión nos convertiría en intermediario financiero regulado. CheckBiz monetiza la confianza —suscripciones, licenciamiento B2B y publicidad— nunca la transacción." },
-  { q: "¿Cómo saben que la cédula es realmente de esa persona?", a: "El Módulo 10 es solo la primera de cinco capas: se suma OTP telefónico, foto con cédula, cruce con SENESCYT/SRI y, a futuro, biometría tipo banco." },
-  { q: "¿CheckBiz guarda o mueve el dinero de las ventas?", a: "No. El pago se acuerda directo entre las partes por fuera de la app. No retenemos fondos ni gestionamos entregas." },
-  { q: "¿Qué gana una universidad o cámara al aliarse?", a: "Indicadores CACES auditables en tiempo real, seguimiento a graduados y un panel agregado de formalización, sin acceso a datos personales sensibles." },
+ { q: "¿Necesito una cuenta para buscar negocios?", a: "No. Los clientes pueden explorar gratis y sin cuenta. Para conversar o reseñar, necesitan una cuenta verificada." },
+ { q: "¿Por qué no cobran comisión?", a: "Porque tu venta es tuya. Pagas un plan fijo y no te cobramos nada por lo que vendes." },
+ { q: "¿Qué significan los sellos?", a: "Verificado identifica a la persona detrás del perfil. Formalizado indica que el negocio está asociado a un RUC activo. Son independientes, sin puntajes ni niveles." },
+ { q: "¿Cómo se verifica la identidad?", a: "El servicio contempla cédula válida, biometría con el Registro Civil, confirmación del correo y aceptación de términos. El emprendedor firma también su Declaración Responsable. En esta versión, la revisión de identidad es manual." },
+ { q: "¿Quién puede dejar una reseña?", a: "Solo un cliente verificado que conversó con el negocio por el chat de CheckBiz." },
+ { q: "¿Qué gana una universidad?", a: "Visibilidad para sus emprendedores y datos verificados del emprendimiento de estudiantes y graduados, siempre agregados. Puede cubrir sus planes mediante un convenio." },
+ { q: "¿Qué plan necesito para publicar?", a: "Necesitas un plan individual o una plaza cubierta por tu universidad. Consulta los beneficios y precios en Planes." },
 ];
 
 /** Aliados institucionales para el marquee de logos.
@@ -139,3 +142,4 @@ export const PERSONAS = [
   { rol: "Abogada independiente", ciudad: "Guayaquil", Icon: Scale, foto: "" },
   { rol: "Técnico de mantenimiento", ciudad: "Durán", Icon: Wrench, foto: "" },
 ];
+

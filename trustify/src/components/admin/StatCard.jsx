@@ -14,7 +14,8 @@ const TONES = {
  */
 export default function StatCard({ icon: Icon, etiqueta, valor, nota, tono = "trust", className }) {
   return (
-    <div className={cn("panel p-5", className)}>
+    <div className={cn("admin-stat panel p-5", className)} data-tone={tono}>
+      <span className="admin-stat-orbit" aria-hidden="true" />
       <div className="flex items-center justify-between">
         <span className={cn("grid size-10 place-items-center rounded-xl", TONES[tono])}>
           <Icon className="size-5" />

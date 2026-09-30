@@ -59,7 +59,8 @@ export default function OtpVerificationPage() {
     setLoading(true);
     try {
       await verificarOtp(codigo);
-      navigate(comoEmprendedor ? "/verificar-foto" : "/bienvenida", { state: { comoEmprendedor } });
+      const destino = typeof location.state?.from === "string" && location.state.from.startsWith("/") ? location.state.from : null;
+      navigate("/verificar-foto", { state: { comoEmprendedor, from: destino } });
     } catch (err) {
       setError(err.message || "Código incorrecto");
     } finally {

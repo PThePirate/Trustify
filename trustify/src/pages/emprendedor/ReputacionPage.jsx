@@ -24,7 +24,7 @@ function generarCertificadoPdf(negocio, rep) {
   doc.text(`Negocio: ${negocio.nombreComercial}`, 20, 45);
   doc.text(`Perfil: checkbiz.ec/negocio/publico/${negocio.slug}`, 20, 53);
   doc.text(`Trust Score: ${rep.trustScore}/100`, 20, 65);
-  doc.text(`Nivel de formalización: ${rep.nivelFormalizacion}`, 20, 73);
+  doc.text(`Sello Verificado: ${rep.insignias?.some(i => i.nombre === "Emprendedor Verificado") ? "Otorgado" : "Pendiente"}`, 20, 73);
   doc.text(`Reseñas: ${rep.totalResenas} (promedio ${rep.promedioResenas.toFixed(1)}/5)`, 20, 81);
 
   if (rep.insignias.length > 0) {
@@ -38,7 +38,6 @@ function generarCertificadoPdf(negocio, rep) {
   doc.save(`certificado-${negocio.slug}.pdf`);
 }
 
-const NIVEL_LABEL = { semilla: "Semilla", asesoria: "En asesoría", formalizado: "Formalizado" };
 
 function colorPorPuntaje(score) {
   if (score >= 70) return { stroke: "hsl(var(--verified))", texto: "text-verified" };
@@ -53,7 +52,7 @@ function Medidor({ score }) {
   const { stroke, texto } = colorPorPuntaje(score);
 
   return (
-    <div className="relative grid place-items-center">
+    <div className="business-score-dial relative grid place-items-center">
       <svg width="180" height="180" viewBox="0 0 180 180" className="-rotate-90">
         <circle cx="90" cy="90" r={radio} fill="none" stroke="hsl(var(--muted))" strokeWidth="14" />
         <circle
@@ -112,24 +111,28 @@ export default function ReputacionPage() {
   const [suscripcion, setSuscripcion] = useState(null);
   const [error, setError] = useState("");
 
-  function cargar() {
-    obtenerReputacion().then(setRep).catch((err) => setError(err.message));
-    listarMisResenas().then(setResenas).catch((err) => setError(err.message));
-    obtenerMiNegocio().then(setNegocio).catch(() => {});
-    obtenerMiSuscripcion().then(setSuscripcion).catch(() => {});
+  const [cargando, setCargando] = useState(false);
+  async function cargar() {
+    setError(""); setCargando(true);
+    try {
+      const [reputacion, opiniones, negocioActual, plan] = await Promise.all([obtenerReputacion(), listarMisResenas(), obtenerMiNegocio(), obtenerMiSuscripcion()]);
+      setRep(reputacion); setResenas(opiniones); setNegocio(negocioActual); setSuscripcion(plan);
+    } catch (err) { setError(err.message); }
+    finally { setCargando(false); }
   }
-  useEffect(cargar, []);
+  useEffect(() => { cargar(); }, []);
 
-  if (error) {
-    return <p className="flex items-center gap-1.5 text-sm text-danger"><AlertCircle className="size-4" /> {error}</p>;
+  if (error && !rep) {
+    return <div role="alert"><p className="text-danger">{error}</p><Button onClick={cargar} disabled={cargando}>Reintentar</Button></div>;
   }
   if (!rep || !resenas) {
     return <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Cargando…</div>;
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+    <div className="business-page">
+      <div className="business-section-banner mb-6 flex flex-wrap items-start justify-between gap-3">
+        <Button onClick={cargar} disabled={cargando}>{cargando ? "Actualizando…" : "Actualizar reputación"}</Button>
         <div>
           <h1 className="font-display text-2xl font-bold sm:text-3xl">Reputación y Trust Score</h1>
           <p className="mt-1 text-muted-foreground">
@@ -142,9 +145,15 @@ export default function ReputacionPage() {
           </Button>
         ) : suscripcion && (
           <Link to="/negocio/planes" className="flex items-center gap-1.5 text-sm text-trust hover:underline">
-            <Sparkles className="size-3.5" /> Certificado PDF disponible en Pro/Elite
+            <Sparkles className="size-3.5" /> Certificado PDF disponible en Plus
           </Link>
         )}
+      </div>
+      {error && <p role="alert" className="mb-4 text-danger">No se pudo actualizar: {error}</p>}
+      <div className="mb-6 flex flex-wrap gap-3">
+        <Button variant="outline" asChild><Link to="/negocio/perfil">Revisar identidad</Link></Button>
+        <Button variant="outline" asChild><Link to="/negocio/solicitudes">Gestionar solicitudes</Link></Button>
+        <Button variant="outline" asChild><Link to="/negocio/formalizacion">Completar formalización</Link></Button>
       </div>
 
       {rep.insignias.length > 0 && (
@@ -160,8 +169,9 @@ export default function ReputacionPage() {
         </div>
       )}
 
-      <div className="panel mb-6 flex flex-col items-center gap-4 p-6 sm:flex-row sm:justify-around">
+      <div className="business-surface business-score-stage mb-6 flex flex-col items-center gap-6 p-6 lg:flex-row lg:justify-around">
         <Medidor score={rep.trustScore} />
+        <div className="w-full max-w-md space-y-3"><h2 className="font-bold">Los cuatro pilares de tu puntaje</h2>{[["Identidad verificada", rep.puntosIdentidad, 40], ["Calidad de reseñas", rep.puntosResenas, 30], ["Solicitudes confirmadas", rep.puntosCumplimiento, 20], ["Formalización", rep.puntosFormalizacion, 10]].map(([label, puntos, total]) => <div key={label}><div className="mb-1 flex justify-between text-sm"><span>{label}</span><strong>{puntos ?? "—"}/{total}</strong></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-verified" style={{ width: `${(puntos ?? 0) / total * 100}%` }} /></div></div>)}</div>
         <div className="grid w-full grid-cols-2 gap-3 sm:w-auto">
           <div className="rounded-lg bg-muted/30 p-3 text-center">
             <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground"><Star className="size-3.5" /> Reseñas</p>
@@ -176,8 +186,8 @@ export default function ReputacionPage() {
             <p className="text-xs text-muted-foreground">{rep.solicitudesConfirmadas} de {rep.totalSolicitudes}</p>
           </div>
           <div className="rounded-lg bg-muted/30 p-3 text-center">
-            <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground"><ShieldCheck className="size-3.5" /> Nivel</p>
-            <p className="mt-1 font-display text-lg font-bold">{NIVEL_LABEL[rep.nivelFormalizacion] ?? rep.nivelFormalizacion}</p>
+            <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground"><ShieldCheck className="size-3.5" /> Sello Verificado</p>
+            <p className="mt-1 font-display text-lg font-bold">{rep.insignias?.some(i => i.nombre === "Emprendedor Verificado") ? "Otorgado" : "Pendiente"}</p>
           </div>
           <div className="rounded-lg bg-muted/30 p-3 text-center">
             <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground"><Calendar className="size-3.5" /> Antigüedad</p>
@@ -203,7 +213,7 @@ export default function ReputacionPage() {
       ) : (
         <div className="space-y-3">
           {resenas.map((r) => (
-            <div key={r.id} className="panel p-4">
+            <div key={r.id} className="business-review panel p-4">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{r.clienteNombre}</span>
                 <div className="flex gap-0.5">

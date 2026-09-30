@@ -1,0 +1,11 @@
+.negocio-imagen-modal { width:min(100%,760px); }
+.negocio-imagen-crop-shell { display:grid; place-items:center; overflow:hidden; min-height:365px; margin-top:1.5rem; border-radius:18px; background:hsl(var(--muted) / .5); }
+.negocio-imagen-crop { position:relative; flex:none; overflow:hidden; touch-action:none; cursor:grab; user-select:none; }
+.negocio-imagen-crop:active { cursor:grabbing; }
+.negocio-imagen-crop.is-logo { width:320px; height:320px; }
+.negocio-imagen-crop.is-portada { width:560px; height:160px; }
+.negocio-imagen-crop img { position:absolute; max-width:none; pointer-events:none; }
+.negocio-imagen-guide { position:absolute; inset:0; border:2px solid white; box-shadow:0 0 0 100px #0007; pointer-events:none; }
+.is-logo .negocio-imagen-guide { border-radius:18px; }
+@media(max-width:650px) { .negocio-imagen-crop-shell { min-height:230px; }.negocio-imagen-crop.is-portada { transform:scale(.54); margin:-37px -129px; } }
+@media(max-width:410px) { .negocio-imagen-crop.is-logo { transform:scale(.8); margin:-32px; } }

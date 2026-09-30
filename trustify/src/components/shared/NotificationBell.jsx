@@ -17,15 +17,20 @@ function tiempoRelativo(iso) {
   return `Hace ${Math.floor(horas / 24)} d`;
 }
 
-export default function NotificationBell() {
-  const [datos, setDatos] = useState(null);
+export default function NotificationBell({ to = "/notificaciones" }) {
+  const [datos, setDatos] = useState({ noLeidas: 0, items: [] });
   const [abierto, setAbierto] = useState(false);
   const ref = useRef(null);
 
   function cargar() {
     listarNotificaciones().then(setDatos).catch(() => {});
   }
-  useEffect(cargar, []);
+  useEffect(() => {
+    cargar();
+    const intervalo = setInterval(cargar, 6000);
+    window.addEventListener("checkbiz:notificaciones-actualizadas", cargar);
+    return () => { clearInterval(intervalo); window.removeEventListener("checkbiz:notificaciones-actualizadas", cargar); };
+  }, []);
 
   useEffect(() => {
     function fuera(e) {
@@ -39,20 +44,20 @@ export default function NotificationBell() {
     if (!notif.leida) {
       await marcarNotificacionLeida(notif.id);
       cargar();
+      window.dispatchEvent(new Event("checkbiz:notificaciones-actualizadas"));
     }
   }
-
-  if (!datos) return null;
 
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setAbierto((a) => !a)}
-        className="relative grid size-9 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+        aria-label={datos.noLeidas ? `${datos.noLeidas} notificaciones sin leer` : "Notificaciones"}
+        className={`relative grid size-10 place-items-center rounded-xl transition-colors ${datos.noLeidas ? "bg-red-600 text-white shadow-md shadow-red-600/30 hover:bg-red-700" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
       >
         <Bell className="size-[18px]" />
         {datos.noLeidas > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-danger text-[10px] font-bold text-white">
+          <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full border-2 border-card bg-red-700 px-1 text-[10px] font-extrabold text-white">
             {datos.noLeidas > 9 ? "9+" : datos.noLeidas}
           </span>
         )}
@@ -73,13 +78,13 @@ export default function NotificationBell() {
                   <button
                     key={n.id}
                     onClick={() => abrirYMarcar(n)}
-                    className={`flex w-full items-start gap-2.5 border-b border-border/60 p-3 text-left last:border-0 hover:bg-muted/50 ${!n.leida ? "bg-trust/5" : ""}`}
+                    className={`flex w-full items-start gap-2.5 border-b border-border/60 p-3 text-left last:border-0 hover:bg-muted/50 ${!n.leida ? "bg-red-600/15 font-semibold" : "opacity-70"}`}
                   >
                     <span className={`grid size-8 shrink-0 place-items-center rounded-lg ${conf.tono}`}>
                       <conf.Icon className="size-4" />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium">{n.titulo}</p>
+                      <p className="text-sm font-medium">{n.titulo}{!n.leida && <span className="ml-2 inline-block size-2 rounded-full bg-red-600" />}</p>
                       {n.mensaje && <p className="line-clamp-2 text-xs text-muted-foreground">{n.mensaje}</p>}
                       <p className="mt-0.5 text-[11px] text-muted-foreground">{tiempoRelativo(n.creadoEn)}</p>
                     </div>
@@ -89,7 +94,7 @@ export default function NotificationBell() {
             )}
           </div>
           <Link
-            to="/notificaciones"
+            to={to}
             onClick={() => setAbierto(false)}
             className="block border-t border-border p-2.5 text-center text-xs font-medium text-trust hover:underline"
           >

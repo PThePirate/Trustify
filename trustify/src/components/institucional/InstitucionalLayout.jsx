@@ -1,6 +1,10 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Landmark, GraduationCap, Users } from "lucide-react";
+import {
+  LayoutDashboard, LogOut, Landmark, GraduationCap, UsersRound, BadgeCheck,
+  MessageSquare, Clock3,
+} from "lucide-react";
 import Logo from "@/components/brand/Logo";
+import PanelMobileNav from "@/components/layout/PanelMobileNav";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { institucionalLogout, obtenerInstitucionActual } from "@/services/institucionalApi";
 import { cn } from "@/lib/utils";
@@ -10,8 +14,13 @@ const NAV_CAMARA = [
 ];
 
 const NAV_UNIVERSIDAD = [
-  { to: "/institucional", label: "Dashboard CACES", icon: GraduationCap, end: true },
-  { to: "/institucional/alumni", label: "Seguimiento de alumni", icon: Users },
+  { to: "/institucional", label: "Resumen", icon: LayoutDashboard, end: true },
+  { to: "/institucional/comunidad", label: "Comunidad", icon: UsersRound },
+  { to: "/institucional/formalizacion", label: "Formalización", icon: BadgeCheck },
+  { to: "/institucional/demanda", label: "Demanda y reputación", icon: MessageSquare },
+  { to: "/institucional/permanencia", label: "Permanencia", icon: Clock3 },
+  { to: "/institucional/caces", label: "Dashboard CACES", icon: GraduationCap },
+  { to: "/institucional/alumni", label: "Seguimiento de alumni", icon: UsersRound },
 ];
 
 export default function InstitucionalLayout() {
@@ -26,7 +35,7 @@ export default function InstitucionalLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="institutional-shell min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-border bg-card lg:flex">
         <div className="flex h-16 items-center gap-2 border-b border-border px-6">
           <Logo />
@@ -69,6 +78,7 @@ export default function InstitucionalLayout() {
       </aside>
 
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
+        <PanelMobileNav items={NAV} />
         <Logo />
         <div className="flex items-center gap-2">
           <ThemeToggle />

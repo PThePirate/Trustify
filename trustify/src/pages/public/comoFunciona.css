@@ -1,0 +1,39 @@
+.how-experience { isolation: isolate; --how-blue:#5283ed; --how-green:#36b68e; --how-coral:#e99c6e; background: radial-gradient(ellipse at 0 55%, #36b68e10, transparent 45%), radial-gradient(ellipse at 100% 80%, #5283ed12, transparent 45%), hsl(var(--background)); }
+.how-experience > header { background: hsl(var(--background) / .9); border-bottom: 1px solid hsl(var(--border)); backdrop-filter: blur(16px); }
+.how-experience > header nav a, .how-experience > header a.text-white, .how-experience > header button.text-white { color: hsl(var(--foreground)); }
+.how-experience > header button.text-white { border-color: hsl(var(--border)); }
+.how-atmosphere { position:absolute; top:65px; inset-inline:0; height:600px; pointer-events:none; z-index:-1; overflow:hidden; }
+.how-atmosphere > svg { position:absolute; width:100%; height:100%; fill:none; stroke:var(--how-blue); opacity:.25; }
+.how-atmosphere ellipse { stroke:var(--how-green); stroke-dasharray:3 12; transform-origin:center; animation:how-orbit 80s linear infinite; }
+.how-atmosphere .how-signal { stroke:var(--how-coral); stroke-width:3; stroke-dasharray:35 1600; animation:how-signal 12s linear infinite; }
+.how-light { position:absolute; width:450px; height:400px; filter:blur(70px); border-radius:50%; opacity:.16; animation:how-drift 14s ease-in-out infinite alternate; }
+.how-light-blue { background:var(--how-blue); left:-180px; top:0; }
+.how-light-green { background:var(--how-green); right:-150px; bottom:0; animation-delay:-7s; }
+.how-object { position:absolute; display:grid; place-items:center; width:54px; height:54px; border:1px solid color-mix(in srgb,currentColor 35%,transparent); border-radius:18px; background:hsl(var(--card) / .85); color:var(--how-blue); box-shadow:0 12px 25px -15px currentColor; animation:how-float 7s ease-in-out infinite; }
+.how-object svg { width:25px; height:25px; }
+.how-object-0 { left:8%; top:30px; rotate:-12deg; }
+.how-object-1 { right:8%; top:70px; color:var(--how-green); rotate:12deg; animation-delay:-2s; }
+.how-object-2 { left:3%; top:240px; color:var(--how-green); animation-delay:-4s; }
+.how-object-3 { right:3%; top:300px; color:var(--how-coral); animation-delay:-3s; }
+.how-object-4 { left:24%; top:340px; width:36px; height:36px; color:var(--how-coral); animation-delay:-5s; }
+.how-object-5 { right:24%; top:340px; width:40px; height:40px; animation-delay:-1s; }
+.how-atmosphere > i { position:absolute; width:4px; height:4px; background:var(--how-coral); border-radius:50%; animation:how-twinkle 4s ease-in-out infinite; }
+.how-heading { padding-block:25px 50px; }
+.how-heading h1 { text-wrap:balance; font-size:clamp(2rem,4vw,3rem); }
+.how-experience section { position:relative; }
+.how-experience section::before { content:''; position:absolute; right:0; top:-35px; width:65px; height:65px; border:1px dashed var(--how-green); border-radius:50%; opacity:.3; animation:how-orbit 40s linear infinite; }
+.how-experience section > .grid { position:relative; }
+.how-experience section > .grid::before { content:''; position:absolute; inset-inline:5%; top:55px; border-top:2px dashed color-mix(in srgb,var(--how-blue) 25%,transparent); }
+.how-experience section > .grid > div { position:relative; --step-accent:var(--how-blue); }
+.how-experience section > .grid > div:nth-child(2n) { --step-accent:var(--how-green); }
+.how-experience section > .grid > div:nth-child(3n) { --step-accent:var(--how-coral); }
+.how-experience section .h-full { border-top:3px solid var(--step-accent); background-image:radial-gradient(ellipse at top right,color-mix(in srgb,var(--step-accent) 13%,transparent),transparent 65%); box-shadow:0 15px 40px -30px var(--step-accent); }
+.how-experience section .h-full .text-muted-foreground\/30 { color:color-mix(in srgb,var(--step-accent) 60%,hsl(var(--muted-foreground))); }
+.how-step-icon { display:grid; place-items:center; width:48px; height:48px; border-radius:14px; background:color-mix(in srgb,var(--step-accent) 12%,transparent); color:var(--step-accent); }
+@keyframes how-float { 50% { translate:0 -14px; } }
+@keyframes how-signal { to { stroke-dashoffset:-1635; } }
+@keyframes how-orbit { to { rotate:360deg; } }
+@keyframes how-drift { to { translate:40px 25px; scale:1.15; } }
+@keyframes how-twinkle { 0%,100% { opacity:.15; } 50% { opacity:.8; scale:1.4; } }
+@media(max-width:767px) { .how-object { width:35px; height:35px; opacity:.5; } .how-object svg { width:18px; height:18px; } .how-object-4,.how-object-5 { display:none; } .how-object-2,.how-object-3 { top:380px; } .how-experience section > .grid::before { display:none; } }
+@media(prefers-reduced-motion:reduce) { .how-experience *, .how-experience *::before { animation:none !important; transition:none !important; } }

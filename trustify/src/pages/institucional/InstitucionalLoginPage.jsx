@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { institucionalLogin } from "@/services/institucionalApi";
+import AuthDecoration from "@/pages/auth/AuthDecoration";
 
 export default function InstitucionalLoginPage() {
   const [correo, setCorreo] = useState("");
@@ -31,19 +32,20 @@ export default function InstitucionalLoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="hidden flex-col justify-between bg-[#153C55] p-12 text-[#FFFCF6] lg:flex">
+    <div className="auth-experience auth-institution grid min-h-screen lg:grid-cols-2">
+      <AuthDecoration />
+      <div className="auth-brand-panel hidden flex-col justify-between bg-[#153C55] p-12 text-[#FFFCF6] lg:flex">
         <Logo className="text-[#FFFCF6]" />
 
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">
-            <Landmark className="size-3.5" /> Acceso institucional — Cámaras y universidades
+            <Landmark className="size-3.5" /> Acceso institucional — Universidades
           </span>
           <h1 className="mt-6 max-w-sm font-display text-3xl font-bold leading-tight">
-            Panel agregado de formalización
+            Tu comunidad emprendedora, conectada
           </h1>
           <p className="mt-4 max-w-sm text-white/70">
-            Vista macro para la Cámara de Impuestos y Cámaras de Negocio — solo
+            Conoce la actividad de tu comunidad universitaria mediante
             conteos agregados, nunca datos personales de un negocio o usuario
             individual.
           </p>
@@ -54,12 +56,12 @@ export default function InstitucionalLoginPage() {
         </p>
       </div>
 
-      <div className="relative flex items-center justify-center px-6 py-16">
+      <div className="auth-form-panel relative flex items-center justify-center px-6 py-16">
         <div className="absolute right-5 top-5">
           <ThemeToggle />
         </div>
 
-        <div className="w-full max-w-sm">
+        <div className="auth-form-content relative z-10 w-full max-w-sm">
           <div className="mb-8 flex justify-center lg:hidden">
             <Logo />
           </div>
@@ -69,7 +71,7 @@ export default function InstitucionalLoginPage() {
           </div>
           <h2 className="font-display text-2xl font-bold">Iniciar sesión</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Ingresa con la cuenta de tu institución (universidad o cámara).
+            Ingresa con la cuenta de tu universidad.
           </p>
 
           <form onSubmit={onSubmit} className="mt-7 space-y-4">
@@ -80,7 +82,7 @@ export default function InstitucionalLoginPage() {
                 <Input
                   id="correo"
                   type="email"
-                  placeholder="camara.impuestos@checkbiz.ec"
+                  placeholder="tu.nombre@universidad.edu.ec"
                   className="pl-10"
                   value={correo}
                   onChange={(e) => setCorreo(e.target.value)}

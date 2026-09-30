@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import Logo from "@/components/brand/Logo";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { adminLogin } from "@/services/adminApi";
+import AuthDecoration from "@/pages/auth/AuthDecoration";
 
 export default function AdminLoginPage() {
   const [correo, setCorreo] = useState("");
@@ -31,9 +32,10 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <div className="auth-experience auth-admin grid min-h-screen lg:grid-cols-2">
+      <AuthDecoration />
       {/* Panel izquierdo — deliberadamente distinto al login público */}
-      <div className="hidden flex-col justify-between bg-[#153C55] p-12 text-[#FFFCF6] lg:flex">
+      <div className="auth-brand-panel hidden flex-col justify-between bg-[#153C55] p-12 text-[#FFFCF6] lg:flex">
         <Logo className="text-[#FFFCF6]" />
 
         <div>
@@ -56,12 +58,12 @@ export default function AdminLoginPage() {
       </div>
 
       {/* Formulario */}
-      <div className="relative flex items-center justify-center px-6 py-16">
+      <div className="auth-form-panel relative flex items-center justify-center px-6 py-16">
         <div className="absolute right-5 top-5">
           <ThemeToggle />
         </div>
 
-        <div className="w-full max-w-sm">
+        <div className="auth-form-content relative z-10 w-full max-w-sm">
           <div className="mb-8 flex justify-center lg:hidden">
             <Logo />
           </div>

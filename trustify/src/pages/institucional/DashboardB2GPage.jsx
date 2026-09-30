@@ -32,8 +32,8 @@ function descargarReporteCsv(datos, detalle) {
 }
 
 const NIVEL_INFO = {
-  semilla: { label: "Semilla", icon: Sprout, tono: "bg-pending/10 text-pending" },
-  asesoria: { label: "Asesoría", icon: GraduationCap, tono: "bg-trust/10 text-trust" },
+  pendiente: { label: "Sin sello", icon: Sprout, tono: "bg-pending/10 text-pending" },
+  verificado: { label: "Verificado", icon: GraduationCap, tono: "bg-trust/10 text-trust" },
   formalizado: { label: "Formalizado", icon: BadgeCheck, tono: "bg-verified/10 text-verified" },
 };
 

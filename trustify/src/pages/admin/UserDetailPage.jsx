@@ -9,10 +9,10 @@ import { obtenerUsuario } from "@/services/adminApi";
 
 const CAPAS = [
   { n: 1, nombre: "Estructura" },
-  { n: 2, nombre: "Teléfono" },
-  { n: 3, nombre: "Foto" },
-  { n: 4, nombre: "SENESCYT/SRI" },
-  { n: 5, nombre: "Biometría" },
+  { n: 2, nombre: "Correo" },
+  { n: 3, nombre: "Cédula" },
+  { n: 4, nombre: "Biometría" },
+  { n: 5, nombre: "SENESCYT/SRI" },
 ];
 
 function formatearFecha(iso) {
@@ -104,7 +104,7 @@ export default function UserDetailPage() {
                 <div key={c.n} className="flex-1 text-center">
                   <div
                     className={`h-2 rounded-full ${
-                      c.n <= usuario.kycLayer ? "bg-verified" : "bg-muted"
+                      (c.n <= 2 ? c.n <= usuario.kycLayer : c.n === 3 && usuario.fotoVerificacionEstado === "aprobada") ? "bg-verified" : "bg-muted"
                     }`}
                   />
                   <p className="mt-1.5 text-[10px] text-muted-foreground">{c.nombre}</p>
@@ -112,9 +112,9 @@ export default function UserDetailPage() {
               ))}
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              Capa {usuario.kycLayer} de 5 · Foto: <span className="font-medium text-foreground">{usuario.fotoVerificacionEstado}</span>
+              KYC documental: <span className="font-medium text-foreground">{usuario.fotoVerificacionEstado}</span>
+              {" · "}Biometría: <span className="font-medium text-foreground">pendiente</span>
               {" · "}SENESCYT/SRI: <span className="font-medium text-foreground">{usuario.senescytSriEstado}</span>
-              <span className="text-[11px]"> (simulado — no consulta esas bases en este piloto)</span>
             </p>
           </div>
 
@@ -126,7 +126,6 @@ export default function UserDetailPage() {
               </h2>
               <p className="font-semibold">{usuario.negocio.nombreComercial}</p>
               <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
-                <span>Nivel: <span className="font-medium text-foreground">{usuario.negocio.nivelFormalizacion}</span></span>
                 <span className="flex items-center gap-1">
                   <Star className="size-3.5 fill-pending text-pending" /> Trust Score {usuario.negocio.trustScore}
                 </span>

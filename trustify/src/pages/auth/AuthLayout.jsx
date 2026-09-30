@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShieldCheck, BadgeCheck, Lock, ArrowLeft } from "lucide-react";
+import { ShieldCheck, BadgeCheck, Lock, ArrowLeft, Store, UserRound, MessageCircle, Star } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import AuroraBackground from "@/components/ui/AuroraBackground";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import AuthDecoration from "./AuthDecoration";
 
 const PUNTOS = [
   { icon: ShieldCheck, text: "KYC bidireccional: 1 cédula = 1 cuenta" },
@@ -15,9 +16,10 @@ const PUNTOS = [
  * AuthLayout: pantalla partida. Izquierda = panel de marca con el sello y
  * aurora animada; derecha = el formulario (children).
  */
-export default function AuthLayout({ children }) {
+export default function AuthLayout({ children, loginVisual = false }) {
   return (
-    <div className="relative grid min-h-screen lg:grid-cols-2">
+    <div className={`auth-experience relative grid min-h-screen lg:grid-cols-2 ${loginVisual ? "login-scene" : ""}`}>
+      <AuthDecoration />
       {/* Volver + tema (flotantes) */}
       <div className="absolute left-5 top-5 z-20">
         <Link
@@ -32,17 +34,22 @@ export default function AuthLayout({ children }) {
       </div>
 
       {/* Panel de marca (izquierda) */}
-      <div className="relative hidden overflow-hidden border-r border-border/60 lg:flex">
+      <div className="auth-brand-panel relative hidden overflow-hidden border-r border-border/60 lg:flex">
         <AuroraBackground />
         <div className="pointer-events-none absolute inset-0 grid-bg opacity-60" />
-        <div className="relative z-10 flex flex-col justify-center px-14">
+        {loginVisual && <>
+          <div className="login-scene-orbit login-scene-orbit-one" aria-hidden="true" />
+          <div className="login-scene-orbit login-scene-orbit-two" aria-hidden="true" />
+          <div className="login-scene-glow" aria-hidden="true" />
+        </>}
+        <div className={`relative z-10 flex w-full flex-col justify-center px-14 ${loginVisual ? "login-brand-content" : ""}`}>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7 }}
-            className="mb-10"
+            className={loginVisual ? "mb-8" : "mb-10"}
           >
-            <Logo showText={false} markClassName="h-40 w-44 rounded-3xl" />
+            <Logo showText={false} markClassName="h-24 w-28 rounded-2xl" />
           </motion.div>
 
           <h2 className="max-w-md font-display text-4xl font-bold leading-tight">
@@ -54,7 +61,7 @@ export default function AuthLayout({ children }) {
             respaldo real: cédula, contrato y reputación.
           </p>
 
-          <ul className="mt-10 space-y-4">
+          {!loginVisual && <ul className="mt-10 space-y-4">
             {PUNTOS.map((p, i) => (
               <motion.li
                 key={p.text}
@@ -69,14 +76,23 @@ export default function AuthLayout({ children }) {
                 {p.text}
               </motion.li>
             ))}
-          </ul>
+          </ul>}
+          {loginVisual && <div className="login-network" aria-label="Negocios y clientes conectados por confianza y conversación">
+            <div className="login-network-line" aria-hidden="true" />
+            <div className="login-network-node"><span><Store size={19} /></span><div><strong>Negocios</strong><small>Muéstrate con confianza</small></div></div>
+            <div className="login-network-center"><ShieldCheck size={22} /><span>CheckBiz</span></div>
+            <div className="login-network-node"><span><UserRound size={19} /></span><div><strong>Clientes</strong><small>Conecta con seguridad</small></div></div>
+            <div className="login-network-float login-network-float-one" aria-hidden="true"><MessageCircle size={16} /></div>
+            <div className="login-network-float login-network-float-two" aria-hidden="true"><Star size={16} /></div>
+          </div>}
         </div>
       </div>
 
       {/* Formulario (derecha) */}
-      <div className="relative flex items-center justify-center px-6 py-16">
+      <div className="auth-form-panel relative flex items-center justify-center px-6 py-16">
         <AuroraBackground className="opacity-40 lg:hidden" />
-        <div className="relative z-10 w-full max-w-md">
+        {loginVisual && <div className="login-form-halo" aria-hidden="true" />}
+        <div className="auth-form-content relative z-10 w-full max-w-md">
           <div className="mb-8 flex justify-center lg:hidden">
             <Logo />
           </div>
