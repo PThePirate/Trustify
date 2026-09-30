@@ -68,7 +68,6 @@ import InstitucionalLayout from "@/components/institucional/InstitucionalLayout"
 import InstitucionalLoginPage from "@/pages/institucional/InstitucionalLoginPage";
 import InstitucionalIndexPage from "@/pages/institucional/InstitucionalIndexPage";
 import SeguimientoAlumniPage from "@/pages/institucional/SeguimientoAlumniPage";
-import DashboardCacesPage from "@/pages/institucional/DashboardCacesPage";
 import UniversidadPanelPage from "@/pages/institucional/UniversidadPanelPage";
 import { obtenerInstitucionActual } from "@/services/institucionalApi";
 
@@ -247,7 +246,6 @@ export default function App() {
               <Route path="formalizacion" element={<UniversidadPanelPage section="formalizacion" />} />
               <Route path="demanda" element={<UniversidadPanelPage section="demanda" />} />
               <Route path="permanencia" element={<UniversidadPanelPage section="permanencia" />} />
-              <Route path="caces" element={<DashboardCacesPage />} />
               <Route path="alumni" element={<SeguimientoAlumniPage />} />
             </Route>
           </Route>

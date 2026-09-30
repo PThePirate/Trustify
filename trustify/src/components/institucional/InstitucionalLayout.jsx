@@ -19,7 +19,6 @@ const NAV_UNIVERSIDAD = [
   { to: "/institucional/formalizacion", label: "Formalización", icon: BadgeCheck },
   { to: "/institucional/demanda", label: "Demanda y reputación", icon: MessageSquare },
   { to: "/institucional/permanencia", label: "Permanencia", icon: Clock3 },
-  { to: "/institucional/caces", label: "Dashboard CACES", icon: GraduationCap },
   { to: "/institucional/alumni", label: "Seguimiento de alumni", icon: UsersRound },
 ];
 
