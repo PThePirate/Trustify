@@ -106,13 +106,6 @@ export async function obtenerDashboardDetalleB2G() {
   return api("/institucional/dashboard-b2g/detalle");
 }
 
-// ---------------------------------------------------------------------
-// Panel B2B Universidades (C2/C3)
-// ---------------------------------------------------------------------
-export async function obtenerDashboardCaces() {
-  return api("/institucional/dashboard-caces");
-}
-
 export async function listarAlumniSeguimiento() {
   return api("/institucional/alumni");
 }
